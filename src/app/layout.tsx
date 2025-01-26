@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/shared/Header";
-import Footer from "@/components/shared/Footer";
+import Footer from "@/app/(commonLayout)/components/shared/Footer";
+import Providers from "./lib/Providers";
 
 const roboto = Roboto({
   weight: "400",
@@ -11,9 +11,9 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Blogiz",
+  title: "MireXaStore",
   description:
-    "Welcome to Blogiz – where innovation meets imagination in the dynamic realm of technology, offering a thrilling journey through the latest trends and groundbreaking discoveries in the world of tech!",
+    "Welcome to e_commerce_web_application – where innovation meets imagination in the dynamic realm of technology, offering a thrilling journey through the latest trends and groundbreaking discoveries in the world of tech!",
 };
 
 export default function RootLayout({
@@ -24,8 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light">
       <body className={roboto.className}>
-        <Header />
-        <div className="min-h-screen">{children}</div>
+        <div className="min-h-screen">
+          <Providers>{children}</Providers>
+        </div>
         <Footer />
       </body>
     </html>

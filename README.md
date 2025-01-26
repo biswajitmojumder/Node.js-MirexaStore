@@ -1,4 +1,4 @@
-# Blogiz-Starter-Pack
+# e_commerce_web_application-Starter-Pack
 
 ## Installation:
 

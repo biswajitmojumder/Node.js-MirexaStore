@@ -1,5 +1,5 @@
 {
-  "name": "blogiz",
+  "name": "e_commerce_web_application",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.1.2",
+    "@heroui/react": "^2.6.14",
+    "framer-motion": "^12.0.5",
+    "next": "^15.1.6",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.0",
