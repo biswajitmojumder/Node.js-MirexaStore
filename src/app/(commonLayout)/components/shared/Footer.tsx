@@ -1,70 +1,53 @@
-import Link from "next/link";
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
-
 const Footer = () => {
   return (
-    <footer className="bg-blue-600 text-white py-8">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-        {/* Logo */}
-        <div className="text-2xl font-bold mb-4 md:mb-0">
-          <Link href="/">MyStore</Link>
+    <footer className="bg-[#F85606] text-white py-6 mt-10">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-6">
+        {/* Logo & Brand */}
+        <div className="flex items-center gap-2 text-2xl font-bold">
+          <img
+            src="../../../favicon.ico"
+            alt="MirexaStore Logo"
+            className="h-10 w-10"
+          />
+          MirexaStore
         </div>
 
-        {/* Footer Links */}
-        <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
-          <Link href="/" className="hover:underline">
+        {/* Navigation Links */}
+        <nav className="flex gap-6 text-lg font-medium mt-4 md:mt-0">
+          <a href="/" className="hover:text-gray-200 transition">
             Home
-          </Link>
-          <Link href="/products" className="hover:underline">
-            Products
-          </Link>
-          <Link href="/about" className="hover:underline">
-            About
-          </Link>
-          {/* New Footer Links */}
-          <Link href="/contact" className="hover:underline">
-            Contact
-          </Link>
-          <Link href="/terms" className="hover:underline">
-            Terms of Service
-          </Link>
-          <Link href="/privacy" className="hover:underline">
-            Privacy Policy
-          </Link>
-        </div>
+          </a>
+          <a href="/product" className="hover:text-gray-200 transition">
+            Product
+          </a>
+          <a href="/cart" className="hover:text-gray-200 transition">
+            Cart
+          </a>
+          <a href="/add-product" className="hover:text-gray-200 transition">
+            Add Product
+          </a>
+        </nav>
 
-        {/* Social Media Icons */}
-        <div className="flex space-x-6 mt-4 md:mt-0">
-          <Link
-            href="https://facebook.com"
-            target="_blank"
-            aria-label="Facebook"
-          >
-            <FaFacebook className="text-2xl hover:text-gray-300" />
-          </Link>
-          <Link href="https://twitter.com" target="_blank" aria-label="Twitter">
-            <FaTwitter className="text-2xl hover:text-gray-300" />
-          </Link>
-          <Link
-            href="https://instagram.com"
-            target="_blank"
-            aria-label="Instagram"
-          >
-            <FaInstagram className="text-2xl hover:text-gray-300" />
-          </Link>
-          <Link
-            href="https://linkedin.com"
-            target="_blank"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedin className="text-2xl hover:text-gray-300" />
-          </Link>
+        {/* Social Media Links */}
+        <div className="flex gap-4 mt-4 md:mt-0">
+          <a href="#" className="hover:text-gray-200 transition">
+            <i className="fab fa-facebook text-xl"></i>
+          </a>
+          <a href="#" className="hover:text-gray-200 transition">
+            <i className="fab fa-twitter text-xl"></i>
+          </a>
+          <a href="#" className="hover:text-gray-200 transition">
+            <i className="fab fa-instagram text-xl"></i>
+          </a>
+          <a href="#" className="hover:text-gray-200 transition">
+            <i className="fab fa-linkedin text-xl"></i>
+          </a>
         </div>
       </div>
 
-      {/* Footer Bottom Text */}
-      <div className="mt-8 text-center text-sm text-gray-300">
-        &copy; {new Date().getFullYear()} MyStore. All rights reserved.
+      {/* Copyright Section */}
+      <div className="text-center text-sm mt-6 border-t border-white/20 pt-4">
+        &copy; {new Date().getFullYear()} MirexaStore. All rights reserved.
       </div>
     </footer>
   );

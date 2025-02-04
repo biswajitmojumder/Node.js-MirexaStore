@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import UserDashboardSideBar from "./component/sidebar";
+import Header from "../(commonLayout)/components/shared/Header";
 
 export const metadata: Metadata = {
   title: "Dashboard - e_commerce_web_application",
@@ -13,7 +15,7 @@ export default function dashboardLayout({
 }>) {
   return (
     <div>
-      sidebar
+      <Header />
       {children}
     </div>
   );

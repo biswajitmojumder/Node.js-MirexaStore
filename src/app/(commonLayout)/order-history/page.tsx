@@ -1,0 +1,249 @@
+"use client"; // Add this line to mark the component as a client component
+
+import React, { useEffect, useState } from "react";
+import Axios from "axios";
+import Loading from "@/app/loading";
+
+interface OrderItem {
+  _id: string;
+  productId: string;
+  quantity: number;
+  price: number;
+  productDetails: Product; // New field for product details
+}
+
+interface ShippingDetails {
+  fullName: string;
+  address: string;
+  city: string;
+  district: string;
+  phone: string;
+  deliveryNote: string;
+  country: string;
+}
+
+interface Order {
+  _id: string;
+  status: string;
+  grandTotal: number;
+  orderDate: string;
+  items: OrderItem[];
+  shippingDetails: ShippingDetails;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  stockQuantity: number;
+  category: string;
+  productImages: string[];
+}
+
+const OrderHistory: React.FC = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProductDetails = async (productId: string) => {
+    try {
+      const response = await Axios.get(
+        `http://localhost:5000/api/product/${productId}`
+      );
+      return response.data.data;
+    } catch (err) {
+      console.error("Failed to fetch product details:", err);
+      return null;
+    }
+  };
+
+  const fetchOrderHistory = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const userId = JSON.parse(localStorage.getItem("user") || "{}")?._id;
+
+      if (!token || !userId) {
+        setError("No token or user ID found. Please log in.");
+        return;
+      }
+
+      const response = await Axios.get(
+        `http://localhost:5000/api/checkout/order/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const ordersWithProductDetails = await Promise.all(
+        response.data.data.map(async (order: Order) => {
+          const itemsWithDetails = await Promise.all(
+            order.items.map(async (item: OrderItem) => {
+              const productDetails = await fetchProductDetails(item.productId);
+              return {
+                ...item,
+                productDetails,
+              };
+            })
+          );
+
+          return {
+            ...order,
+            items: itemsWithDetails,
+          };
+        })
+      );
+
+      setOrders(ordersWithProductDetails);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch order history");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderHistory();
+  }, []);
+
+  const cancelOrder = async (orderId: string) => {
+    try {
+      await Axios.post(
+        `http://localhost:5000/api/checkout/cancel-order/${orderId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      alert("Order cancelled successfully");
+      fetchOrderHistory();
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "processing":
+        return "bg-yellow-400 text-black";
+      case "shipped":
+        return "bg-blue-500 text-white";
+      case "delivered":
+        return "bg-green-500 text-white";
+      case "cancelled":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
+  };
+
+  if (loading) return <Loading></Loading>;
+  if (error)
+    return <div className="text-center text-red-500 text-lg">{error}</div>;
+
+  return (
+    <div className="max-w-5xl mx-auto my-8 px-4 md:px-8">
+      <h1 className="text-3xl font-semibold text-center mb-8 text-gray-900">
+        Your Order History
+      </h1>
+
+      <div className="space-y-8">
+        {orders.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg">
+            You have no orders yet.
+          </p>
+        ) : (
+          orders.map((order) => (
+            <div
+              key={order._id}
+              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out"
+            >
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <h3 className="text-2xl font-semibold text-blue-600 mb-2 sm:mb-0">
+                  Order ID: {order._id.slice(-6)}
+                </h3>
+                <p className="text-lg text-gray-500">
+                  {new Date(order.orderDate).toLocaleDateString()}
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center mb-6">
+                <p
+                  className={` text-sm font-medium px-3 py-2 rounded-full ${getStatusColor(
+                    order.status
+                  )}`}
+                >
+                  {order.status}
+                </p>
+                <p className="text-xl font-medium text-gray-700">
+                  Total:{" "}
+                  <span className="text-xl font-semibold">
+                    ${order.grandTotal.toFixed(2)}
+                  </span>
+                </p>
+              </div>
+
+              <div className="mt-6 space-y-6">
+                <h4 className="text-xl font-semibold">Items</h4>
+                {order.items.map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex justify-between items-center py-4 border-b border-gray-300 mb-4"
+                  >
+                    <img
+                      src={
+                        item.productDetails?.productImages?.[0] ||
+                        "https://via.placeholder.com/80"
+                      }
+                      alt={item.productDetails?.name || "Product"}
+                      className="w-24 h-24 object-cover rounded-md shadow-sm"
+                    />
+                    <div className="ml-6 flex-1">
+                      <p className="text-lg font-semibold text-gray-800">
+                        {item.productDetails?.name ||
+                          "Product details not found"}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Description:{" "}
+                        <span className="italic text-gray-500">
+                          {item.productDetails?.description ||
+                            "No description available."}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Qty: {item.quantity} | Price:{" "}
+                        <span className="font-semibold">
+                          ${item.price.toFixed(2)}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                <h4 className="text-xl font-semibold">Shipping Details</h4>
+                <div className="text-gray-700 text-sm mt-2">
+                  {Object.entries(order.shippingDetails).map(([key, value]) => (
+                    <p key={key} className="mb-1">
+                      <strong>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}:
+                      </strong>{" "}
+                      {value}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OrderHistory;

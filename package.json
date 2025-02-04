@@ -1,5 +1,5 @@
 {
-  "name": "e_commerce_web_application",
+  "name": "MirexaStore ",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,13 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.6.14",
+    "axios": "^1.7.9",
+    "express-session": "^1.18.1",
     "framer-motion": "^12.0.5",
+    "heroicons": "^2.2.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.474.0",
+    "nexios-http": "^1.1.21",
     "next": "^15.1.6",
-    "react": "^18",
-    "react-dom": "^18",
+    "next-auth": "^4.24.11",
+    "next-themes": "^0.4.4",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.0",
-    "react-icons": "^5.0.1"
+    "react-icons": "^5.4.0",
+    "react-toastify": "^11.0.3"
   },
   "devDependencies": {
     "@types/node": "^20",

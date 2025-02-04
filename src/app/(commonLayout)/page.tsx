@@ -1,9 +1,9 @@
-import ProductSection from "./components/ui/ProductSection";
+import Product from "./product/page";
 
 const HomePage = async () => {
   return (
     <>
-      <ProductSection></ProductSection>
+      <Product></Product>
     </>
   );
 };
