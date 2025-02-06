@@ -1,15 +1,37 @@
+//  const cancelOrder = async (orderId: string) => {
+//   try {
+//     await Axios.post(
+//       `http://localhost:5000/api/checkout/cancel-order/${orderId}`,
+//       {},
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//         },
+//       }
+//     );
+//     alert("Order cancelled successfully");
+//     fetchOrderHistory();
+//   } catch (error) {
+//     console.error("Error cancelling order:", error);
+//   }
+// };
+
 "use client"; // Add this line to mark the component as a client component
 
 import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import Loading from "@/app/loading";
+import { ToastContainer, toast } from "react-toastify"; // Importing Toastify
+import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 
 interface OrderItem {
   _id: string;
   productId: string;
   quantity: number;
   price: number;
-  productDetails: Product; // New field for product details
+  productDetails: Product;
+  review?: string;
+  rating?: number; // New field for rating
 }
 
 interface ShippingDetails {
@@ -85,6 +107,7 @@ const OrderHistory: React.FC = () => {
               return {
                 ...item,
                 productDetails,
+                rating: 5, // Set initial rating as 5
               };
             })
           );
@@ -108,22 +131,54 @@ const OrderHistory: React.FC = () => {
     fetchOrderHistory();
   }, []);
 
-  const cancelOrder = async (orderId: string) => {
+  const handleReviewSubmit = async (
+    productId: string,
+    userId: string,
+    rating: number,
+    comment: string
+  ) => {
     try {
-      await Axios.post(
-        `http://localhost:5000/api/checkout/cancel-order/${orderId}`,
-        {},
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        toast.error("You must be logged in to submit a review.");
+        return;
+      }
+
+      if (!comment.trim()) {
+        toast.error("Review cannot be empty.");
+        return;
+      }
+
+      const response = await Axios.post(
+        "http://localhost:5000/api/reviews/create",
+        {
+          productId,
+          userId,
+          rating,
+          comment,
+          likes: [],
+          replies: [],
+        },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`, // Include token in headers
           },
         }
       );
-      alert("Order cancelled successfully");
-      fetchOrderHistory();
+
+      // Show success toast
+      toast.success("Review submitted successfully!");
     } catch (error) {
-      console.error("Error cancelling order:", error);
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit the review.");
     }
+  };
+
+  const handleRatingChange = (item: OrderItem, rating: number) => {
+    item.rating = rating; // Update the rating for the item
+    setOrders([...orders]); // Trigger re-render
   };
 
   const getStatusColor = (status: string) => {
@@ -141,7 +196,7 @@ const OrderHistory: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading></Loading>;
+  if (loading) return <Loading />;
   if (error)
     return <div className="text-center text-red-500 text-lg">{error}</div>;
 
@@ -171,9 +226,9 @@ const OrderHistory: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
                 <p
-                  className={` text-sm font-medium px-3 py-2 rounded-full ${getStatusColor(
+                  className={`text-sm font-medium px-3 py-2 rounded-full ${getStatusColor(
                     order.status
                   )}`}
                 >
@@ -192,7 +247,7 @@ const OrderHistory: React.FC = () => {
                 {order.items.map((item) => (
                   <div
                     key={item._id}
-                    className="flex justify-between items-center py-4 border-b border-gray-300 mb-4"
+                    className="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-gray-300 mb-4"
                   >
                     <img
                       src={
@@ -220,6 +275,52 @@ const OrderHistory: React.FC = () => {
                           ${item.price.toFixed(2)}
                         </span>
                       </p>
+
+                      {/* Rating system */}
+                      <div className="mt-4">
+                        <h5 className="text-lg font-medium">
+                          Rate this Product
+                        </h5>
+                        <div className="flex space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => handleRatingChange(item, star)}
+                              className={`${
+                                item.rating >= star
+                                  ? "text-yellow-400"
+                                  : "text-gray-400"
+                              }`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Review Form */}
+                      <div className="mt-4">
+                        <h5 className="text-lg font-medium">Write a Review</h5>
+                        <textarea
+                          placeholder="Your review"
+                          rows={4}
+                          className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+                          onChange={(e) => (item.review = e.target.value)}
+                        />
+                        <button
+                          onClick={() =>
+                            handleReviewSubmit(
+                              item.productId,
+                              order._id,
+                              item.rating || 5,
+                              item.review || ""
+                            )
+                          }
+                          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+                        >
+                          Submit Review
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -242,6 +343,9 @@ const OrderHistory: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* ToastContainer */}
+      <ToastContainer />
     </div>
   );
 };

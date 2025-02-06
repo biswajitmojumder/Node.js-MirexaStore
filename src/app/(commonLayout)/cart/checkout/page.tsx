@@ -78,6 +78,7 @@ const CheckoutPage = () => {
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
     calculateTotal(updatedCart);
+    window.dispatchEvent(new Event("cartUpdated"));
     toast.success("Item removed from cart.");
   };
 
@@ -85,13 +86,13 @@ const CheckoutPage = () => {
     const userToken = localStorage.getItem("accessToken");
 
     if (!userToken) {
-      toast.error("Please log in to place an order.");
+      toast.error("You need to be logged in to place an order. Please log in.");
       router.push("/login");
       return;
     }
 
     if (!cartItems || cartItems.length === 0) {
-      toast.error("Your cart is empty. Add items before placing an order.");
+      toast.error("Your cart is empty. Please add items before proceeding.");
       return;
     }
 
@@ -130,18 +131,21 @@ const CheckoutPage = () => {
 
       if (response.status === 200) {
         // Display the success message
+
         toast.success("✅ Order placed successfully!");
 
         // Clear the cart after placing the order
         localStorage.removeItem("cart");
-
+        window.dispatchEvent(new Event("cartUpdated"));
         // Redirect to the order history page after the success message
         setTimeout(() => {
-          router.push(`/order-history`);
+          router.push("/order-history");
         }, 2000); // Redirect after a short delay to allow the toast to be visible
       }
     } catch (error) {
-      toast.error("Something went wrong, please try again.");
+      toast.error(
+        "There was an error processing your order. Please try again later."
+      );
     } finally {
       setLoading(false);
     }

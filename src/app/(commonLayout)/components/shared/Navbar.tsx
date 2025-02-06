@@ -2,7 +2,6 @@ import Link from "next/link";
 import SearchBar from "./Navbar/SearchBar";
 import ProfileDropdown from "./Navbar/ProfileDropDown";
 import CartButton from "./Navbar/CartButton";
-import ThemeSwitch from "./Navbar/ThemeSwitch";
 
 const Navbar = () => {
   return (
@@ -51,7 +50,6 @@ const Navbar = () => {
           <SearchBar />
 
           {/* Theme Toggle */}
-          <ThemeSwitch />
 
           {/* Cart Button Styled & Positioned before Profile */}
           <CartButton />

@@ -1,102 +1,72 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation"; // For navigation
 import { motion } from "framer-motion";
 
+// Type Definitions
 export type Product = {
-  _id: string;
+  _id: string; // Using _id as unique identifier instead of id
   name: string;
-  category: string;
   price: string;
-  productImages: string[];
+  productImages: string[]; // Array of image URLs
 };
 
-type ProductSectionProps = {
-  products: Product[];
-  categories: string[];
+type RelatedProductProps = {
+  relatedProducts: Product[];
 };
 
-const ProductCart = ({ products, categories }: ProductSectionProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const productsPerPage = 4; // Show only 4 products at a time
+  const router = useRouter(); // Router for navigation
 
-  const productsPerPage = 8;
-  const router = useRouter();
-
-  useEffect(() => {
-    // Load search query from localStorage
-    const storedQuery = localStorage.getItem("searchQuery") || "";
-    setSearchQuery(storedQuery);
-  }, []);
-
-  // Filter products based on selected category
-  const filteredProductsByCategory: Product[] =
-    selectedCategory === "all"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
-
-  // Filter products based on search query from localStorage
-  const filteredProducts: Product[] = filteredProductsByCategory.filter(
-    (product) =>
-      product.name &&
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Ensure products are not empty
+  if (!relatedProducts || !Array.isArray(relatedProducts)) {
+    return <p>Invalid related products data.</p>;
+  }
 
   // Pagination logic
   const totalPages: number = Math.ceil(
-    filteredProducts.length / productsPerPage
+    relatedProducts.length / productsPerPage
   );
-
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const displayedProducts: Product[] = useMemo(
     () =>
-      filteredProducts.slice(
+      relatedProducts.slice(
         (currentPage - 1) * productsPerPage,
         currentPage * productsPerPage
       ),
-    [filteredProducts, currentPage]
+    [relatedProducts, currentPage]
   );
 
+  // Navigate to the product details page
   const handleSeeDetails = (productId: string) => {
     router.push(`/product/${productId}`);
   };
 
   return (
     <main className="container mx-auto px-4 py-8">
-      {/* Category Filter Section */}
-      <div className="flex justify-end mb-6">
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="select select-bordered w-full md:w-1/4"
-        >
-          <option value="all">All Categories</option>
-          {categories.length > 0 &&
-            categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-        </select>
-      </div>
-
-      {/* Product Grid */}
-      <div className="grid text-center grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-6">
+      {/* Related Products Grid */}
+      <h1 className="text-3xl pb-10 lg:pl-5 font-semibold">Related Product</h1>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
             <motion.div
-              key={product._id}
+              key={product._id} // Use _id as the unique key for each product
               className="card bg-base-100 shadow-md rounded-lg overflow-hidden cursor-pointer"
               onClick={() => handleSeeDetails(product._id)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
-              <figure className="flex items-center justify-center overflow-hidden">
+              <figure className="h-40 flex items-center justify-center overflow-hidden">
+                {/* Display the first image if available */}
                 {product.productImages && product.productImages.length > 0 ? (
                   <img
-                    src={product.productImages[0]}
+                    src={product.productImages[0]} // Display the first image
                     alt={product.name}
-                    className="w-full h-auto object-contain max-h-[200px] mx-auto"
+                    className="w-full h-full object-cover"
+                    style={{ maxHeight: "150px", maxWidth: "150px" }}
                   />
                 ) : (
                   <span className="text-3xl font-bold text-gray-500">
@@ -104,18 +74,17 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
                   </span>
                 )}
               </figure>
-              <div className="card-body p-1 lg:p-4 flex flex-col items-center">
-                <h2 className="card-title text-base lg:text-lg font-medium">
+              <div className="card-body p-4 flex flex-col items-center">
+                <h2 className="card-title text-lg font-medium">
                   {product.name}
                 </h2>
-                <p className="text-gray-500">{product.category}</p>
                 <p className="text-[#F85606] font-bold">৳{product.price}</p>
               </div>
             </motion.div>
           ))
         ) : (
           <p className="col-span-full text-center text-gray-500">
-            No products found.
+            No related products found.
           </p>
         )}
       </div>
@@ -123,6 +92,7 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-2">
+          {/* Previous Button */}
           <button
             className="btn btn-sm btn-outline"
             disabled={currentPage === 1}
@@ -131,9 +101,10 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
             Previous
           </button>
 
+          {/* Page Number Buttons */}
           {Array.from({ length: totalPages }, (_, index) => (
             <button
-              key={index + 1}
+              key={index + 1} // Ensure unique key for pagination buttons
               className={`btn btn-sm ${
                 currentPage === index + 1 ? "btn-primary" : "btn-outline"
               }`}
@@ -143,6 +114,7 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
             </button>
           ))}
 
+          {/* Next Button */}
           <button
             className="btn btn-sm btn-outline"
             disabled={currentPage === totalPages}
@@ -156,4 +128,4 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
   );
 };
 
-export default ProductCart;
+export default RelatedProduct;

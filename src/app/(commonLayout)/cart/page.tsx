@@ -127,11 +127,7 @@ const CartPage = () => {
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         setCartItems(updatedCart);
         toast.success("Item removed from cart!");
-
-        // Cart empty হলে বা item remove হলে refresh দিন
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000); // 1 second delay for smooth UI experience
+        window.dispatchEvent(new Event("cartUpdated"));
       } catch (error) {
         console.error("Error removing item:", error);
         toast.error("Something went wrong while removing item.");
