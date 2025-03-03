@@ -1,6 +1,11 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 interface Review {
+  updatedAt: string;
+  createdAt: any;
   _id: string;
   userName?: string;
   userId: string;
@@ -9,17 +14,26 @@ interface Review {
   comment: string;
   likes: string[];
   replies: {
+    _id: string;
     userId: string;
     comment: string;
-    userName: any;
+    userName: string;
     timestamp: string;
+    isEditing: boolean;
   }[];
 }
 
 interface ReviewsSectionProps {
   reviews: Review[];
+  setReviews: React.Dispatch<React.SetStateAction<Review[]>>;
   onLikeReview: (reviewId: string) => void;
   onReplyReview: (reviewId: string, replyComment: string) => void;
+  onDeleteReply: (reviewId: string, replyId: string) => void;
+  onUpdateReply: (
+    reviewId: string,
+    replyId: string,
+    updatedReply: string
+  ) => void;
 }
 
 const formatDate = (timestamp: string) => {
@@ -37,11 +51,25 @@ const formatDate = (timestamp: string) => {
 
 const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   reviews,
+  setReviews,
   onLikeReview,
   onReplyReview,
+  onDeleteReply,
+  onUpdateReply,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 5;
+  const totalPages = Math.ceil(reviews.length / reviewsPerPage);
+
+  const currentReviews = reviews.slice(
+    (currentPage - 1) * reviewsPerPage,
+    currentPage * reviewsPerPage
+  );
+
   const [replyInput, setReplyInput] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+
+  const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Calculate total reviews, comments, and average rating
   const totalReviews = reviews.length;
@@ -49,20 +77,102 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     (acc, review) => acc + review.replies.length,
     0
   );
-
-  // Calculate the average rating
   const averageRating =
     totalReviews > 0
       ? reviews.reduce((acc, review) => acc + review.rating, 0) / totalReviews
       : 0;
 
   const handleSendReply = (reviewId: string) => {
-    // Send the reply
-    onReplyReview(reviewId, replyInput);
+    if (replyInput.trim()) {
+      onReplyReview(reviewId, replyInput);
+      setReplyInput(""); // Reset input field after submitting
+      setReplyingTo(null); // Reset replying state
 
-    // Clear the input and close the reply box after sending
-    setReplyInput("");
-    setReplyingTo(null);
+      // Save scroll position before page reload
+      const scrollPosition = window.scrollY;
+      localStorage.setItem("scrollPosition", scrollPosition.toString());
+
+      window.location.reload();
+    } else {
+      toast.warn("Please enter a reply before sending.");
+    }
+  };
+
+  // On page load, restore scroll position
+  useEffect(() => {
+    const savedPosition = localStorage.getItem("scrollPosition");
+    if (savedPosition) {
+      window.scrollTo(0, parseInt(savedPosition));
+    }
+  }, []);
+
+  const handleDeleteReply = (reviewId: string, replyId: string) => {
+    onDeleteReply(reviewId, replyId);
+    const updatedReviews = reviews.map((review) => {
+      if (review._id === reviewId) {
+        review.replies = review.replies.filter(
+          (reply) => reply._id !== replyId
+        );
+      }
+      return review;
+    });
+    setReviews(updatedReviews);
+  };
+
+  const handleEditReply = async (
+    reviewId: string,
+    replyId: string,
+    newComment: string
+  ) => {
+    // Check if replyId is undefined or null before proceeding
+    if (!replyId) {
+      console.error("Reply ID is missing or undefined!");
+      toast.error("Reply ID is missing or undefined!");
+      return;
+    }
+
+    // Check if reviewId is undefined or null before proceeding
+    if (!reviewId) {
+      console.error("Review ID is missing or undefined!");
+      toast.error("Review ID is missing or undefined!");
+      return;
+    }
+
+    console.log("Updating reply with:", { reviewId, replyId, newComment });
+
+    try {
+      console.log(
+        `Making PUT request to: /api/reviews/edit-reply/${reviewId}/${replyId}`
+      );
+
+      const response = await axios.put(
+        `/api/reviews/edit-reply/${reviewId}/${replyId}`,
+        { updatedComment: newComment }
+      );
+
+      console.log("Response from server:", response.data);
+
+      const updatedReviews = reviews.map((review) => {
+        if (review._id === reviewId) {
+          review.replies = review.replies.map((reply) => {
+            if (reply._id === replyId) {
+              reply.comment = newComment;
+            }
+            return reply;
+          });
+        }
+        return review;
+      });
+
+      setReviews(updatedReviews);
+      toast.success("Reply updated successfully!");
+    } catch (error) {
+      console.error(
+        "Failed to update reply:",
+        error.response?.data || error.message
+      );
+      toast.error("Failed to update reply.");
+    }
   };
 
   return (
@@ -71,7 +181,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         Customer Reviews
       </h2>
       <hr />
-      {/* Total reviews, comments count, and average rating */}
       <div className="mb-8 text-center pt-3">
         <h3 className="text-2xl font-semibold text-gray-800">
           Customer Feedback Overview
@@ -84,8 +193,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         </p>
       </div>
 
-      {reviews.length > 0 ? (
-        reviews.map((review) => (
+      {currentReviews.length > 0 ? (
+        currentReviews.map((review) => (
           <div
             key={review._id}
             className="w-full bg-white border rounded-lg shadow-md p-6 mb-6"
@@ -100,7 +209,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     {review.userId.name || "Anonymous"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {review.createdAt ? formatDate(review.createdAt) : "N/A"}
+                    {review.createdAt ? formatDate(review.updatedAt) : "N/A"}
                   </p>
                 </div>
               </div>
@@ -137,21 +246,86 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               </button>
             </div>
 
-            {/* Display Replies */}
             <div className="mt-4 ml-6">
-              {review.replies && review.replies.length > 0 ? (
-                review.replies.map((reply, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-white">
-                      {reply.userId[0] || "?"}
+              {review.replies.length > 0 ? (
+                review.replies.map((reply) => (
+                  <div
+                    key={reply._id}
+                    className="flex items-center justify-between bg-gray-100 m-1 p-3 rounded-lg shadow-sm"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold uppercase">
+                        {reply.userName?.[0] || "?"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {reply.userName}
+                        </p>
+                        {reply.isEditing ? (
+                          <div className="mt-2">
+                            <input
+                              value={reply.comment}
+                              onChange={(e) => {
+                                reply.comment = e.target.value;
+                              }}
+                              className="w-full p-2 border rounded-md"
+                            />
+                            <button
+                              onClick={() =>
+                                handleEditReply(
+                                  review._id,
+                                  reply._id,
+                                  reply.comment
+                                )
+                              }
+                              className="bg-blue-600 text-white px-4 py-2 mt-2"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-700">
+                            {reply.comment}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          {formatDate(reply.timestamp)}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{reply.userName}</p>
-                      <p className="text-sm text-gray-500">{reply.comment}</p>
-                      <p className="text-xs text-gray-400">
-                        {formatDate(reply.timestamp)}
-                      </p>
-                    </div>
+
+                    {reply.userId === loggedInUser._id && (
+                      <div className="flex space-x-2">
+                        {/* <button
+                          onClick={() => {
+                            reply.isEditing = !reply.isEditing;
+                            setReviews([...reviews]);
+                          }}
+                          className="ml-auto text-yellow-500 hover:text-yellow-700"
+                        >
+                          ✎ Edit
+                        </button> */}
+                        <button
+                          onClick={() =>
+                            handleDeleteReply(review._id, reply._id)
+                          }
+                          className="ml-auto text-red-500 hover:text-red-700"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-red-500 hover:text-red-700 transition-all duration-200 ease-in-out"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M9 3a1 1 0 011-1h4a1 1 0 011 1v1h5a1 1 0 110 2h-1.1l-1.28 13.022A2 2 0 0114.64 20H9.36a2 2 0 01-1.98-1.978L6.1 6H5a1 1 0 110-2h5V3zM8.1 6l1.2 12h5.4l1.2-12H8.1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -159,7 +333,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
               )}
             </div>
 
-            {/* Reply Input Field */}
             {replyingTo === review._id && (
               <div className="mt-4 flex items-center">
                 <input
@@ -180,6 +353,62 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       ) : (
         <p>No reviews yet.</p>
       )}
+      <div className="mt-6 flex justify-center gap-2">
+        <button
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          className="btn btn-sm btn-outline"
+        >
+          Previous
+        </button>
+
+        {currentPage > 3 && (
+          <>
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={() => setCurrentPage(1)}
+            >
+              1
+            </button>
+            <span className="btn btn-sm btn-outline">...</span>
+          </>
+        )}
+
+        {Array.from(
+          { length: Math.min(3, totalPages) },
+          (_, index) => currentPage - 1 + index
+        )
+          .filter((page) => page > 0 && page <= totalPages)
+          .map((page) => (
+            <button
+              key={page}
+              className={`btn btn-sm ${
+                currentPage === page ? "btn-primary" : "btn-outline"
+              }`}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+        {currentPage < totalPages - 2 && (
+          <>
+            <span className="btn btn-sm btn-outline">...</span>
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={() => setCurrentPage(totalPages)}
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          className="btn btn-sm btn-outline"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

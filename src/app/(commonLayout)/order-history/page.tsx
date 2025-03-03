@@ -1,21 +1,3 @@
-//  const cancelOrder = async (orderId: string) => {
-//   try {
-//     await Axios.post(
-//       `http://localhost:5000/api/checkout/cancel-order/${orderId}`,
-//       {},
-//       {
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-//         },
-//       }
-//     );
-//     alert("Order cancelled successfully");
-//     fetchOrderHistory();
-//   } catch (error) {
-//     console.error("Error cancelling order:", error);
-//   }
-// };
-
 "use client"; // Add this line to mark the component as a client component
 
 import React, { useEffect, useState } from "react";
@@ -133,16 +115,23 @@ const OrderHistory: React.FC = () => {
 
   const handleReviewSubmit = async (
     productId: string,
-    userId: string,
+    orderId: string,
     rating: number,
     comment: string
   ) => {
     try {
-      // Retrieve the token from localStorage
+      // Retrieve the token and user info from localStorage
       const token = localStorage.getItem("accessToken");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userName = user?.name; // Get the username from the localStorage user object
 
       if (!token) {
         toast.error("You must be logged in to submit a review.");
+        return;
+      }
+
+      if (!userName) {
+        toast.error("User name is missing. Please log in.");
         return;
       }
 
@@ -151,11 +140,13 @@ const OrderHistory: React.FC = () => {
         return;
       }
 
+      // Send the review to the backend with the necessary data
       const response = await Axios.post(
         "http://localhost:5000/api/reviews/create",
         {
           productId,
-          userId,
+          userId: orderId, // Assuming userId is orderId for simplicity here, adjust accordingly.
+          userName, // Include the userName field here
           rating,
           comment,
           likes: [],

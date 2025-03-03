@@ -131,17 +131,49 @@ const ProductCart = ({ products, categories }: ProductSectionProps) => {
             Previous
           </button>
 
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index + 1}
-              className={`btn btn-sm ${
-                currentPage === index + 1 ? "btn-primary" : "btn-outline"
-              }`}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
+          {/* First page and ellipsis if needed */}
+          {currentPage > 3 && (
+            <>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setCurrentPage(1)}
+              >
+                1
+              </button>
+              <span className="btn btn-sm btn-outline">...</span>
+            </>
+          )}
+
+          {/* Page numbers around the current page */}
+          {Array.from(
+            { length: Math.min(3, totalPages) },
+            (_, index) => currentPage - 1 + index
+          )
+            .filter((page) => page > 0 && page <= totalPages)
+            .map((page) => (
+              <button
+                key={page}
+                className={`btn btn-sm ${
+                  currentPage === page ? "btn-primary" : "btn-outline"
+                }`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+
+          {/* Ellipsis and last page if needed */}
+          {currentPage < totalPages - 2 && (
+            <>
+              <span className="btn btn-sm btn-outline">...</span>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                {totalPages}
+              </button>
+            </>
+          )}
 
           <button
             className="btn btn-sm btn-outline"
