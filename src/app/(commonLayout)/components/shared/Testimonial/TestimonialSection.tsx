@@ -1,6 +1,7 @@
 "use client";
 import { FC, useEffect, useState } from "react";
 import axios from "axios";
+import Image from "next/image";
 
 interface Testimonial {
   createdAt: string;
@@ -72,10 +73,12 @@ const Testimonials: FC = () => {
             className="card bg-base-100 shadow-lg p-4 rounded-lg"
           >
             <div className="flex items-center mb-4">
-              <img
+              <Image
                 src={testimonial.image}
                 alt={testimonial.userName}
-                className="w-16 h-16 rounded-full mr-4"
+                width={64} // 16 * 4 = 64px
+                height={64}
+                className="rounded-full mr-4"
               />
               <div>
                 <h2 className="font-semibold text-lg truncate">

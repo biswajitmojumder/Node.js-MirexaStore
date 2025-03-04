@@ -22,7 +22,7 @@ const CheckoutPage = () => {
     deliveryNote: "",
     country: "Bangladesh", // Default country
   });
-
+  const [isFirstOrder, setIsFirstOrder] = useState(false); // Track if it's the user's first order
   const router = useRouter();
 
   const cities = [
@@ -60,6 +60,9 @@ const CheckoutPage = () => {
         deliveryNote: "",
         country: "Bangladesh", // Assume Bangladesh as default
       });
+
+      // Check if it's the user's first order
+      checkFirstOrder(storedUser._id);
     }
   }, []);
 
@@ -69,6 +72,36 @@ const CheckoutPage = () => {
       0
     );
     setTotalAmount(total);
+  };
+
+  // Check if it's the user's first order
+  const checkFirstOrder = async (userId: string) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/checkout/check-first-order/${userId}`
+      );
+      if (response.data.isFirstOrder) {
+        setIsFirstOrder(true);
+      } else {
+        setIsFirstOrder(false);
+      }
+    } catch (error) {
+      // Enhanced error handling
+      if (axios.isAxiosError(error)) {
+        // Axios error has a response property
+        console.error(
+          "Error checking first order:",
+          error.response?.data || error.message
+        );
+      } else {
+        // Non-Axios errors (e.g., network issues)
+        console.error("Unexpected error:", error);
+      }
+
+      toast.error(
+        "There was an error checking the first order. Please try again later."
+      );
+    }
   };
 
   const handleRemoveItem = (productId: string) => {
@@ -98,23 +131,37 @@ const CheckoutPage = () => {
 
     setLoading(true);
 
+    // Calculate the total amount before applying any discounts
+    const totalAmount = cartItems.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+
+    // Calculate the discount if it's the first order
+    const discount = isFirstOrder ? 0.1 * totalAmount : 0;
+    const discountedTotal = totalAmount - discount;
+
+    // Calculate the grand total by adding the shipping cost
+    const grandTotal = discountedTotal + shippingCost;
+
     const orderData = {
       userId: user?._id,
       items: cartItems.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
         price: item.price,
+        // Add any additional item details like item name or image if needed
       })),
-      totalAmount,
-      shippingCost,
-      grandTotal: totalAmount + shippingCost,
-      status: "Processing",
+      totalPrice: discountedTotal,
+      shippingCost: shippingCost, // Include shipping cost here
+      totalAmount: totalAmount, // The original total amount before discount
+      grandTotal: grandTotal, // Grand total including shipping cost
+      status: "Processing", // Update order status as per your business logic
       orderDate: new Date().toISOString(),
-      shippingDetails: formData,
-      deliveryNote: formData.deliveryNote, // Include delivery note here
+      shippingDetails: formData, // Shipping details from the form
+      deliveryNote: formData.deliveryNote, // Delivery note for the whole order
     };
 
-    // Log the orderData to the console before posting
     console.log("Order Data being posted:", orderData);
 
     try {
@@ -130,23 +177,29 @@ const CheckoutPage = () => {
       );
 
       if (response.status === 200) {
-        // Display the success message
-
         toast.success("✅ Order placed successfully!");
-
-        // Clear the cart after placing the order
         localStorage.removeItem("cart");
         window.dispatchEvent(new Event("cartUpdated"));
-        // Redirect to the order history page after the success message
         setTimeout(() => {
           router.push("/order-history");
-        }, 2000); // Redirect after a short delay to allow the toast to be visible
+        }, 2000);
       }
     } catch (error) {
+      // Check if the error is an Axios error
+      if (axios.isAxiosError(error)) {
+        // Log Axios-specific error details
+        console.error("Error:", error.response?.data || error.message);
+      } else {
+        // Log unexpected errors (e.g., network issues)
+        console.error("Unexpected error:", error);
+      }
+
+      // Show an error message to the user
       toast.error(
         "There was an error processing your order. Please try again later."
       );
     } finally {
+      // Set loading state to false once the operation is done
       setLoading(false);
     }
   };
@@ -309,55 +362,52 @@ const CheckoutPage = () => {
                 >
                   <div className="flex items-center">
                     <img
-                      src={item.productImages[0] || "/default-image.png"}
+                      src={item.productImages}
                       alt={item.name}
-                      className="w-12 h-12 object-cover rounded-md"
+                      className="w-16 h-16 object-cover rounded-md"
                     />
-                    <span className="ml-4">{item.name}</span>
+                    <span className="ml-3 font-medium">{item.name}</span>
                   </div>
-                  <div className="flex items-center">
-                    <span className="mr-4">${item.price.toFixed(2)}</span>
-                    <span>x {item.quantity}</span>
-                  </div>
+                  <span>
+                    {item.quantity} x ৳{item.price}
+                  </span>
                   <button
-                    className="text-red-500 hover:text-red-700"
                     onClick={() => handleRemoveItem(item.productId)}
+                    className="text-red-500 hover:text-red-700"
                   >
                     <X size={20} />
                   </button>
                 </div>
               ))
             ) : (
-              <p className="text-gray-600">Your cart is empty.</p>
+              <p>No items in the cart.</p>
             )}
           </div>
 
-          {/* Total */}
-          <div className="mt-4">
-            <div className="flex justify-between text-sm text-gray-700">
-              <span>Subtotal</span>
-              <span>${totalAmount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-700">
-              <span>Shipping</span>
-              <span>${shippingCost.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-lg font-semibold text-gray-800 mt-2">
-              <span>Total</span>
-              <span>${(totalAmount + shippingCost).toFixed(2)}</span>
-            </div>
-
-            <button
-              onClick={handleOrder}
-              className="w-full mt-6 py-3 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition"
-              disabled={loading}
-            >
-              {loading ? "Processing..." : "Place Order"}
-            </button>
+          {/* Shipping Cost */}
+          <div className="mt-4 flex justify-between items-center">
+            <span className="font-medium">Shipping</span>
+            <span>{shippingCost}</span>
           </div>
+
+          {/* Total */}
+          <div className="mt-4 flex justify-between items-center font-semibold">
+            <span>Total</span>
+            <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
+          </div>
+
+          {/* Place Order Button */}
+          <button
+            onClick={handleOrder}
+            className="mt-6 w-full bg-blue-500 text-white py-3 rounded-md font-semibold hover:bg-blue-600 disabled:bg-gray-400"
+            disabled={loading}
+          >
+            {loading ? "Placing Order..." : "Place Order"}
+          </button>
         </div>
       </div>
-      <ToastContainer></ToastContainer>
+
+      <ToastContainer position="top-right" />
     </div>
   );
 };

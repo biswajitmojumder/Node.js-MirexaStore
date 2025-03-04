@@ -197,7 +197,7 @@ const CartPage = () => {
                       {item.name}
                     </h2>
                     <p className="text-lg text-gray-600">
-                      ${item.price ? item.price.toFixed(2) : "0.00"}
+                      ৳{item.price ? item.price.toFixed(2) : "0.00"}
                     </p>
                     <div className="flex items-center space-x-4 mt-3">
                       <button
@@ -227,7 +227,7 @@ const CartPage = () => {
                 Order Summary
               </h3>
               <p className="text-lg text-gray-600 mb-4">
-                Total Price: ${totalPrice.toFixed(2)}
+                Total Price: ৳{totalPrice.toFixed(2)}
               </p>
               <button
                 onClick={handleCheckoutRedirect}

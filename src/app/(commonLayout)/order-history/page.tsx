@@ -1,12 +1,13 @@
 "use client"; // Add this line to mark the component as a client component
 
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import Axios from "axios";
 import Loading from "@/app/loading";
 import { ToastContainer, toast } from "react-toastify"; // Importing Toastify
 import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 
 interface OrderItem {
+  shippingCost: ReactNode;
   _id: string;
   productId: string;
   quantity: number;
@@ -27,9 +28,12 @@ interface ShippingDetails {
 }
 
 interface Order {
+  totalPrice: any;
+  shippingCost: any;
   _id: string;
   status: string;
   grandTotal: number;
+  discountApplied: number;
   orderDate: string;
   items: OrderItem[];
   shippingDetails: ShippingDetails;
@@ -228,7 +232,7 @@ const OrderHistory: React.FC = () => {
                 <p className="text-xl font-medium text-gray-700">
                   Total:{" "}
                   <span className="text-xl font-semibold">
-                    ${order.grandTotal.toFixed(2)}
+                    ৳{(order.totalPrice + order.shippingCost).toFixed(2)}
                   </span>
                 </p>
               </div>
@@ -263,8 +267,21 @@ const OrderHistory: React.FC = () => {
                       <p className="text-sm text-gray-600 mt-2">
                         Qty: {item.quantity} | Price:{" "}
                         <span className="font-semibold">
-                          ${item.price.toFixed(2)}
+                          ৳{item.price.toFixed(2)}
+                        </span>{" "}
+                        | shippingCost:{" "}
+                        <span className="font-semibold">
+                          ৳{order.shippingCost.toFixed(2)}
                         </span>
+                        {order.discountApplied ? (
+                          <>
+                            {" "}
+                            | FirstOrderDiscount:{" "}
+                            <span className="font-semibold">
+                              ৳{order.discountApplied.toFixed(2)}
+                            </span>
+                          </>
+                        ) : null}
                       </p>
 
                       {/* Rating system */}
