@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import ReviewsSection from "./review";
+import FloatingIcons from "../components/ui/FloatingIcons";
 
 interface Review {
   _id: string;
@@ -445,6 +446,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       </div>
 
       <ToastContainer />
+      <FloatingIcons />
     </>
   );
 };

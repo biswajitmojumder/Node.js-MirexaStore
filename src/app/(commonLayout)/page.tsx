@@ -1,15 +1,17 @@
 import Banner from "./components/shared/Banner";
 import Newsletter from "./components/shared/NewsletterSubscription/NewsletterSubscription";
 import Testimonials from "./components/shared/Testimonial/TestimonialSection";
+import FloatingIcons from "./components/ui/FloatingIcons";
 import Product from "./product/page";
 
-const HomePage = async () => {
+const HomePage = () => {
   return (
     <>
-      <Banner></Banner>
-      <Product></Product>
-      <Testimonials></Testimonials>
-      <Newsletter></Newsletter>
+      <Banner />
+      <Product />
+      <Testimonials />
+      <Newsletter />
+      <FloatingIcons />
     </>
   );
 };

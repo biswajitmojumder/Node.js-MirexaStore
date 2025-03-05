@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import FloatingIcons from "../../components/ui/FloatingIcons";
 
 const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -408,6 +409,7 @@ const CheckoutPage = () => {
       </div>
 
       <ToastContainer position="top-right" />
+      <FloatingIcons></FloatingIcons>
     </div>
   );
 };
