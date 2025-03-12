@@ -139,11 +139,10 @@ const CheckoutPage = () => {
     );
 
     // Calculate the discount if it's the first order
-    const discount = isFirstOrder ? 0.1 * totalAmount : 0;
-    const discountedTotal = totalAmount - discount;
+    const total = totalAmount + shippingCost;
 
     // Calculate the grand total by adding the shipping cost
-    const grandTotal = discountedTotal + shippingCost;
+    const grandTotal = total;
 
     const orderData = {
       userId: user?._id,
@@ -153,7 +152,7 @@ const CheckoutPage = () => {
         price: item.price,
         // Add any additional item details like item name or image if needed
       })),
-      totalPrice: discountedTotal,
+      totalPrice: total,
       shippingCost: shippingCost, // Include shipping cost here
       totalAmount: totalAmount, // The original total amount before discount
       grandTotal: grandTotal, // Grand total including shipping cost
