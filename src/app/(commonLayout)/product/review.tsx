@@ -1,14 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 
 interface Review {
   updatedAt: string;
-  createdAt: any;
+  createdAt: string;
   _id: string;
   userName?: string;
-  userId: string;
+  userId: {
+    _id: string;
+    name: string;
+  };
   timestamp?: string;
   rating: number;
   comment: string;
@@ -166,7 +169,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
       setReviews(updatedReviews);
       toast.success("Reply updated successfully!");
-    } catch (error) {
+    } catch (err) {
+      const error = err as AxiosError<any>;
       console.error(
         "Failed to update reply:",
         error.response?.data || error.message

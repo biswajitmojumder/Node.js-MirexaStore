@@ -1,23 +1,24 @@
 "use client";
 
+import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ReviewsSection from "./review";
 import FloatingIcons from "../components/ui/FloatingIcons";
 
-interface Review {
-  _id: string;
-  productId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  likes: string[];
-  replies: { _id: string; userId: string; comment: string }[]; // Add _id for replies
-}
+// interface Review {
+//   _id: string;
+//   productId: string;
+//   userId: string;
+//   rating: number;
+//   comment: string;
+//   likes: string[];
+//   replies: { _id: string; userId: string; comment: string }[]; // Add _id for replies
+// }
 
 interface ProductDetailsProps {
   product: {
@@ -29,6 +30,16 @@ interface ProductDetailsProps {
       stockQuantity: number;
       category: string;
       productImages: string[];
+      discountPrice?: number;
+      brand: string;
+      tags: string[];
+      variants: {
+        color: string;
+        size: string;
+        price: number;
+        stock: number;
+        images: string[];
+      }[];
     };
   };
   relatedProducts: {
@@ -39,6 +50,34 @@ interface ProductDetailsProps {
       productImages: string[];
     }[];
   };
+}
+interface Variant {
+  color: string;
+  size: string;
+  price: number;
+  stock: number;
+  images: string[];
+}
+export interface ReviewReply {
+  _id: string;
+  userId: string;
+  userName: string;
+  comment: string;
+  timestamp: Date;
+}
+
+export interface Review {
+  _id: string;
+  productId: string;
+  userId: string;
+  rating: number;
+  comment: string;
+  likes: string[];
+  replies: ReviewReply[];
+  updatedAt: string;
+  createdAt: string;
+  timestamp?: string;
+  userName?: string;
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({
@@ -55,6 +94,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     product.data.productImages[0]
   );
   const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+
+  const handleVariantChange = (type: string, value: string) => {
+    setSelectedVariant(
+      (prev: any) =>
+        ({
+          ...prev,
+          [type]: value,
+        } as Variant)
+    );
+  };
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -92,14 +143,29 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       return;
     }
 
+    // ✅ Check if color and size are selected
+    if (!selectedVariant?.color) {
+      toast.error("Please select color.");
+      setIsLoading(false);
+      return;
+    }
+    if (!selectedVariant?.size) {
+      toast.error("Please select size.");
+      setIsLoading(false);
+      return;
+    }
+
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const existingCartItem = cart.find(
       (item: any) =>
-        item.productId === product.data._id && item.userId === userId
+        item.productId === product.data._id &&
+        item.userId === userId &&
+        item.color === selectedVariant.color &&
+        item.size === selectedVariant.size
     );
 
     if (existingCartItem) {
-      toast.info("This product is already in your cart.");
+      toast.info("This product with selected variant is already in your cart.");
       setIsLoading(false);
       return;
     }
@@ -110,8 +176,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
-      stockQuantity,
+      stockQuantity: selectedVariant.stock, // Variant-specific stock
       productImages: product.data.productImages,
+      color: selectedVariant.color,
+      size: selectedVariant.size,
     };
 
     cart.push(cartItem);
@@ -133,39 +201,45 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     const user = JSON.parse(storedUser);
     const userId = user._id;
 
+    // ✅ Check if color and size are selected
+    if (!selectedVariant?.color) {
+      toast.error("Please select color.");
+      return;
+    }
+    if (!selectedVariant?.size) {
+      toast.error("Please select size.");
+      return;
+    }
+
     const cartItem = {
       userId,
       productId: product.data._id,
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
-      stockQuantity,
+      stockQuantity: selectedVariant.stock,
       productImages: product.data.productImages,
+      color: selectedVariant.color,
+      size: selectedVariant.size,
     };
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-    if (cart.length === 0) {
+    const existingCartItem = cart.find(
+      (item: any) =>
+        item.productId === product.data._id &&
+        item.userId === userId &&
+        item.color === selectedVariant.color &&
+        item.size === selectedVariant.size
+    );
+
+    if (!existingCartItem) {
       cart.push(cartItem);
       localStorage.setItem("cart", JSON.stringify(cart));
-    } else {
-      const existingCartItem = cart.find(
-        (item: any) =>
-          item.productId === product.data._id && item.userId === userId
-      );
-
-      if (existingCartItem) {
-        router.push("/cart/checkout");
-        return;
-      } else {
-        cart.push(cartItem);
-        localStorage.setItem("cart", JSON.stringify(cart));
-      }
+      window.dispatchEvent(new Event("cartUpdated"));
+      setStockQuantity((prevStock) => prevStock - cartQuantity);
+      toast.success("Added to cart!");
     }
-
-    window.dispatchEvent(new Event("cartUpdated"));
-    setStockQuantity((prevStock) => prevStock - cartQuantity);
-    toast.success("Added to cart!");
 
     router.push("/cart/checkout");
   };
@@ -205,7 +279,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             : review
         )
       );
-    } catch (error) {
+    } catch (err) {
+      const error = err as AxiosError<any>;
       if (error.response?.status === 401) {
         toast.error("Unauthorized. Please log in again.");
       } else {
@@ -246,9 +321,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       toast.success("Replied to the review!");
 
-      // Fetch reviews again after the reply is successfully sent
+      // Option 1: Fetch reviews again after reply
       fetchReviews();
 
+      // OR Option 2: Update reply manually with temp ID (until fetch update comes)
       setReviews((prevReviews) =>
         prevReviews.map((review) =>
           review._id === reviewId
@@ -257,6 +333,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                 replies: [
                   ...review.replies,
                   {
+                    _id: uuidv4(), // Temporary ID
                     userId: user._id,
                     userName: user.name,
                     comment: replyComment,
@@ -353,7 +430,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                   <img
                     src={selectedImage}
                     alt={product.data.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain transition-all duration-300"
                   />
                 </div>
               </div>
@@ -364,7 +441,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     key={index}
                     src={image}
                     alt={product.data.name}
-                    className={`w-24 h-24 object-cover rounded-lg cursor-pointer border ${
+                    className={`w-20 h-20 object-cover rounded-lg cursor-pointer border transition-all duration-300 ${
                       selectedImage === image
                         ? "border-orange-600"
                         : "border-gray-300"
@@ -378,37 +455,125 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
           {/* Product Details */}
           <div className="w-full md:w-1/2">
-            <div className="flex flex-col gap-4">
-              <div>
-                <span className="text-xl font-semibold text-orange-600">
-                  ৳ {product.data.price}
-                </span>
-                <span className="ml-4 text-lg text-gray-500">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+                {product.data.discountPrice ? (
+                  <>
+                    <span className="text-xl font-semibold text-orange-600">
+                      ৳ {product.data.discountPrice}
+                    </span>
+                    <span className="text-lg text-gray-500 line-through">
+                      ৳ {product.data.price}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xl font-semibold text-orange-600">
+                    ৳ {product.data.price}
+                  </span>
+                )}
+                <span className="text-sm text-gray-500">
                   {product.data.stockQuantity} in stock
                 </span>
               </div>
+
               <p className="text-base text-gray-700">
                 {product.data.description}
               </p>
 
+              {/* Brand and Tags */}
+              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                <span>Brand: {product.data.brand}</span>
+                <span>Tags: {product.data.tags.join(", ")}</span>
+              </div>
+
+              {/* Variants */}
+              {product.data.variants && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-2">
+                    Select Variants
+                  </h4>
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* Color Options */}
+                    <div>
+                      <h5 className="font-semibold">Color</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {product.data.variants
+                          .filter(
+                            (variant, index, self) =>
+                              index ===
+                              self.findIndex((t) => t.color === variant.color)
+                          )
+                          .map((variant, index) =>
+                            variant.color ? (
+                              <label
+                                key={index}
+                                className={`cursor-pointer w-10 h-10 border rounded-full ${
+                                  selectedVariant?.color === variant.color
+                                    ? "border-orange-600"
+                                    : "border-gray-300"
+                                }`}
+                                style={{ backgroundColor: variant.color }}
+                                onClick={() =>
+                                  handleVariantChange("color", variant.color)
+                                }
+                              />
+                            ) : null
+                          )}
+                      </div>
+                    </div>
+
+                    {/* Size Options */}
+                    <div>
+                      <h5 className="font-semibold">Size</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {product.data.variants
+                          .filter(
+                            (variant, index, self) =>
+                              index ===
+                              self.findIndex((t) => t.size === variant.size)
+                          )
+                          .map((variant, index) =>
+                            variant.size ? (
+                              <label
+                                key={index}
+                                className={`cursor-pointer px-4 py-2 border rounded-lg ${
+                                  selectedVariant?.size === variant.size
+                                    ? "bg-orange-600 text-white border-orange-600"
+                                    : "border-gray-300"
+                                }`}
+                                onClick={() =>
+                                  handleVariantChange("size", variant.size)
+                                }
+                              >
+                                {variant.size}
+                              </label>
+                            ) : null
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Quantity Selector */}
-              <div className="mt-4 flex items-center">
-                <span className="mr-4">Quantity:</span>
+              <div className="mt-4 flex items-center gap-2">
+                <label className="text-sm">Quantity:</label>
                 <input
                   type="number"
                   value={cartQuantity}
                   min="1"
-                  max={stockQuantity}
+                  max={selectedVariant ? selectedVariant.stock : 1}
                   onChange={(e) => setCartQuantity(parseInt(e.target.value))}
                   className="w-20 p-2 border border-gray-300 rounded-md"
                 />
               </div>
 
-              <div className="mt-4">
+              {/* Add to Cart & Buy Now Buttons */}
+              <div className="mt-6 flex flex-col gap-4">
                 <button
                   onClick={handleAddToCart}
                   disabled={isLoading || stockQuantity <= 0}
-                  className={`w-full py-3 bg-orange-600 text-white font-semibold rounded-md ${
+                  className={`w-full py-3 bg-orange-600 text-white font-semibold rounded-md transition-all duration-300 ${
                     isLoading || stockQuantity <= 0
                       ? "opacity-50 cursor-not-allowed"
                       : ""
@@ -419,7 +584,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                 <button
                   onClick={handleBuyNow}
                   disabled={isLoading || stockQuantity <= 0}
-                  className={`w-full mt-4 py-3 bg-green-600 text-white font-semibold rounded-md ${
+                  className={`w-full py-3 bg-green-600 text-white font-semibold rounded-md transition-all duration-300 ${
                     isLoading || stockQuantity <= 0
                       ? "opacity-50 cursor-not-allowed"
                       : ""

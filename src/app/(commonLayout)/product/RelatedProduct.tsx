@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation"; // For navigation
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 // Type Definitions
 export type Product = {
-  _id: string; // Using _id as unique identifier instead of id
+  _id: string;
   name: string;
-  price: string;
-  productImages: string[]; // Array of image URLs
+  price: number;
+  discountPrice?: number;
+  category: string;
+  brand?: string;
+  productImages: string[];
+  slug: string;
 };
 
 type RelatedProductProps = {
@@ -18,19 +22,14 @@ type RelatedProductProps = {
 
 const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const productsPerPage = 4; // Show only 4 products at a time
-  const router = useRouter(); // Router for navigation
-
-  // Ensure products are not empty
-  if (!relatedProducts || !Array.isArray(relatedProducts)) {
-    return <p>Invalid related products data.</p>;
-  }
+  const productsPerPage = 4; // Show 4 products per page
+  const router = useRouter();
 
   // Pagination logic
   const totalPages: number = Math.ceil(
     relatedProducts.length / productsPerPage
   );
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   const displayedProducts: Product[] = useMemo(
     () =>
       relatedProducts.slice(
@@ -40,32 +39,34 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
     [relatedProducts, currentPage]
   );
 
-  // Navigate to the product details page
-  const handleSeeDetails = (productId: string) => {
-    router.push(`/product/${productId}`);
+  // Navigate to product details page
+  const handleSeeDetails = (slug: string) => {
+    router.push(`/product/${slug}`);
   };
 
   return (
     <main className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <h1 className="text-3xl pb-10 font-semibold">Related Products</h1>
+
       {/* Related Products Grid */}
-      <h1 className="text-3xl pb-10 lg:pl-5 font-semibold">Related Product</h1>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {displayedProducts.length > 0 ? (
           displayedProducts.map((product) => (
             <motion.div
-              key={product._id} // Use _id as the unique key for each product
+              key={product._id}
               className="card bg-base-100 shadow-md rounded-lg overflow-hidden cursor-pointer"
-              onClick={() => handleSeeDetails(product._id)}
+              onClick={() => handleSeeDetails(product.slug)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
-              <figure className="h-40 flex items-center justify-center overflow-hidden">
-                {/* Display the first image if available */}
-                {product.productImages && product.productImages.length > 0 ? (
+              {/* Product Image */}
+              <figure className="h-40 flex items-center justify-center overflow-hidden bg-white">
+                {product.productImages?.length > 0 ? (
                   <img
-                    src={product.productImages[0]} // Display the first image
+                    src={product.productImages[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-2"
                     style={{ maxHeight: "150px", maxWidth: "150px" }}
                   />
                 ) : (
@@ -74,11 +75,38 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
                   </span>
                 )}
               </figure>
-              <div className="card-body p-4 flex flex-col items-center">
-                <h2 className="card-title text-lg font-medium">
+
+              {/* Product Details */}
+              <div className="card-body p-2 lg:p-4 flex flex-col items-center gap-1">
+                <h2 className="card-title text-sm lg:text-base font-medium text-center">
                   {product.name}
                 </h2>
-                <p className="text-[#F85606] font-bold">৳{product.price}</p>
+
+                {/* Brand (optional) */}
+                {product.brand && (
+                  <p className="text-gray-500 text-xs">{product.brand}</p>
+                )}
+
+                {/* Category */}
+                <p className="text-gray-500 text-xs">{product.category}</p>
+
+                {/* Price */}
+                <div className="flex items-center gap-2">
+                  {product.discountPrice ? (
+                    <>
+                      <span className="text-[#F85606] font-bold">
+                        ৳{product.discountPrice}
+                      </span>
+                      <span className="line-through text-gray-400 text-xs">
+                        ৳{product.price}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[#F85606] font-bold">
+                      ৳{product.price}
+                    </span>
+                  )}
+                </div>
               </div>
             </motion.div>
           ))
@@ -89,7 +117,7 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
         )}
       </div>
 
-      {/* Pagination */}
+      {/* ✅ Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-2">
           {/* Previous Button */}
@@ -101,18 +129,49 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
             Previous
           </button>
 
-          {/* Page Number Buttons */}
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index + 1} // Ensure unique key for pagination buttons
-              className={`btn btn-sm ${
-                currentPage === index + 1 ? "btn-primary" : "btn-outline"
-              }`}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
+          {/* First Page and Ellipsis */}
+          {currentPage > 3 && (
+            <>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setCurrentPage(1)}
+              >
+                1
+              </button>
+              <span className="btn btn-sm btn-outline">...</span>
+            </>
+          )}
+
+          {/* Dynamic Page Numbers */}
+          {Array.from(
+            { length: Math.min(3, totalPages) },
+            (_, index) => currentPage - 1 + index
+          )
+            .filter((page) => page > 0 && page <= totalPages)
+            .map((page) => (
+              <button
+                key={page}
+                className={`btn btn-sm ${
+                  currentPage === page ? "btn-primary" : "btn-outline"
+                }`}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            ))}
+
+          {/* Ellipsis and Last Page */}
+          {currentPage < totalPages - 2 && (
+            <>
+              <span className="btn btn-sm btn-outline">...</span>
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                {totalPages}
+              </button>
+            </>
+          )}
 
           {/* Next Button */}
           <button

@@ -45,8 +45,9 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
       throw new Error("Invalid product data received");
     }
 
+    console.log(productData.data.category);
     // Fetch related products by category (excluding the current product)
-    const relatedProductsUrl = `http://localhost:5000/api/product/${id}/related`;
+    const relatedProductsUrl = `http://localhost:5000/api/product/category/${productData.data.category}`;
 
     const relatedProductsResponse = await fetch(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok

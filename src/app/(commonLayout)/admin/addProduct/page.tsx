@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,6 +9,13 @@ import Loading from "@/app/loading";
 // ✅ SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>
   `${slug}-${color}-${size}`;
+
+// ✅ Slug generator from name
+const generateSlug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/ /g, "-")
+    .replace(/[^\w-]+/g, "");
 
 // ✅ Interfaces
 interface ProductData {
@@ -34,6 +41,7 @@ interface Variant {
 
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
+  const [slugEdited, setSlugEdited] = useState(false); // Track if slug was edited manually
   const [productData, setProductData] = useState<ProductData>({
     name: "",
     slug: "",
@@ -55,11 +63,24 @@ const AddProduct = () => {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
 
+  // ✅ Auto-generate slug when name changes (unless manually edited)
+  useEffect(() => {
+    if (!slugEdited) {
+      setProductData((prev) => ({
+        ...prev,
+        slug: generateSlug(prev.name),
+      }));
+    }
+  }, [productData.name, slugEdited]);
+
   // ✅ Input Change Handler
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
+
+    if (name === "slug") setSlugEdited(true); // User manually edited slug
+
     setProductData((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
@@ -124,6 +145,7 @@ const AddProduct = () => {
     setVariants([]);
     setIsFeatured(false);
     setIsNewArrival(false);
+    setSlugEdited(false);
   };
 
   // ✅ Form Submit
@@ -162,29 +184,33 @@ const AddProduct = () => {
     name: keyof ProductData,
     type = "text"
   ) => (
-    <div>
-      <label>{label}</label>
+    <div className="flex flex-col gap-2">
+      <label className="font-medium text-gray-700">{label}</label>
       <input
         type={type}
         name={name}
         value={productData[name]}
         onChange={handleInputChange}
-        className="w-full p-2 border rounded"
+        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );
 
   const renderArrayField = (label: string, state: string[], setter: any) => (
-    <div>
-      <label>{label}</label>
+    <div className="flex flex-col gap-2">
+      <label className="font-medium text-gray-700">{label}</label>
       {state.map((val, idx) => (
-        <div key={idx} className="flex gap-2 mb-2">
+        <div key={idx} className="flex gap-2 items-center">
           <input
             value={val}
             onChange={(e) => handleArrayChange(setter, idx, e.target.value)}
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button type="button" onClick={() => removeArrayItem(setter, idx)}>
+          <button
+            type="button"
+            onClick={() => removeArrayItem(setter, idx)}
+            className="bg-red-500 text-white px-3 py-1 rounded-md"
+          >
             X
           </button>
         </div>
@@ -192,7 +218,7 @@ const AddProduct = () => {
       <button
         type="button"
         onClick={() => addArrayItem(setter)}
-        className="bg-gray-200 px-3 py-1 rounded"
+        className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md text-gray-700"
       >
         Add {label}
       </button>
@@ -203,26 +229,29 @@ const AddProduct = () => {
   const renderVariants = () =>
     colors.flatMap((color) =>
       sizes.map((size) => (
-        <div key={`${color}-${size}`} className="border p-4 my-2 rounded-lg">
-          <h4 className="font-bold">
+        <div
+          key={`${color}-${size}`}
+          className="border p-6 my-4 rounded-lg shadow-md hover:shadow-xl transition-shadow"
+        >
+          <h4 className="font-bold text-xl">
             {color} - {size}
           </h4>
           <div className="flex gap-4 items-center">
             <input
               value={generateSKU(productData.slug, color, size)}
               disabled
-              className="p-2 border rounded w-full"
+              className="p-3 border border-gray-300 rounded-md w-full"
             />
             <button
               type="button"
               onClick={() => handleVariantChange(color, size)}
-              className="bg-blue-500 text-white px-3 py-1 rounded"
+              className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700"
             >
               Add Variant
             </button>
           </div>
           {variants.some((v) => v.color === color && v.size === size) && (
-            <div className="mt-2 grid grid-cols-3 gap-4">
+            <div className="mt-4 grid grid-cols-3 gap-4">
               <input
                 type="number"
                 placeholder="Stock"
@@ -234,7 +263,7 @@ const AddProduct = () => {
                     Number(e.target.value)
                   )
                 }
-                className="p-2 border rounded"
+                className="p-3 border border-gray-300 rounded-md"
               />
               <input
                 type="number"
@@ -247,7 +276,7 @@ const AddProduct = () => {
                     Number(e.target.value)
                   )
                 }
-                className="p-2 border rounded"
+                className="p-3 border border-gray-300 rounded-md"
               />
               <input
                 type="text"
@@ -260,7 +289,7 @@ const AddProduct = () => {
                     e.target.value.split(",")
                   )
                 }
-                className="p-2 border rounded"
+                className="p-3 border border-gray-300 rounded-md"
               />
             </div>
           )}
@@ -270,12 +299,15 @@ const AddProduct = () => {
 
   // ✅ Return Form
   return (
-    <div className="p-6">
+    <div className="p-8 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <ToastContainer />
       {loading && <Loading />}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="text-center text-2xl font-semibold text-gray-800">
+          Add Product
+        </div>
         {renderInputField("Product Name", "name")}
-        {renderInputField("Slug", "slug")}
+        {renderInputField("Slug (Editable)", "slug")}
         {renderInputField("Description", "description")}
         {renderInputField("Price", "price", "number")}
         {renderInputField("Discount Price", "discountPrice", "number")}
@@ -283,13 +315,41 @@ const AddProduct = () => {
         {renderInputField("Category", "category")}
         {renderInputField("Brand", "brand")}
         {renderInputField("Video URL", "videoUrl")}
+
         {renderArrayField("Product Images", productImages, setProductImages)}
         {renderArrayField("Tags", tags, setTags)}
         {renderArrayField("Colors", colors, setColors)}
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
+
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+            />
+            Featured
+          </label>
+          <label className="flex items-center gap-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={isNewArrival}
+              onChange={(e) => setIsNewArrival(e.target.checked)}
+            />
+            New Arrival
+          </label>
+        </div>
+
+        <h3 className="text-lg font-semibold mt-6 text-gray-800">
+          Variants (Color + Size)
+        </h3>
         {renderVariants()}
-        <button type="submit" className="bg-green-500 text-white p-2 rounded">
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 w-full"
+        >
           Add Product
         </button>
       </form>
