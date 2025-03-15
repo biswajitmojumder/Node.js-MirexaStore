@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { v4 as uuidv4 } from "uuid";
@@ -9,16 +10,6 @@ import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import ReviewsSection from "./review";
 import FloatingIcons from "../components/ui/FloatingIcons";
-
-// interface Review {
-//   _id: string;
-//   productId: string;
-//   userId: string;
-//   rating: number;
-//   comment: string;
-//   likes: string[];
-//   replies: { _id: string; userId: string; comment: string }[]; // Add _id for replies
-// }
 
 interface ProductDetailsProps {
   product: {
@@ -66,18 +57,27 @@ export interface ReviewReply {
   timestamp: Date;
 }
 
-export interface Review {
+interface Review {
+  updatedAt: string;
+  createdAt: string;
   _id: string;
-  productId: string;
-  userId: string;
+  userName?: string;
+  userId: {
+    _id: string;
+    name: string;
+  };
+  timestamp?: string;
   rating: number;
   comment: string;
   likes: string[];
-  replies: ReviewReply[];
-  updatedAt: string;
-  createdAt: string;
-  timestamp?: string;
-  userName?: string;
+  replies: {
+    _id: string;
+    userId: string;
+    comment: string;
+    userName: string;
+    timestamp: string;
+    isEditing: boolean;
+  }[];
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({
@@ -143,16 +143,25 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       return;
     }
 
-    // ✅ Check if color and size are selected
-    if (!selectedVariant?.color) {
-      toast.error("Please select color.");
-      setIsLoading(false);
-      return;
-    }
-    if (!selectedVariant?.size) {
-      toast.error("Please select size.");
-      setIsLoading(false);
-      return;
+    // ✅ Check if color and size are selected if they exist
+    if (product.data.variants) {
+      if (
+        product.data.variants.some((variant) => variant.color) &&
+        !selectedVariant?.color
+      ) {
+        toast.error("Please select color.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (
+        product.data.variants.some((variant) => variant.size) &&
+        !selectedVariant?.size
+      ) {
+        toast.error("Please select size.");
+        setIsLoading(false);
+        return;
+      }
     }
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -160,8 +169,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       (item: any) =>
         item.productId === product.data._id &&
         item.userId === userId &&
-        item.color === selectedVariant.color &&
-        item.size === selectedVariant.size
+        item.color === selectedVariant?.color &&
+        item.size === selectedVariant?.size
     );
 
     if (existingCartItem) {
@@ -176,10 +185,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
-      stockQuantity: selectedVariant.stock, // Variant-specific stock
+      stockQuantity: selectedVariant?.stock, // Variant-specific stock
       productImages: product.data.productImages,
-      color: selectedVariant.color,
-      size: selectedVariant.size,
+      color: selectedVariant?.color,
+      size: selectedVariant?.size,
     };
 
     cart.push(cartItem);
@@ -201,14 +210,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     const user = JSON.parse(storedUser);
     const userId = user._id;
 
-    // ✅ Check if color and size are selected
-    if (!selectedVariant?.color) {
-      toast.error("Please select color.");
-      return;
-    }
-    if (!selectedVariant?.size) {
-      toast.error("Please select size.");
-      return;
+    // ✅ Check if color and size are selected if they exist
+    if (product.data.variants) {
+      if (
+        product.data.variants.some((variant) => variant.color) &&
+        !selectedVariant?.color
+      ) {
+        toast.error("Please select color.");
+        return;
+      }
+
+      if (
+        product.data.variants.some((variant) => variant.size) &&
+        !selectedVariant?.size
+      ) {
+        toast.error("Please select size.");
+        return;
+      }
     }
 
     const cartItem = {
@@ -217,10 +235,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
-      stockQuantity: selectedVariant.stock,
+      stockQuantity: selectedVariant?.stock,
       productImages: product.data.productImages,
-      color: selectedVariant.color,
-      size: selectedVariant.size,
+      color: selectedVariant?.color,
+      size: selectedVariant?.size,
     };
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -229,8 +247,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       (item: any) =>
         item.productId === product.data._id &&
         item.userId === userId &&
-        item.color === selectedVariant.color &&
-        item.size === selectedVariant.size
+        item.color === selectedVariant?.color &&
+        item.size === selectedVariant?.size
     );
 
     if (!existingCartItem) {
@@ -437,6 +455,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               {/* Thumbnails for the Gallery */}
               <div className="flex gap-4 overflow-x-auto">
                 {product.data.productImages.map((image, index) => (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={index}
                     src={image}
@@ -494,63 +513,67 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                   </h4>
                   <div className="grid grid-cols-2 gap-6">
                     {/* Color Options */}
-                    <div>
-                      <h5 className="font-semibold">Color</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {product.data.variants
-                          .filter(
-                            (variant, index, self) =>
-                              index ===
-                              self.findIndex((t) => t.color === variant.color)
-                          )
-                          .map((variant, index) =>
-                            variant.color ? (
-                              <label
-                                key={index}
-                                className={`cursor-pointer w-10 h-10 border rounded-full ${
-                                  selectedVariant?.color === variant.color
-                                    ? "border-orange-600"
-                                    : "border-gray-300"
-                                }`}
-                                style={{ backgroundColor: variant.color }}
-                                onClick={() =>
-                                  handleVariantChange("color", variant.color)
-                                }
-                              />
-                            ) : null
-                          )}
+                    {product.data.variants.some((variant) => variant.color) && (
+                      <div>
+                        <h5 className="font-semibold">Color</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {product.data.variants
+                            .filter(
+                              (variant, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.color === variant.color)
+                            )
+                            .map((variant, index) =>
+                              variant.color ? (
+                                <label
+                                  key={index}
+                                  className={`cursor-pointer w-10 h-10 border rounded-full ${
+                                    selectedVariant?.color === variant.color
+                                      ? "border-orange-600"
+                                      : "border-gray-300"
+                                  }`}
+                                  style={{ backgroundColor: variant.color }}
+                                  onClick={() =>
+                                    handleVariantChange("color", variant.color)
+                                  }
+                                />
+                              ) : null
+                            )}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Size Options */}
-                    <div>
-                      <h5 className="font-semibold">Size</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {product.data.variants
-                          .filter(
-                            (variant, index, self) =>
-                              index ===
-                              self.findIndex((t) => t.size === variant.size)
-                          )
-                          .map((variant, index) =>
-                            variant.size ? (
-                              <label
-                                key={index}
-                                className={`cursor-pointer px-4 py-2 border rounded-lg ${
-                                  selectedVariant?.size === variant.size
-                                    ? "bg-orange-600 text-white border-orange-600"
-                                    : "border-gray-300"
-                                }`}
-                                onClick={() =>
-                                  handleVariantChange("size", variant.size)
-                                }
-                              >
-                                {variant.size}
-                              </label>
-                            ) : null
-                          )}
+                    {product.data.variants.some((variant) => variant.size) && (
+                      <div>
+                        <h5 className="font-semibold">Size</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {product.data.variants
+                            .filter(
+                              (variant, index, self) =>
+                                index ===
+                                self.findIndex((t) => t.size === variant.size)
+                            )
+                            .map((variant, index) =>
+                              variant.size ? (
+                                <label
+                                  key={index}
+                                  className={`cursor-pointer px-4 py-2 border rounded-lg ${
+                                    selectedVariant?.size === variant.size
+                                      ? "bg-orange-600 text-white border-orange-600"
+                                      : "border-gray-300"
+                                  }`}
+                                  onClick={() =>
+                                    handleVariantChange("size", variant.size)
+                                  }
+                                >
+                                  {variant.size}
+                                </label>
+                              ) : null
+                            )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}

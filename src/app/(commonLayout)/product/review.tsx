@@ -92,22 +92,12 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       setReplyingTo(null); // Reset replying state
 
       // Save scroll position before page reload
-      const scrollPosition = window.scrollY;
-      localStorage.setItem("scrollPosition", scrollPosition.toString());
 
       window.location.reload();
     } else {
       toast.warn("Please enter a reply before sending.");
     }
   };
-
-  // On page load, restore scroll position
-  useEffect(() => {
-    const savedPosition = localStorage.getItem("scrollPosition");
-    if (savedPosition) {
-      window.scrollTo(0, parseInt(savedPosition));
-    }
-  }, []);
 
   const handleDeleteReply = (reviewId: string, replyId: string) => {
     onDeleteReply(reviewId, replyId);

@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 import FloatingIcons from "../components/ui/FloatingIcons";
 
 interface OrderItem {
+  color: ReactNode;
+  size: ReactNode;
   shippingCost: ReactNode;
   _id: string;
   productId: string;
@@ -58,7 +60,7 @@ const OrderHistory: React.FC = () => {
   const fetchProductDetails = async (productId: string) => {
     try {
       const response = await Axios.get(
-        `http://localhost:5000/api/product/${productId}`
+        `http://localhost:5000/api/product/history/${productId}`
       );
       return response.data.data;
     } catch (err) {
@@ -234,7 +236,7 @@ const OrderHistory: React.FC = () => {
                 <p className="text-xl font-medium text-gray-700">
                   Total:{" "}
                   <span className="text-xl font-semibold">
-                    ৳{(order.totalPrice + order.shippingCost).toFixed(2)}
+                    ৳{order.totalPrice}
                   </span>
                 </p>
               </div>
@@ -266,6 +268,21 @@ const OrderHistory: React.FC = () => {
                             "No description available."}
                         </span>
                       </p>
+
+                      {/* Conditionally render Size and Color */}
+                      {item.size && (
+                        <span className="text-sm text-gray-600 mt-2">
+                          Size:{" "}
+                          <span className="font-semibold">{item.size}</span> |{" "}
+                        </span>
+                      )}
+                      {item.color && (
+                        <span className="text-sm text-gray-600 mt-2">
+                          Color:{" "}
+                          <span className="font-semibold">{item.color}</span>
+                        </span>
+                      )}
+
                       <p className="text-sm text-gray-600 mt-2">
                         Qty: {item.quantity} | Price:{" "}
                         <span className="font-semibold">

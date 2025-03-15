@@ -150,6 +150,10 @@ const CheckoutPage = () => {
         productId: item.productId,
         quantity: item.quantity,
         price: item.price,
+        color: item.color || "",
+        size: item.size || "",
+        name: item.name || "",
+        productImage: item.productImage || [],
         // Add any additional item details like item name or image if needed
       })),
       totalPrice: total,
@@ -328,20 +332,21 @@ const CheckoutPage = () => {
             </div>
 
             {/* Delivery Note */}
+            {/* Delivery Note */}
             <div>
               <label htmlFor="deliveryNote" className="text-sm text-gray-600">
                 Delivery Note
               </label>
               <textarea
                 id="deliveryNote"
-                rows={3}
+                rows={4}
                 value={formData.deliveryNote}
                 onChange={(e) =>
                   setFormData({ ...formData, deliveryNote: e.target.value })
                 }
                 className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                placeholder="Optional"
-              />
+                placeholder="Any specific instruction about delivery..."
+              ></textarea>
             </div>
           </div>
         </div>
@@ -360,17 +365,36 @@ const CheckoutPage = () => {
                   key={item.productId}
                   className="flex justify-between items-center bg-gray-50 p-3 rounded-md"
                 >
-                  <div className="flex items-center">
+                  {/* Product Image & Name */}
+                  <div className="flex items-center gap-3">
                     <img
-                      src={item.productImages}
+                      src={item.productImages[0]} // productImages is an array, so take first image
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-md"
                     />
-                    <span className="ml-3 font-medium">{item.name}</span>
+                    <div>
+                      <h4 className="font-medium">{item.name}</h4>
+                      {/* Color & Size */}
+                      <div className="text-sm text-gray-500">
+                        <p>
+                          Color:{" "}
+                          <span className="capitalize">{item.color}</span>
+                        </p>
+                        <p>
+                          Size: <span className="uppercase">{item.size}</span>
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <span>
-                    {item.quantity} x ৳{item.price}
-                  </span>
+
+                  {/* Quantity x Price */}
+                  <div className="text-right">
+                    <p>
+                      {item.quantity} x ৳{item.price}
+                    </p>
+                  </div>
+
+                  {/* Remove Button */}
                   <button
                     onClick={() => handleRemoveItem(item.productId)}
                     className="text-red-500 hover:text-red-700"
