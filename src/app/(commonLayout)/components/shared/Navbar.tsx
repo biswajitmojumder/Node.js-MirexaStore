@@ -37,12 +37,6 @@ const Navbar = () => {
           >
             Cart
           </Link>
-          <Link
-            href="/add-product"
-            className="text-white hover:text-gray-200 transition"
-          >
-            Add Product
-          </Link>
         </nav>
 
         {/* Right Section: Search, Theme, Cart, Profile */}

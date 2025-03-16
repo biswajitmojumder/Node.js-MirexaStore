@@ -3,13 +3,13 @@
 
 import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import ReviewsSection from "./review";
 import FloatingIcons from "../components/ui/FloatingIcons";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ProductDetailsProps {
   product: {
@@ -174,7 +174,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     );
 
     if (existingCartItem) {
-      toast.info("This product with selected variant is already in your cart.");
+      toast.error(
+        "This product with selected variant is already in your cart."
+      );
       setIsLoading(false);
       return;
     }
@@ -438,6 +440,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   return (
     <>
       <div className="product-details pt-5 flex flex-col gap-8 px-4 sm:px-8 lg:px-16">
+        <Toaster position="top-right" reverseOrder={false} />
         <h1 className="text-3xl font-semibold">{product.data.name}</h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Product Images Gallery */}
@@ -633,7 +636,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         />
       </div>
 
-      <ToastContainer />
       <FloatingIcons />
     </>
   );

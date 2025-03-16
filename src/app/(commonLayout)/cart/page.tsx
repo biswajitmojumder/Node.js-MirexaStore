@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 type CartItem = {
   userId: string;
@@ -121,6 +121,7 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Shopping Cart</h1>
         {cartItems.length === 0 ? (
@@ -236,8 +237,6 @@ const CartPage = () => {
           </div>
         </div>
       )}
-
-      <ToastContainer />
     </div>
   );
 };

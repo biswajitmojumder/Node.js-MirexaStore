@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import FloatingIcons from "../../components/ui/FloatingIcons";
 import Loading from "@/app/loading";
+import toast, { Toaster } from "react-hot-toast";
 
 const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -225,6 +225,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
+      <Toaster position="top-right" reverseOrder={false} />
       {loading ? (
         <Loading />
       ) : (
@@ -454,7 +455,6 @@ const CheckoutPage = () => {
         </div>
       )}
 
-      <ToastContainer position="top-right" />
       <FloatingIcons></FloatingIcons>
     </div>
   );
