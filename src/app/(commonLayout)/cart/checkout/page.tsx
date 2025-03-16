@@ -6,6 +6,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import FloatingIcons from "../../components/ui/FloatingIcons";
+import Loading from "@/app/loading";
 
 const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -26,6 +27,7 @@ const CheckoutPage = () => {
   const [isFirstOrder, setIsFirstOrder] = useState(false); // Track if it's the user's first order
   const router = useRouter();
 
+  console.log(isFirstOrder);
   const cities = [
     "Dhaka",
     "Sylhet",
@@ -223,213 +225,234 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
-      <h1 className="text-3xl font-semibold text-center mb-6">Checkout</h1>
+      {loading ? (
+        <Loading />
+      ) : (
+        <div>
+          <h1 className="text-3xl font-semibold text-center mb-6">Checkout</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Billing & Shipping Information */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-2xl font-medium text-gray-800 mb-4">
-            Shipping Information
-          </h2>
-          <div className="space-y-4">
-            {/* Name */}
-            <div>
-              <label htmlFor="fullName" className="text-sm text-gray-600">
-                Full Name
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="text-sm text-gray-600">
-                Phone
-              </label>
-              <input
-                id="phone"
-                type="text"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="text-sm text-gray-600">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Address */}
-            <div>
-              <label htmlFor="address" className="text-sm text-gray-600">
-                Address
-              </label>
-              <input
-                id="address"
-                type="text"
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              />
-            </div>
-
-            {/* City */}
-            <div>
-              <label htmlFor="city" className="text-sm text-gray-600">
-                City
-              </label>
-              <select
-                id="city"
-                value={formData.city}
-                onChange={handleCityChange}
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              >
-                {cities.map((city, index) => (
-                  <option key={index} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* District */}
-            <div>
-              <label htmlFor="district" className="text-sm text-gray-600">
-                District
-              </label>
-              <input
-                id="district"
-                type="text"
-                value={formData.district}
-                onChange={(e) =>
-                  setFormData({ ...formData, district: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Delivery Note */}
-            {/* Delivery Note */}
-            <div>
-              <label htmlFor="deliveryNote" className="text-sm text-gray-600">
-                Delivery Note
-              </label>
-              <textarea
-                id="deliveryNote"
-                rows={4}
-                value={formData.deliveryNote}
-                onChange={(e) =>
-                  setFormData({ ...formData, deliveryNote: e.target.value })
-                }
-                className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                placeholder="Any specific instruction about delivery..."
-              ></textarea>
-            </div>
+          {/* First Order Discount */}
+          <div className="bg-blue-100 text-blue-800 p-6 rounded-lg mb-6 text-center shadow-lg">
+            <p className="font-semibold text-xl leading-tight">
+              Congratulations! Enjoy a{" "}
+              <span className="text-2xl font-bold text-blue-600">
+                10% discount
+              </span>{" "}
+              on your first order!
+            </p>
+            <p className="mt-3 text-md text-gray-700">
+              Don&apos;t miss out on this limited-time offer to save big. This
+              special discount is available for first-time customers only.
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Thank you for choosing us. We look forward to serving you again
+              soon. Stay tuned for more exclusive offers!
+            </p>
           </div>
-        </div>
 
-        {/* Order Summary */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-2xl font-medium text-gray-800 mb-4">
-            Order Summary
-          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Billing & Shipping Information */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-2xl font-medium text-gray-800 mb-4">
+                Shipping Information
+              </h2>
+              <div className="space-y-4">
+                {/* Name */}
+                <div>
+                  <label htmlFor="fullName" className="text-sm text-gray-600">
+                    Full Name
+                  </label>
+                  <input
+                    id="fullName"
+                    type="text"
+                    value={formData.fullName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullName: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  />
+                </div>
 
-          {/* Cart Items */}
-          <div className="space-y-4">
-            {cartItems.length > 0 ? (
-              cartItems.map((item) => (
-                <div
-                  key={item.productId}
-                  className="flex justify-between items-center bg-gray-50 p-3 rounded-md"
-                >
-                  {/* Product Image & Name */}
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={item.productImages[0]} // productImages is an array, so take first image
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                    <div>
-                      <h4 className="font-medium">{item.name}</h4>
-                      {/* Color & Size */}
-                      <div className="text-sm text-gray-500">
+                {/* Phone */}
+                <div>
+                  <label htmlFor="phone" className="text-sm text-gray-600">
+                    Phone
+                  </label>
+                  <input
+                    id="phone"
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="email" className="text-sm text-gray-600">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label htmlFor="address" className="text-sm text-gray-600">
+                    Address
+                  </label>
+                  <input
+                    id="address"
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* City */}
+                <div>
+                  <label htmlFor="city" className="text-sm text-gray-600">
+                    City
+                  </label>
+                  <select
+                    id="city"
+                    value={formData.city}
+                    onChange={handleCityChange}
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  >
+                    {cities.map((city, index) => (
+                      <option key={index} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* District */}
+                <div>
+                  <label htmlFor="district" className="text-sm text-gray-600">
+                    District
+                  </label>
+                  <input
+                    id="district"
+                    type="text"
+                    value={formData.district}
+                    onChange={(e) =>
+                      setFormData({ ...formData, district: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Delivery Note */}
+                <div>
+                  <label
+                    htmlFor="deliveryNote"
+                    className="text-sm text-gray-600"
+                  >
+                    Delivery Note
+                  </label>
+                  <textarea
+                    id="deliveryNote"
+                    rows={4}
+                    value={formData.deliveryNote}
+                    onChange={(e) =>
+                      setFormData({ ...formData, deliveryNote: e.target.value })
+                    }
+                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
+                    placeholder="Any specific instruction about delivery..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-2xl font-medium text-gray-800 mb-4">
+                Order Summary
+              </h2>
+
+              {/* Cart Items */}
+              <div className="space-y-4">
+                {cartItems.length > 0 ? (
+                  cartItems.map((item) => (
+                    <div
+                      key={item.productId}
+                      className="flex justify-between items-center bg-gray-50 p-3 rounded-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={item.productImages[0]}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <h4 className="font-medium">{item.name}</h4>
+                          <div className="text-sm text-gray-500">
+                            <p>
+                              Color:{" "}
+                              <span className="capitalize">{item.color}</span>
+                            </p>
+                            <p>
+                              Size:{" "}
+                              <span className="uppercase">{item.size}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
                         <p>
-                          Color:{" "}
-                          <span className="capitalize">{item.color}</span>
-                        </p>
-                        <p>
-                          Size: <span className="uppercase">{item.size}</span>
+                          {item.quantity} x ৳{item.price}
                         </p>
                       </div>
+
+                      <button
+                        onClick={() => handleRemoveItem(item.productId)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X size={20} />
+                      </button>
                     </div>
-                  </div>
+                  ))
+                ) : (
+                  <p>No items in the cart.</p>
+                )}
+              </div>
 
-                  {/* Quantity x Price */}
-                  <div className="text-right">
-                    <p>
-                      {item.quantity} x ৳{item.price}
-                    </p>
-                  </div>
+              <div className="mt-4 flex justify-between items-center">
+                <span className="font-medium">Shipping</span>
+                <span>{shippingCost}</span>
+              </div>
 
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => handleRemoveItem(item.productId)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <p>No items in the cart.</p>
-            )}
+              <div className="mt-4 flex justify-between items-center font-semibold">
+                <span>Total</span>
+                <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
+              </div>
+
+              <button
+                onClick={handleOrder}
+                className="mt-6 w-full bg-blue-500 text-white py-3 rounded-md font-semibold hover:bg-blue-600 disabled:bg-gray-400"
+                disabled={loading}
+              >
+                {loading ? "Placing Order..." : "Place Order"}
+              </button>
+            </div>
           </div>
-
-          {/* Shipping Cost */}
-          <div className="mt-4 flex justify-between items-center">
-            <span className="font-medium">Shipping</span>
-            <span>{shippingCost}</span>
-          </div>
-
-          {/* Total */}
-          <div className="mt-4 flex justify-between items-center font-semibold">
-            <span>Total</span>
-            <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
-          </div>
-
-          {/* Place Order Button */}
-          <button
-            onClick={handleOrder}
-            className="mt-6 w-full bg-blue-500 text-white py-3 rounded-md font-semibold hover:bg-blue-600 disabled:bg-gray-400"
-            disabled={loading}
-          >
-            {loading ? "Placing Order..." : "Place Order"}
-          </button>
         </div>
-      </div>
+      )}
 
       <ToastContainer position="top-right" />
       <FloatingIcons></FloatingIcons>
