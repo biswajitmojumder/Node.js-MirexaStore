@@ -53,9 +53,12 @@ const AdminOrders: React.FC = () => {
         return;
       }
 
-      const response = await Axios.get("http://localhost:5000/api/checkout", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await Axios.get(
+        "https://mirexa-store-backend.vercel.app/api/checkout",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setOrders(response.data.data);
       setLoading(false);
@@ -81,7 +84,7 @@ const AdminOrders: React.FC = () => {
       }
 
       await Axios.patch(
-        `http://localhost:5000/api/checkout/update-status/${orderId}`,
+        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -119,7 +122,7 @@ const AdminOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `http://localhost:5000/api/checkout/${orderId}`,
+                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,

@@ -114,7 +114,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/reviews/${product.data._id}`
+          `https://mirexa-store-backend.vercel.app/api/reviews/${product.data._id}`
         );
         setReviews(response.data.data);
       } catch (error) {
@@ -285,7 +285,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `http://localhost:5000/api/reviews/like/${reviewId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/like/${reviewId}`,
         {},
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
@@ -309,7 +309,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `http://localhost:5000/api/reviews/reply/${reviewId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/reply/${reviewId}`,
         { reply: replyComment, userName: auth.user.name },
         {
           headers: {
@@ -353,7 +353,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/reviews/delete-reply/${reviewId}/${replyId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 

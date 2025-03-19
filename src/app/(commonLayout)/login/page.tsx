@@ -20,8 +20,11 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
+        "https://mirexa-store-backend.vercel.app/api/auth/login",
+        {
+          email,
+          password,
+        }
       );
 
       const { token, data } = response.data;
@@ -56,7 +59,10 @@ const Login = () => {
   // Handle Google login
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    window.open("http://localhost:5000/api/auth/google", "_self");
+    window.open(
+      "https://mirexa-store-backend.vercel.app/api/auth/google",
+      "_self"
+    );
   };
 
   return (

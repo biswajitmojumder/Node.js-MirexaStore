@@ -24,7 +24,7 @@ const Testimonials: FC = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
+          `https://mirexa-store-backend.vercel.app/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
         );
 
         console.log("Backend Response:", response.data);

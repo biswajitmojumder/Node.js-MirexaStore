@@ -27,11 +27,14 @@ const UserViewPage = () => {
       }
 
       try {
-        const response = await axios.get("http://localhost:5000/api/users", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await axios.get(
+          "https://mirexa-store-backend.vercel.app/api/users",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         setUsers(response.data.data); // Assuming response has 'data' key
         setFilteredUsers(response.data.data); // Initially showing all users
         setLoading(false);
@@ -68,7 +71,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.patch(
-          `http://localhost:5000/api/users/${userId}/role`,
+          `https://mirexa-store-backend.vercel.app/api/users/${userId}/role`,
           {},
           {
             headers: {
@@ -120,11 +123,14 @@ const UserViewPage = () => {
     // Proceed with deletion after confirmation
     toast
       .promise(
-        axios.delete(`http://localhost:5000/api/users/${deleteUserId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }),
+        axios.delete(
+          `https://mirexa-store-backend.vercel.app/api/users/${deleteUserId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        ),
         {
           pending: "Deleting user...",
           success: "User deleted successfully",

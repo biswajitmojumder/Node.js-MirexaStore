@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import styles from "../../components/ui/CategorySection.module.css";
 import Image from "next/image";
+import Loading from "@/app/loading";
 
 interface Category {
   _id: string;
@@ -25,7 +26,7 @@ const CategorySection = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/category")
+      .get("https://mirexa-store-backend.vercel.app/api/category")
       .then((response) => {
         if (Array.isArray(response.data.data)) {
           setCategories(response.data.data);
@@ -41,7 +42,7 @@ const CategorySection = () => {
   }, []);
 
   if (loading) {
-    return <p>Loading categories...</p>;
+    return <Loading></Loading>;
   }
 
   const settings = {

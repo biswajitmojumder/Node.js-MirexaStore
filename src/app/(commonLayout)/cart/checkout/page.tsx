@@ -82,7 +82,7 @@ const CheckoutPage = () => {
   const checkFirstOrder = async (userId: string) => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/checkout/check-first-order/${userId}`
+        `https://mirexa-store-backend.vercel.app/api/checkout/check-first-order/${userId}`
       );
       if (response.data.isFirstOrder) {
         setIsFirstOrder(true);
@@ -173,7 +173,7 @@ const CheckoutPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/checkout",
+        "https://mirexa-store-backend.vercel.app/api/checkout",
         orderData,
         {
           headers: {

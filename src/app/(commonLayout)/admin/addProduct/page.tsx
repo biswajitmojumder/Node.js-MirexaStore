@@ -164,11 +164,15 @@ const AddProduct = () => {
     };
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/product", finalData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      await axios.post(
+        "https://mirexa-store-backend.vercel.app/api/product",
+        finalData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
       toast.success("✅ Product added successfully!");
       resetForm();
     } catch (err) {

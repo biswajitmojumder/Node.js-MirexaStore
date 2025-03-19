@@ -43,7 +43,9 @@ const CategoryProductsPage = () => {
   useEffect(() => {
     if (categorySlug) {
       axios
-        .get(`http://localhost:5000/api/product/category/${categorySlug}`)
+        .get(
+          `https://mirexa-store-backend.vercel.app/api/product/category/${categorySlug}`
+        )
         .then((res) => {
           if (Array.isArray(res.data.data)) {
             setProducts(res.data.data);

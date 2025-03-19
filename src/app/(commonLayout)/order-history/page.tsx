@@ -61,7 +61,7 @@ const OrderHistory: React.FC = () => {
   const fetchProductDetails = async (productId: string) => {
     try {
       const response = await Axios.get(
-        `http://localhost:5000/api/product/history/${productId}`
+        `https://mirexa-store-backend.vercel.app/api/product/history/${productId}`
       );
       return response.data.data;
     } catch (err) {
@@ -81,7 +81,7 @@ const OrderHistory: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `http://localhost:5000/api/checkout/order/${userId}`,
+        `https://mirexa-store-backend.vercel.app/api/checkout/order/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -151,7 +151,7 @@ const OrderHistory: React.FC = () => {
 
       // Send the review to the backend with the necessary data
       const response = await Axios.post(
-        "http://localhost:5000/api/reviews/create",
+        "https://mirexa-store-backend.vercel.app/api/reviews/create",
         {
           productId,
           userId: orderId, // Assuming userId is orderId for simplicity here, adjust accordingly.

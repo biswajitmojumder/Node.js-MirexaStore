@@ -20,7 +20,7 @@ const EditProductPage = () => {
       const fetchProduct = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/product/details/${id}`
+            `https://mirexa-store-backend.vercel.app/api/product/details/${id}`
           );
           setProduct(response.data.data);
           setLoading(false);
@@ -70,11 +70,15 @@ const EditProductPage = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/product/${id}`, product, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.put(
+        `https://mirexa-store-backend.vercel.app/api/product/${id}`,
+        product,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       toast.success("Product updated successfully!");
       router.push("/admin/products");
     } catch (err) {

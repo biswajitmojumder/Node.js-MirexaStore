@@ -3,7 +3,7 @@
 import ProductCart from "../components/ui/ProductCart";
 
 const Product = async () => {
-  const apiUrl = "http://localhost:5000/api/product"; // ✅ API to get all products
+  const apiUrl = "https://mirexa-store-backend.vercel.app/api/product"; // ✅ API to get all products
   const response = await fetch(apiUrl);
 
   if (!response.ok) {

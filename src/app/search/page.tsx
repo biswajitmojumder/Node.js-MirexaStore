@@ -36,7 +36,9 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/product`);
+        const res = await axios.get(
+          `https://mirexa-store-backend.vercel.app/api/product`
+        );
         const filtered = res.data.data.filter((product: Product) =>
           product.name.toLowerCase().includes(query?.toLowerCase() || "")
         );
