@@ -26,7 +26,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
       return; // Ensure the function exits here
     }
 
-    const relatedProductsUrl = `http://localhost:5000/product/category/${productData.data.category}`;
+    const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
