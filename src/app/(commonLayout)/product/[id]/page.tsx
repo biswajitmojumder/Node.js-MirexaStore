@@ -15,13 +15,15 @@ const ProductPage = async ({ params }: { params: tParams }) => {
 
     if (!response.ok) {
       notFound();
+      return; // Ensure the function exits here if not found
     }
 
     const productData = await response.json();
     console.log("Product Data:", productData);
 
     if (!productData || !productData.data || !productData.data.category) {
-      throw new Error("Invalid product data received");
+      notFound(); // Instead of throwing an error, redirect to notFound
+      return; // Ensure the function exits here
     }
 
     const relatedProductsUrl = `http://localhost:5000/api/product/category/${productData.data.category}`;
