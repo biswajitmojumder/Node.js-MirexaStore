@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 // Type Definitions
 export type Product = {
@@ -63,11 +64,13 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
               {/* Product Image */}
               <figure className="h-40 flex items-center justify-center overflow-hidden bg-white">
                 {product.productImages?.length > 0 ? (
-                  <img
+                  <Image
                     src={product.productImages[0]}
                     alt={product.name}
-                    className="w-full h-full object-contain p-2"
-                    style={{ maxHeight: "150px", maxWidth: "150px" }}
+                    width={150}
+                    height={150}
+                    className="object-contain p-2 max-h-[150px] max-w-[150px]"
+                    unoptimized
                   />
                 ) : (
                   <span className="text-3xl font-bold text-gray-500">

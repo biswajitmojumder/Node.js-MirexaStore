@@ -110,11 +110,8 @@ const Login = () => {
       </div>
 
       <div className="mt-4 text-center">
-        <a
-          href="/forgot-password"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Forgot Password?
+        <a href="/register" className="text-sm text-blue-600 hover:underline">
+          Don&apos;t have an account? Sign Up
         </a>
       </div>
 

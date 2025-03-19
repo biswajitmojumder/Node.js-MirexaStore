@@ -1,35 +1,15 @@
+// src/app/(commonLayout)/product/[id]/page.tsx
+
 import { notFound } from "next/navigation";
 import RelatedProduct from "../RelatedProduct";
 import ProductDetails from "../productDetails";
 
-interface ProductDetailsProps {
-  product: {
-    data: {
-      _id: string;
-      name: string;
-      description: string;
-      price: number;
-      stockQuantity: number;
-      category: string;
-      productImages: string[];
-      reviews: { rating: number; comment: string }[];
-    };
-  };
-  relatedProducts?: {
-    data: {
-      _id: string;
-      name: string;
-      price: number;
-      productImages: string[];
-    }[];
-  };
-}
+type tParams = Promise<{ id: string[] }>;
 
-const ProductPage = async ({ params }: { params: { id: string } }) => {
-  const { id } = params;
+const ProductPage = async ({ params }: { params: tParams }) => {
+  const { id } = await params;
 
   try {
-    // Fetch product details
     const apiUrl = `http://localhost:5000/api/product/${id}`;
     const response = await fetch(apiUrl);
 
@@ -40,31 +20,26 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
     const productData = await response.json();
     console.log("Product Data:", productData);
 
-    // Check if product data exists and is in the correct format
     if (!productData || !productData.data || !productData.data.category) {
       throw new Error("Invalid product data received");
     }
 
-    console.log(productData.data.category);
-    // Fetch related products by category (excluding the current product)
     const relatedProductsUrl = `http://localhost:5000/api/product/category/${productData.data.category}`;
-
     const relatedProductsResponse = await fetch(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
-      : { data: [] }; // Use an empty array if there's an issue with the fetch
+      : { data: [] };
     console.log("Related Products:", relatedProducts);
 
-    // Ensure related products exist before passing to the component
     const relatedProductsData = relatedProducts?.data || [];
 
     return (
       <>
         <ProductDetails
           product={productData}
-          relatedProducts={relatedProductsData} // Pass relatedProducts prop here
+          relatedProducts={relatedProductsData}
         />
-        {/* Only render RelatedProduct if relatedProductsData is an array and has items */}
+
         {Array.isArray(relatedProductsData) &&
         relatedProductsData.length > 0 ? (
           <RelatedProduct relatedProducts={relatedProductsData} />
@@ -78,5 +53,7 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
     notFound();
   }
 };
+
+export const dynamic = "force-static"; // This will treat this page as a static page
 
 export default ProductPage;

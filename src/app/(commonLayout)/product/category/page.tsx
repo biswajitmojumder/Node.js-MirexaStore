@@ -6,6 +6,7 @@ import Link from "next/link"; // ✅ Import Next.js Link
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import styles from "../../components/ui/CategorySection.module.css";
+import Image from "next/image";
 
 interface Category {
   _id: string;
@@ -86,13 +87,16 @@ const CategorySection = () => {
                 {" "}
                 {/* ✅ Dynamic slug link */}
                 <div className="mb-6 overflow-hidden p-2 rounded-xl cursor-pointer">
-                  <img
+                  <Image
                     src={
                       category.bannerImage ||
                       "https://via.placeholder.com/400x200"
                     }
                     alt={category.name}
+                    width={400}
+                    height={200}
                     className={styles.sliderImage}
+                    unoptimized
                   />
                 </div>
                 <h3 className={styles.categoryName}>{category.name}</h3>

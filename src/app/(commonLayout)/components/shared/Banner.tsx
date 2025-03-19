@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Image from "next/image"; // Import Image from next/image
 
 const Banner = () => {
   const images = [
@@ -15,16 +16,22 @@ const Banner = () => {
     }, 5000); // Change image every 5 seconds
 
     return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, []);
+  }, [images.length]); // Added images.length as a dependency
 
   return (
     <div>
-      <section
-        className="relative w-full bg-cover bg-center text-white py-20 sm:py-32 px-4"
-        style={{
-          backgroundImage: `url(${images[currentImageIndex]})`,
-        }}
-      >
+      <section className="relative w-full bg-cover bg-center text-white py-20 sm:py-32 px-4">
+        {/* Using Image component here */}
+        <div className="absolute inset-0">
+          <Image
+            src={images[currentImageIndex]}
+            alt="Banner Image"
+            layout="fill"
+            objectFit="cover"
+            className="z-0"
+            unoptimized
+          />
+        </div>
         <div className="absolute inset-0 bg-black opacity-50 transition-opacity duration-300 hover:opacity-75"></div>
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">

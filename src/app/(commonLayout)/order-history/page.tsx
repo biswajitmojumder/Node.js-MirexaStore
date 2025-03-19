@@ -6,6 +6,7 @@ import Loading from "@/app/loading";
 import { ToastContainer, toast } from "react-toastify"; // Importing Toastify
 import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 import FloatingIcons from "../components/ui/FloatingIcons";
+import Image from "next/image";
 
 interface OrderItem {
   color: ReactNode;
@@ -17,7 +18,7 @@ interface OrderItem {
   price: number;
   productDetails: Product;
   review?: string;
-  rating?: number; // New field for rating
+  rating: number; // New field for rating
 }
 
 interface ShippingDetails {
@@ -118,6 +119,7 @@ const OrderHistory: React.FC = () => {
 
   useEffect(() => {
     fetchOrderHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleReviewSubmit = async (
@@ -243,18 +245,21 @@ const OrderHistory: React.FC = () => {
 
               <div className="mt-6 space-y-6">
                 <h4 className="text-xl font-semibold">Items</h4>
-                {order.items.map((item) => (
+                {order.items.map((item: OrderItem) => (
                   <div
                     key={item._id}
                     className="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-gray-300 mb-4"
                   >
-                    <img
+                    <Image
                       src={
                         item.productDetails?.productImages?.[0] ||
                         "https://via.placeholder.com/80"
                       }
                       alt={item.productDetails?.name || "Product"}
-                      className="w-24 h-24 object-cover rounded-md shadow-sm"
+                      width={96} // Equivalent to 24rem in Tailwind
+                      height={96} // Equivalent to 24rem in Tailwind
+                      className="object-cover rounded-md shadow-sm"
+                      unoptimized
                     />
                     <div className="ml-6 flex-1">
                       <p className="text-lg font-semibold text-gray-800">
@@ -314,7 +319,7 @@ const OrderHistory: React.FC = () => {
                               key={star}
                               onClick={() => handleRatingChange(item, star)}
                               className={`${
-                                item.rating >= star
+                                item?.rating >= star
                                   ? "text-yellow-400"
                                   : "text-gray-400"
                               }`}

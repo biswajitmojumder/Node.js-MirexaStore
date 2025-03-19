@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import FloatingIcons from "../../components/ui/FloatingIcons";
 import Loading from "@/app/loading";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -394,10 +395,13 @@ const CheckoutPage = () => {
                       className="flex justify-between items-center bg-gray-50 p-3 rounded-md"
                     >
                       <div className="flex items-center gap-3">
-                        <img
+                        <Image
                           src={item.productImages[0]}
                           alt={item.name}
-                          className="w-16 h-16 object-cover rounded-md"
+                          width={64}
+                          height={64}
+                          className="object-cover rounded-md"
+                          unoptimized
                         />
                         <div>
                           <h4 className="font-medium">{item.name}</h4>

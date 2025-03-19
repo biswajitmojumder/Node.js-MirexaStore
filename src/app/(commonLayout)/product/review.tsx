@@ -12,7 +12,7 @@ interface Review {
     _id: string;
     name: string;
   };
-  timestamp?: string;
+  timestamp: string; // Ensure timestamp is always a string
   rating: number;
   comment: string;
   likes: string[];

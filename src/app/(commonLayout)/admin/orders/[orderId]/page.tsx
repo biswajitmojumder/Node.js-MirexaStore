@@ -6,6 +6,7 @@ import { useParams } from "next/navigation"; // ✅ Fix applied
 import Loading from "@/app/loading";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 interface ShippingDetails {
   fullName: string;
@@ -191,10 +192,13 @@ const OrderDetails: React.FC = () => {
                 >
                   {/* Product Image */}
                   {item.product?.productImages?.[0] ? (
-                    <img
+                    <Image
                       src={item.product.productImages[0]}
                       alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-md mr-4"
+                      width={80}
+                      height={80}
+                      className="object-cover rounded-md mr-4"
+                      unoptimized
                     />
                   ) : (
                     <div className="w-20 h-20 bg-gray-300 flex items-center justify-center rounded-md mr-4">

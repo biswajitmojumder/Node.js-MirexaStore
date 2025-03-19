@@ -12,11 +12,11 @@ const AdminProductPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(""); // Track the selected category
+  const [categories, setCategories] = useState<string[]>([]); // All categories
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(10000);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(""); // For searching by name
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null); // For storing product ID to delete
   const [isModalOpen, setIsModalOpen] = useState(false); // To track if the modal is open
   const router = useRouter();
@@ -43,6 +43,35 @@ const AdminProductPage = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    // Filter products based on selected category, price range, and search query
+    const filterProducts = () => {
+      let filtered = [...products];
+
+      if (selectedCategory) {
+        filtered = filtered.filter(
+          (product) => product.category === selectedCategory
+        );
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter((product) =>
+          product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      if (minPrice || maxPrice) {
+        filtered = filtered.filter(
+          (product) => product.price >= minPrice && product.price <= maxPrice
+        );
+      }
+
+      setFilteredProducts(filtered);
+    };
+
+    filterProducts(); // Apply filters whenever any of the state values change
+  }, [selectedCategory, searchQuery, minPrice, maxPrice, products]);
+
   const handleDeleteClick = (productId: string) => {
     setDeleteProductId(productId); // Set the product ID to delete
     setIsModalOpen(true); // Open the confirmation modal
@@ -60,8 +89,9 @@ const AdminProductPage = () => {
     }
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/product/${deleteProductId}`,
+      await axios.patch(
+        `http://localhost:5000/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,20 +99,27 @@ const AdminProductPage = () => {
         }
       );
 
+      // Filter out the product from the list but keep it marked as inactive
       setProducts((prevProducts) =>
-        prevProducts.filter((product) => product._id !== deleteProductId)
-      );
-      setFilteredProducts((prevFilteredProducts) =>
-        prevFilteredProducts.filter(
-          (product) => product._id !== deleteProductId
+        prevProducts.map((product) =>
+          product._id === deleteProductId
+            ? { ...product, status: "inactive" }
+            : product
         )
       );
-      toast.success("Product deleted successfully!");
+      setFilteredProducts((prevFilteredProducts) =>
+        prevFilteredProducts.map((product) =>
+          product._id === deleteProductId
+            ? { ...product, status: "inactive" }
+            : product
+        )
+      );
+      toast.success("Product status updated to inactive!");
     } catch (error) {
-      toast.error("Error deleting product!");
-      console.error("Error deleting product:", error);
+      toast.error("Error updating product status!");
+      console.error("Error updating product status:", error);
     } finally {
-      setIsModalOpen(false); // Close the modal after deletion
+      setIsModalOpen(false); // Close the modal after updating
     }
   };
 
@@ -112,7 +149,46 @@ const AdminProductPage = () => {
         message="Are you sure you want to delete this product?"
       />
 
-      {/* Other filters and table rendering... */}
+      {/* Filters */}
+      <div className="mb-4 flex flex-wrap justify-between items-center gap-4">
+        <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Search by name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-2 border rounded-md w-full sm:w-48"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-3 py-2 border rounded-md w-full sm:w-auto"
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => setMinPrice(Number(e.target.value))}
+            className="px-3 py-2 border rounded-md w-full sm:w-28"
+          />
+          <input
+            type="number"
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(Number(e.target.value))}
+            className="px-3 py-2 border rounded-md w-full sm:w-28"
+          />
+        </div>
+      </div>
+
+      {/* Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
         <table className="min-w-full table-auto">
           <thead>

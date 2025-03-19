@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -92,10 +93,13 @@ const CartPageCSR = () => {
                   key={item._id}
                   className="relative flex items-center bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                 >
-                  <img
+                  <Image
                     src={item.productId.productImages[0]}
                     alt={item.productId.name}
-                    className="w-28 h-28 object-cover rounded-lg"
+                    width={112}
+                    height={112}
+                    className="object-cover rounded-lg"
+                    unoptimized
                   />
                   <div className="ml-6 flex-1">
                     <h2 className="text-xl font-medium text-gray-800 mb-2">

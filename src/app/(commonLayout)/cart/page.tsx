@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 type CartItem = {
   userId: string;
@@ -143,10 +144,13 @@ const CartPage = () => {
 
                   <div className="w-28 h-28 bg-gray-200 rounded-lg overflow-hidden">
                     {item.productImages?.length > 0 ? (
-                      <img
+                      <Image
                         src={item.productImages[0]}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        width={300} // width হিসাবে প্রয়োজনীয় মান দিন (w-full)
+                        height={300} // height হিসাবে প্রয়োজনীয় মান দিন (h-full)
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500">

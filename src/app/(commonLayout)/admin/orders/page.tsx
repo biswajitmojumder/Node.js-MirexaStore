@@ -30,6 +30,7 @@ const AdminOrders: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
   const router = useRouter();
 
   useEffect(() => {
@@ -149,10 +150,15 @@ const AdminOrders: React.FC = () => {
     );
   };
 
-  // Filter orders by order ID based on the search query
-  const filteredOrders = orders.filter((order) =>
-    order._id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter orders by order ID and status based on the search query and selected status
+  const filteredOrders = orders.filter((order) => {
+    const matchesQuery = order._id
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "" || order.status === statusFilter;
+
+    return matchesQuery && matchesStatus;
+  });
 
   if (loading) return <Loading />;
   if (error)
@@ -175,7 +181,7 @@ const AdminOrders: React.FC = () => {
       </h1>
 
       {/* Search Bar */}
-      <div className="mb-4 flex justify-center">
+      <div className="mb-4 flex justify-center gap-4">
         <input
           type="text"
           placeholder="Search by Order ID"
@@ -183,6 +189,20 @@ const AdminOrders: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg"
         />
+
+        {/* Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        >
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Canceled">Canceled</option>
+        </select>
       </div>
 
       <div className="overflow-x-auto sm:overflow-x-visible">
