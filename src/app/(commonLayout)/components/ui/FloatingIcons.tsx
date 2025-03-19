@@ -7,7 +7,7 @@ const FloatingIcons: React.FC = () => {
     <div className="fixed bottom-5 right-5 flex flex-col items-center space-y-2 md:space-y-3 lg:space-y-4 z-50">
       {/* WhatsApp Icon */}
       <a
-        href="https://wa.me/+8801611643808" // Replace with your actual phone number
+        href="https://wa.me/+8801831283283" // Replace with your actual phone number
         target="_blank"
         rel="noopener noreferrer"
         className="bg-green-500 text-white p-2 rounded-full shadow-lg hover:scale-110 hover:bg-green-600 transition-all duration-500 text-2xl md:text-3xl lg:text-4xl animate-bounce"
