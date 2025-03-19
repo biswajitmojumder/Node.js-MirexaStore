@@ -4,42 +4,36 @@ import { notFound } from "next/navigation";
 import RelatedProduct from "../RelatedProduct";
 import ProductDetails from "../productDetails";
 
-type tParams = { id: string };
+type tParams = Promise<{ id: string[] }>;
 
 const ProductPage = async ({ params }: { params: tParams }) => {
-  const { id } = params;
-
-  if (!id) {
-    console.error("Product ID is missing");
-    return notFound();
-  }
+  const { id } = await params;
 
   try {
     const apiUrl = `https://mirexa-store-backend.vercel.app/api/product/${id}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      console.error(`Failed to fetch product: ${response.status}`);
-      return notFound();
+      notFound();
+      return; // Ensure the function exits here if not found
     }
 
     const productData = await response.json();
+    console.log("Product Data:", productData);
 
-    if (!productData?.data?.category) {
-      console.error("Invalid product data format");
-      return notFound();
+    if (!productData || !productData.data || !productData.data.category) {
+      notFound(); // Instead of throwing an error, redirect to notFound
+      return; // Ensure the function exits here
     }
 
-    const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
+    const relatedProductsUrl = `http://localhost:5000/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
+    const relatedProducts = relatedProductsResponse.ok
+      ? await relatedProductsResponse.json()
+      : { data: [] };
+    console.log("Related Products:", relatedProducts);
 
-    let relatedProductsData = [];
-    if (relatedProductsResponse.ok) {
-      const relatedProducts = await relatedProductsResponse.json();
-      relatedProductsData = relatedProducts?.data || [];
-    } else {
-      console.warn("Failed to fetch related products");
-    }
+    const relatedProductsData = relatedProducts?.data || [];
 
     return (
       <>
@@ -48,7 +42,8 @@ const ProductPage = async ({ params }: { params: tParams }) => {
           relatedProducts={relatedProductsData}
         />
 
-        {relatedProductsData.length > 0 ? (
+        {Array.isArray(relatedProductsData) &&
+        relatedProductsData.length > 0 ? (
           <RelatedProduct relatedProducts={relatedProductsData} />
         ) : (
           <p>No related products available.</p>
@@ -57,10 +52,10 @@ const ProductPage = async ({ params }: { params: tParams }) => {
     );
   } catch (error) {
     console.error("Error fetching product details:", error);
-    return notFound();
+    notFound();
   }
 };
 
-export const dynamic = "force-static";
+export const dynamic = "force-static"; // This will treat this page as a static page
 
 export default ProductPage;
