@@ -36,6 +36,9 @@ const Register = () => {
       );
 
       if (response.data) {
+        // Save email to localStorage
+        localStorage.setItem("signUpEmail", email); // Save the email
+
         // On success, redirect to login page
         router.push("/login");
       }

@@ -226,7 +226,15 @@ const CheckoutPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster
+        position="top-center"
+        gutter={10}
+        containerStyle={{
+          top: "70px",
+          zIndex: 9999,
+        }}
+        reverseOrder={false}
+      />
       {loading ? (
         <Loading />
       ) : (

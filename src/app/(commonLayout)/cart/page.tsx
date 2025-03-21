@@ -122,7 +122,15 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster
+        position="top-center"
+        gutter={10}
+        containerStyle={{
+          top: "70px",
+          zIndex: 9999,
+        }}
+        reverseOrder={false}
+      />
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Shopping Cart</h1>
         {cartItems.length === 0 ? (

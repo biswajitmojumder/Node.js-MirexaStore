@@ -93,7 +93,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
 
       // Save scroll position before page reload
 
-      window.location.reload();
+      // window.location.reload();
     } else {
       toast.warn("Please enter a reply before sending.");
     }
@@ -190,7 +190,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       {currentReviews.length > 0 ? (
         currentReviews.map((review) => (
           <div
-            key={review._id}
+            key={review?._id}
             className="w-full bg-white border rounded-lg shadow-md p-6 mb-6"
           >
             <div className="flex items-center justify-between">
@@ -241,8 +241,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
             </div>
 
             <div className="mt-4 ml-6">
-              {review.replies.length > 0 ? (
-                review.replies.map((reply) => (
+              {(review.replies ?? []).length > 0 ? (
+                (review.replies ?? []).map((reply) => (
                   <div
                     key={reply._id}
                     className="flex items-center justify-between bg-gray-100 m-1 p-3 rounded-lg shadow-sm"

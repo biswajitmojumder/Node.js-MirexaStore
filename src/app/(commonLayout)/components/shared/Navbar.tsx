@@ -2,6 +2,7 @@ import Link from "next/link";
 import SearchBar from "./Navbar/SearchBar";
 import ProfileDropdown from "./Navbar/ProfileDropDown";
 import CartButton from "./Navbar/CartButton";
+import Image from "next/image";
 
 const Navbar = () => {
   return (
@@ -12,10 +13,12 @@ const Navbar = () => {
           href="/"
           className="flex items-center gap-1 lg:gap-2 text-2xl font-bold text-white"
         >
-          <img
+          <Image
             src="/favicon.ico"
             alt="MirexaStore Logo"
             className="h-10 w-10"
+            width={40}
+            height={40}
           />
           <span className=" text-lg lg:text-2xl">MirexaStore</span>
         </Link>

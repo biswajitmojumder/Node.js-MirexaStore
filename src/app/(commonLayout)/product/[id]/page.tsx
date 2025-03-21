@@ -28,6 +28,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
 
     const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
+    console.log(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
       : { data: [] };
@@ -56,6 +57,6 @@ const ProductPage = async ({ params }: { params: tParams }) => {
   }
 };
 
-export const dynamic = "force-static"; // This will treat this page as a static page
+// This will treat this page as a static page
 
 export default ProductPage;

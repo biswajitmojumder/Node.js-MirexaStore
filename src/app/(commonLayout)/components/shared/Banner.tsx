@@ -4,9 +4,9 @@ import Image from "next/image"; // Import Image from next/image
 
 const Banner = () => {
   const images = [
-    "https://i.ibb.co.com/mLcnZG3/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047.jpg",
-    "https://i.ibb.co.com/DgzxfvS9/download.jpg",
-    "https://i.ibb.co.com/Ng6ZfZ3b/toy-shopping-cart-with-boxes-credit-card-with-copy-space-339191-197.jpg",
+    "https://i.ibb.co/mLcnZG3/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047.jpg",
+    "https://i.ibb.co/DgzxfvS9/download.jpg",
+    "https://i.ibb.co/Ng6ZfZ3b/toy-shopping-cart-with-boxes-credit-card-with-copy-space-339191-197.jpg",
   ];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -16,20 +16,21 @@ const Banner = () => {
     }, 5000); // Change image every 5 seconds
 
     return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, [images.length]); // Added images.length as a dependency
+  }, [images.length]);
 
   return (
     <div>
       <section className="relative w-full bg-cover bg-center text-white py-20 sm:py-32 px-4">
-        {/* Using Image component here */}
+        {/* Using Image component for optimized image loading */}
         <div className="absolute inset-0">
           <Image
             src={images[currentImageIndex]}
             alt="Banner Image"
-            layout="fill"
-            objectFit="cover"
+            fill // This is used for the image to fill its container
+            style={{ objectFit: "cover" }}
             className="z-0"
-            unoptimized
+            priority={currentImageIndex === 0} // Prioritize the first image for better performance
+            sizes="(max-width: 768px) 100vw, 100vw" // Responsive image sizes
           />
         </div>
         <div className="absolute inset-0 bg-black opacity-50 transition-opacity duration-300 hover:opacity-75"></div>
@@ -43,7 +44,7 @@ const Banner = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-6 sm:mb-8">
             <a
-              href="#"
+              href="/product"
               className="inline-block px-8 sm:px-10 py-4 bg-gradient-to-r from-[#F85606] to-[#E14003] text-white rounded-full text-sm sm:text-xl font-semibold transition-transform transform hover:scale-105 hover:shadow-lg"
             >
               Shop Now

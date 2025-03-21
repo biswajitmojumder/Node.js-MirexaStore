@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const ProfileDropdown = () => {
   const [user, setUser] = useState<any>(null);
@@ -20,6 +21,7 @@ const ProfileDropdown = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("cart");
     setUser(null);
     setIsOpen(false);
     router.push("/login");
@@ -60,12 +62,15 @@ const ProfileDropdown = () => {
       >
         {/* ✅ Desktop: Fully Rounded Profile Icon */}
         <div className="hidden sm:block w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-white overflow-hidden">
-          <img
+          <Image
             className="w-full h-full object-cover"
             src={
               user?.photo || "https://img.icons8.com/ios-glyphs/30/user--v1.png"
             }
             alt="Profile"
+            layout="responsive"
+            height={500}
+            width={500}
           />
         </div>
 

@@ -4,7 +4,7 @@
 import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import ReviewsSection from "./review";
 import FloatingIcons from "../components/ui/FloatingIcons";
@@ -25,7 +25,7 @@ interface ProductDetailsProps {
       discountPrice?: number;
       brand: string;
       tags: string[];
-      variants: Variant[]; // Referring to the Variant interface
+      variants: Variant[];
     };
   };
   relatedProducts: {
@@ -51,7 +51,7 @@ export interface ReviewReply {
   userId: string;
   userName: string;
   comment: string;
-  timestamp: string; // Changed to string for consistency with Review
+  timestamp: string;
 }
 
 interface Review {
@@ -63,7 +63,7 @@ interface Review {
     _id: string;
     name: string;
   };
-  timestamp: string; // Always a string
+  timestamp: string;
   rating: number;
   comment: string;
   likes: string[];
@@ -72,19 +72,10 @@ interface Review {
     userId: string;
     comment: string;
     userName: string;
-    timestamp: string; // Ensure this is a string
+    timestamp: string;
     isEditing: boolean;
   }[];
 }
-
-// interface ReviewsSectionProps {
-//   reviews: Review[];
-//   setReviews: React.Dispatch<React.SetStateAction<Review[]>>; // Ensuring it's Review[] here
-//   onLikeReview: (reviewId: string) => void;
-//   onReplyReview: (reviewId: string, replyComment: string) => void;
-//   onDeleteReply: (reviewId: string, replyId: string) => void;
-//   onUpdateReply: (reviewId: string, replyId: string, newReply: string) => void;
-// }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   const router = useRouter();
@@ -133,6 +124,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     if (!storedUser) {
       toast.error("Please log in to add items to the cart.");
       setIsLoading(false);
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
+
       return;
     }
 
@@ -190,7 +186,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
-      stockQuantity: selectedVariant?.stock, // Variant-specific stock
+      stockQuantity: selectedVariant?.stock,
       productImages: product.data.productImages,
       color: selectedVariant?.color,
       size: selectedVariant?.size,
@@ -209,6 +205,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       toast.error("Please log in to proceed to checkout.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
       return;
     }
 
@@ -273,6 +272,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     if (!storedUser || !token) {
       toast.error("Please log in first.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
       return null;
     }
 
@@ -290,7 +292,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 
-      toast.success("Review like/unlike toggled!");
+      toast.success(
+        "✨ Your feedback has been recorded! Thanks for engaging! 💖"
+      );
+
       setReviews((prevReviews) =>
         prevReviews.map((review) =>
           review._id === reviewId
@@ -321,7 +326,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
       toast.success("Replied to the review!");
 
-      // Make sure timestamp is always a string
       setReviews((prevReviews) =>
         prevReviews.map((review) =>
           review._id === reviewId
@@ -330,11 +334,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                 replies: [
                   ...review.replies,
                   {
-                    _id: data.newReply._id,
+                    _id: data.newReply?._id,
                     userId: auth.user._id,
                     userName: auth.user.name,
                     comment: replyComment,
-                    timestamp: new Date().toISOString(), // Ensure this is a string
+                    timestamp: new Date().toISOString(),
                     isEditing: false,
                   },
                 ],
@@ -369,7 +373,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         )
       );
     } catch (error) {
-      toast.error("Error deleting the reply.");
+      toast.error(
+        "Error deleting the reply. Please refresh the page and try again."
+      );
     }
   };
 
@@ -401,7 +407,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       ) : (
         <main>
           <div className="product-details pt-5 flex flex-col gap-8 px-4 sm:px-8 lg:px-16">
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster
+              position="top-center" // টোস্ট টপ সেন্টারে আসবে
+              gutter={10} // নেভবারের নিচ থেকে gap দিবে
+              containerStyle={{
+                top: "70px", // নেভবারের উচ্চতার সমান করে নিন (আপনার নেভবারের height অনুযায়ী adjust করুন)
+                zIndex: 9999, // যেন অন্য কিছুর নিচে না চলে যায়
+              }}
+              reverseOrder={false}
+            />
+
             <h1 className="text-3xl font-semibold">{product.data.name}</h1>
             <div className="flex flex-col md:flex-row gap-8">
               {/* Product Images Gallery */}

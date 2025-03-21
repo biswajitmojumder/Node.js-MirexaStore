@@ -1,7 +1,7 @@
 import { Nexios } from "nexios-http";
 
 const nexiosInstance = new Nexios({
-	baseURL: "http://localhost:5000",
+	baseURL: "https://e-commerce-web-application-rust.vercel.app/",
 	timeout: 10000,
 	headers: {
 		"Content-Type": "application/json",

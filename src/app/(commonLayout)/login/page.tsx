@@ -1,17 +1,24 @@
-"use client"; // Ensure this runs on the client-side
-
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // Import Next.js router
-import { toast, ToastContainer } from "react-toastify"; // Import Toastify
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
+import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false); // Google login state
-  const router = useRouter(); // Initialize Next.js router
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const signUpEmail = localStorage.getItem("signUpEmail");
+    if (signUpEmail) {
+      setEmail(signUpEmail);
+      localStorage.removeItem("signUpEmail");
+    }
+  }, []);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +37,7 @@ const Login = () => {
       const { token, data } = response.data;
       localStorage.setItem("accessToken", token);
       localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("role", data.role); // Store user role
+      localStorage.setItem("role", data.role);
 
       toast.success("Login successful! Redirecting...", {
         position: "top-center",
@@ -39,11 +46,11 @@ const Login = () => {
 
       // Redirect user based on their role
       setTimeout(() => {
-        const role = data.role; // Get role from the logged-in user
+        const role = data.role;
         if (role === "admin") {
-          router.push("/"); // Admin Dashboard
+          router.push("/");
         } else {
-          router.push("/"); // User Dashboard
+          router.push("/");
         }
       }, 2000);
     } catch (error: any) {
@@ -108,7 +115,7 @@ const Login = () => {
       <div className="mt-6 text-center">
         <button
           onClick={handleGoogleLogin}
-          disabled={isGoogleLoading}
+          disabled={true}
           className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
         >
           {isGoogleLoading ? "Redirecting..." : "Login with Google"}

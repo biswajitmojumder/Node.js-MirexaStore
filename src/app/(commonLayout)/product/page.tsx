@@ -26,7 +26,7 @@ const Product = async () => {
     <div>
       {/* New Arrivals Section */}
       <section>
-        <h2 className="text-3xl font-semibold text-center mb-8 text-gray-800">
+        <h2 className="text-3xl pt-7 font-semibold text-center mb-8 text-gray-800">
           New Arrivals
         </h2>
         <ProductCart products={newArrivalProducts} />
