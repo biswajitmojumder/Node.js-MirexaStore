@@ -3,10 +3,10 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import Axios from "axios";
 import Loading from "@/app/loading";
-import { ToastContainer, toast } from "react-toastify"; // Importing Toastify
 import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 import FloatingIcons from "../components/ui/FloatingIcons";
 import Image from "next/image";
+import toast, { Toaster } from "react-hot-toast";
 
 interface OrderItem {
   color: ReactNode;
@@ -77,6 +77,7 @@ const OrderHistory: React.FC = () => {
 
       if (!token || !userId) {
         setError("No token or user ID found. Please log in.");
+
         return;
       }
 
@@ -205,7 +206,15 @@ const OrderHistory: React.FC = () => {
       <h1 className="text-3xl font-semibold text-center mb-8 text-gray-900">
         Your Order History
       </h1>
-
+      <Toaster
+        position="top-center"
+        gutter={10}
+        containerStyle={{
+          top: "70px",
+          zIndex: 9999,
+        }}
+        reverseOrder={false}
+      />
       <div className="space-y-8">
         {orders.length === 0 ? (
           <p className="text-center text-gray-500 text-lg">
@@ -375,9 +384,6 @@ const OrderHistory: React.FC = () => {
           ))
         )}
       </div>
-
-      {/* ToastContainer */}
-      <ToastContainer />
       <FloatingIcons />
     </div>
   );

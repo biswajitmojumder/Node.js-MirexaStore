@@ -28,13 +28,19 @@ const ProductPage = async ({ params }: { params: tParams }) => {
 
     const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
+
     console.log(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
       : { data: [] };
     console.log("Related Products:", relatedProducts);
 
-    const relatedProductsData = relatedProducts?.data || [];
+    // ✅ Filter out the current product
+    const currentProductId = productData.data._id;
+    const relatedProductsData =
+      relatedProducts?.data?.filter(
+        (product: any) => product._id !== currentProductId
+      ) || [];
 
     return (
       <>
@@ -47,7 +53,9 @@ const ProductPage = async ({ params }: { params: tParams }) => {
         relatedProductsData.length > 0 ? (
           <RelatedProduct relatedProducts={relatedProductsData} />
         ) : (
-          <p>No related products available.</p>
+          <p className="text-left lg:ml-6 ml-5 py-8 lg:px-4">
+            No similar items available right now. Please check back later!
+          </p>
         )}
       </>
     );

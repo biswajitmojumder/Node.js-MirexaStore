@@ -14,7 +14,6 @@ const HomePage = () => {
       <Product />
       <Testimonials />
       <Newsletter />
-      <FloatingIcons />
     </>
   );
 };

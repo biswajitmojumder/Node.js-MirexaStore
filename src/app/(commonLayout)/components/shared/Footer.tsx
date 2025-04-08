@@ -119,11 +119,7 @@ const Footer = () => {
         <p>
           &copy; {new Date().getFullYear()} MirexaStore. All Rights Reserved.
         </p>
-        <div className="flex justify-center gap-4 mt-2">
-          <img src="/visa.png" alt="Visa" className="h-6" />
-          <img src="/mastercard.png" alt="Mastercard" className="h-6" />
-          <img src="/paypal.png" alt="Paypal" className="h-6" />
-        </div>
+        <div className="flex justify-center gap-4 mt-2"></div>
       </div>
     </footer>
   );

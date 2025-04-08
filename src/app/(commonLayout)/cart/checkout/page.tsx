@@ -323,7 +323,9 @@ const CheckoutPage = () => {
                   <input
                     id="address"
                     type="text"
-                    value={formData.address}
+                    value={
+                      formData.address === "Bangladesh" ? "" : formData.address
+                    }
                     onChange={(e) =>
                       setFormData({ ...formData, address: e.target.value })
                     }

@@ -132,9 +132,34 @@ const CartPage = () => {
         reverseOrder={false}
       />
       <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Shopping Cart</h1>
+        <div className="flex justify-center items-center">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">
+            Shopping Cart
+          </h1>
+        </div>
+
         {cartItems.length === 0 ? (
-          <p className="text-xl text-gray-600">Your cart is empty.</p>
+          <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+            <Image
+              src="https://i.ibb.co.com/whX10JvN/download-removebg-preview.png"
+              alt="Empty Cart"
+              width={192} // Set the width of the image
+              height={192} // Set the height of the image
+              className="opacity-80"
+            />
+            <h2 className="text-2xl font-semibold text-gray-700 mt-4">
+              Your Shopping Cart is Empty
+            </h2>
+            <p className="text-gray-500 mt-2">
+              {" Looks like you haven't added anything to your cart yet."}
+            </p>
+            <a
+              href="/product"
+              className="mt-6 px-6 py-2 bg-[#EA580C] text-white rounded-md hover:bg-[#c2490b] transition"
+            >
+              Browse Products
+            </a>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-4">

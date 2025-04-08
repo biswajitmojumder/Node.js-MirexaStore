@@ -1,36 +1,23 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image"; // Import Image from next/image
 
-const Banner = () => {
-  const images = [
-    "https://i.ibb.co/mLcnZG3/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047.jpg",
-    "https://i.ibb.co/DgzxfvS9/download.jpg",
-    "https://i.ibb.co/Ng6ZfZ3b/toy-shopping-cart-with-boxes-credit-card-with-copy-space-339191-197.jpg",
-  ];
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
-
-    return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, [images.length]);
-
+const Banner: React.FC = () => {
   return (
     <div>
       <section className="relative w-full bg-cover bg-center text-white py-20 sm:py-32 px-4">
-        {/* Using Image component for optimized image loading */}
+        {/* Using next/image to load the background image with optimizations */}
         <div className="absolute inset-0">
           <Image
-            src={images[currentImageIndex]}
+            src="https://i.ibb.co/mLcnZG3/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047.jpg"
             alt="Banner Image"
-            fill // This is used for the image to fill its container
-            style={{ objectFit: "cover" }}
+            layout="fill" // layout="fill" works well with absolute positioning
+            objectFit="cover" // Maintain aspect ratio and cover the area
+            priority={true} // Ensure this image loads first
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 100vw" // Adjust image size based on viewport
+            placeholder="blur" // Add blur effect while loading
+            blurDataURL="data:image/svg+xml;base64,..." // Use a base64 low-quality image or placeholder
             className="z-0"
-            priority={currentImageIndex === 0} // Prioritize the first image for better performance
-            sizes="(max-width: 768px) 100vw, 100vw" // Responsive image sizes
           />
         </div>
         <div className="absolute inset-0 bg-black opacity-50 transition-opacity duration-300 hover:opacity-75"></div>

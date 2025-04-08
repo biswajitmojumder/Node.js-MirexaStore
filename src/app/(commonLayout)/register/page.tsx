@@ -1,5 +1,3 @@
-// src/app/register/page.tsx (Next.js Registration Page)
-
 "use client";
 
 import { useState } from "react";
@@ -11,7 +9,7 @@ const Register = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>(""); // Address optional
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -30,16 +28,14 @@ const Register = () => {
           email,
           password,
           phone,
-          address,
+          address: address || "Bangladesh", // Address খালি থাকলে না পাঠাবে
           role: "user", // Fixed role set to 'user'
         }
       );
+      console.log("response", response);
 
       if (response.data) {
-        // Save email to localStorage
         localStorage.setItem("signUpEmail", email); // Save the email
-
-        // On success, redirect to login page
         router.push("/login");
       }
     } catch (err: any) {
@@ -62,7 +58,7 @@ const Register = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Name
+              Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -78,7 +74,7 @@ const Register = () => {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -94,7 +90,7 @@ const Register = () => {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
@@ -110,7 +106,7 @@ const Register = () => {
               htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
-              Phone
+              Phone <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -126,14 +122,13 @@ const Register = () => {
               htmlFor="address"
               className="block text-sm font-medium text-gray-700"
             >
-              Address
+              Address (Optional)
             </label>
             <input
               type="text"
               id="address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EA580C]"
             />
           </div>

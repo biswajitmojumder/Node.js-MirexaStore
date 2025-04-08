@@ -619,8 +619,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
             </div>
           </div>
 
-          <div className="pt-8">
-            <h3 className="text-2xl font-semibold mb-4">Product Reviews</h3>
+          <div className="pt-10">
             <ReviewsSection
               reviews={reviews}
               setReviews={setReviews}

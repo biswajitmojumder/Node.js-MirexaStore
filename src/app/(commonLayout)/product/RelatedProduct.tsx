@@ -114,8 +114,8 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
             </motion.div>
           ))
         ) : (
-          <p className="col-span-full text-center text-gray-500">
-            No related products found.
+          <p className="text-xl text-gray-600 text-center py-8 px-4">
+            No similar items available right now. Please check back later!
           </p>
         )}
       </div>
