@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";

@@ -183,6 +183,7 @@ const AddProduct = () => {
 
     const sellerEmail = user?.email || "";
     const sellerName = user?.name || "";
+    const sellerNumber = user?.phone || 0;
 
     const finalData = {
       ...productData,
@@ -196,6 +197,7 @@ const AddProduct = () => {
       variants,
       sellerEmail,
       sellerName,
+      sellerNumber,
     };
 
     setLoading(true);
@@ -211,16 +213,22 @@ const AddProduct = () => {
         }
       );
 
-      // Check the response status and handle success
       if (response.status === 200) {
         toast.success("✅ Product added successfully!");
         resetForm();
       } else {
         throw new Error("Failed to add product.");
       }
-    } catch (err) {
-      console.error("Error adding product:", err); // Log the error to help debug
-      toast.error("❌ Failed to add product.");
+    } catch (err: any) {
+      console.error("Error adding product:", err);
+
+      if (err.response && err.response.status === 400) {
+        toast.error(
+          `❌ ${err.response.data.message || "Slug already exists."}`
+        );
+      } else {
+        toast.error("❌ Failed to add product.");
+      }
     } finally {
       setLoading(false);
     }
@@ -415,7 +423,7 @@ const AddProduct = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["admin"]}>
+    <WithAuth requiredRoles={["reseller"]}>
       <AddProduct />
     </WithAuth>
   );

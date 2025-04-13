@@ -5,6 +5,50 @@ import RelatedProduct from "../RelatedProduct";
 import ProductDetails from "../productDetails";
 
 type tParams = Promise<{ id: string[] }>;
+export async function generateMetadata({ params }: { params: tParams }) {
+  const { id } = await params;
+
+  try {
+    const res = await fetch(
+      `https://mirexa-store-backend.vercel.app/api/product/${id}`
+    );
+    if (!res.ok) {
+      return {
+        title: "Product Not Found - MirexaStore",
+        description:
+          "The product you're looking for does not exist or is currently unavailable.",
+      };
+    }
+
+    const productData = await res.json();
+    const product = productData.data;
+
+    return {
+      title: product.name || "Product - MirexaStore",
+      description:
+        product.description?.slice(0, 160) ||
+        "Explore premium products from MirexaStore.",
+      openGraph: {
+        title: product.name,
+        description: product.description,
+        images: [
+          {
+            url: product.productImages[0],
+            width: 800,
+            height: 600,
+            alt: product.name,
+          },
+        ],
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Product Page - MirexaStore",
+      description: "Explore the finest products at MirexaStore.",
+    };
+  }
+}
 
 const ProductPage = async ({ params }: { params: tParams }) => {
   const { id } = await params;

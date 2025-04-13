@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { FaSearch } from "react-icons/fa";
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,22 +47,26 @@ const SearchBar = () => {
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch(); // 👉 Enter key press
+          }}
           className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-white w-full pl-10"
         />
         <button
           onClick={handleSearch}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-[#F85606] px-3 py-1 rounded-lg shadow-md hover:bg-gray-100 transition"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-[#F85606] px-4 py-2 rounded-lg shadow-md hover:bg-gray-100 transition"
         >
           🔍
         </button>
       </div>
 
       {/* Mobile Search */}
+
       <button
-        className="md:hidden text-white"
+        className="md:hidden mr-2 flex items-center justify-center text-white bg-[#F85606] hover:bg-[#e04d00] rounded-full p-2 shadow-lg transition transform hover:scale-105 border border-white"
         onClick={() => setShowSearch(!showSearch)}
       >
-        🔍
+        <FaSearch />
       </button>
 
       {showSearch && (
@@ -71,19 +76,24 @@ const SearchBar = () => {
           transition={{ duration: 0.3 }}
           className="absolute top-16 left-0 right-0 px-6 z-10"
         >
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-[#F85606] pl-10"
-          />
-          <button
-            onClick={handleSearch}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#F85606] text-white px-3 py-1 rounded-lg shadow-md hover:bg-[#e04d00] transition"
-          >
-            🔍
-          </button>
+          <div className="relative w-full">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch(); // 👉 Enter key press
+              }}
+              className="px-4 py-2 rounded-lg border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-[#F85606] pl-10"
+            />
+            <button
+              onClick={handleSearch}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#F85606] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#e04d00] transition"
+            >
+              🔍
+            </button>
+          </div>
 
           {/* Suggestion List */}
           {suggestions.length > 0 && (

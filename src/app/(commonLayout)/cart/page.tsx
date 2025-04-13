@@ -121,67 +121,64 @@ const CartPage = () => {
   }, [quantityUpdated]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <Toaster
         position="top-center"
         gutter={10}
-        containerStyle={{
-          top: "70px",
-          zIndex: 9999,
-        }}
+        containerStyle={{ top: "70px", zIndex: 9999 }}
         reverseOrder={false}
       />
+
       <div className="container mx-auto">
-        <div className="flex justify-center items-center">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">
-            Shopping Cart
-          </h1>
-        </div>
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
+          🛒 Your Shopping Cart
+        </h1>
 
         {cartItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center">
             <Image
               src="https://i.ibb.co.com/whX10JvN/download-removebg-preview.png"
               alt="Empty Cart"
-              width={192} // Set the width of the image
-              height={192} // Set the height of the image
+              width={192}
+              height={192}
               className="opacity-80"
             />
             <h2 className="text-2xl font-semibold text-gray-700 mt-4">
               Your Shopping Cart is Empty
             </h2>
             <p className="text-gray-500 mt-2">
-              {" Looks like you haven't added anything to your cart yet."}
+              {"Looks like you haven't added anything yet."}
             </p>
             <a
               href="/product"
-              className="mt-6 px-6 py-2 bg-[#EA580C] text-white rounded-md hover:bg-[#c2490b] transition"
+              className="mt-6 px-6 py-2 bg-[#EA580C] text-white rounded-md hover:bg-[#c2490b] transition duration-300"
             >
               Browse Products
             </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Cart Items */}
             <div className="md:col-span-2 space-y-4">
               {cartItems.map((item) => (
                 <div
                   key={item.productId}
-                  className="relative flex items-center bg-white p-6 rounded-xl shadow-lg"
+                  className="relative flex items-center bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition duration-300"
                 >
                   <button
-                    className="absolute top-2 right-2 text-red-600 text-3xl font-bold hover:text-red-700"
+                    className="absolute top-3 right-3 text-red-600 text-2xl font-bold hover:text-red-700"
                     onClick={() => showConfirmationModal(item.productId)}
                   >
                     &times;
                   </button>
 
-                  <div className="w-28 h-28 bg-gray-200 rounded-lg overflow-hidden">
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-200">
                     {item.productImages?.length > 0 ? (
                       <Image
                         src={item.productImages[0]}
                         alt={item.name}
-                        width={300} // width হিসাবে প্রয়োজনীয় মান দিন (w-full)
-                        height={300} // height হিসাবে প্রয়োজনীয় মান দিন (h-full)
+                        width={300}
+                        height={300}
                         className="object-cover"
                         unoptimized
                       />
@@ -193,11 +190,14 @@ const CartPage = () => {
                   </div>
 
                   <div className="ml-6 flex-1">
-                    <h2 className="text-xl font-semibold text-gray-800">
+                    <h2 className="text-lg font-semibold text-gray-800">
                       {item.name}
                     </h2>
-                    <p className="text-md text-gray-600 mb-1">
-                      Price: ৳{item.price.toFixed(2)}
+                    <p className="text-sm text-gray-600 mb-1">
+                      Price:{" "}
+                      <span className="font-semibold">
+                        ৳{item.price.toFixed(2)}
+                      </span>
                     </p>
                     {item.color && (
                       <p className="text-sm text-gray-500">
@@ -211,17 +211,17 @@ const CartPage = () => {
                     )}
                     <div className="flex items-center space-x-4 mt-3">
                       <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
                         onClick={() => handleQuantityChange(item.productId, -1)}
                         disabled={item.quantity <= 1}
                       >
-                        -
+                        −
                       </button>
                       <span className="text-lg font-semibold text-gray-800">
                         {item.quantity}
                       </span>
                       <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
                         onClick={() => handleQuantityChange(item.productId, 1)}
                       >
                         +
@@ -232,18 +232,22 @@ const CartPage = () => {
               ))}
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            {/* Order Summary */}
+            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-20">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
                 Order Summary
               </h3>
-              <p className="text-lg text-gray-600 mb-4">
-                Total Price: ৳{totalPrice.toFixed(2)}
-              </p>
+              <div className="text-lg text-gray-700 mb-6 flex justify-between">
+                <span>Total:</span>
+                <span className="font-semibold text-orange-600">
+                  ৳{totalPrice.toFixed(2)}
+                </span>
+              </div>
               <button
                 onClick={handleCheckoutRedirect}
-                className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
               >
-                Checkout
+                Proceed to Checkout
               </button>
             </div>
           </div>

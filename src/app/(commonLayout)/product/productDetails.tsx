@@ -2,7 +2,7 @@
 "use client";
 
 import { v4 as uuidv4 } from "uuid";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { redirect, useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
@@ -11,10 +11,17 @@ import FloatingIcons from "../components/ui/FloatingIcons";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 import Loading from "@/app/loading";
+import { HiPlus, HiMinus } from "react-icons/hi";
 
 interface ProductDetailsProps {
   product: {
     data: {
+      sellerNumber: number;
+      warranty: ReactNode;
+      weight: React.JSX.Element;
+      longDescription: React.JSX.Element;
+      sellerName: any;
+      sellerEmail: any;
       _id: string;
       name: string;
       description: string;
@@ -87,6 +94,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   const [selectedImage, setSelectedImage] = useState(
     product.data.productImages[0]
   );
+
   const [reviews, setReviews] = useState<Review[]>([]);
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
@@ -186,6 +194,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
+      sellerEmail: product?.data?.sellerEmail,
+      sellerName: product?.data?.sellerName,
       stockQuantity: selectedVariant?.stock,
       productImages: product.data.productImages,
       color: selectedVariant?.color,
@@ -239,6 +249,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       quantity: cartQuantity,
       name: product.data.name,
       price: product.data.price,
+      sellerEmail: product?.data?.sellerEmail,
+      sellerName: product?.data?.sellerName,
       stockQuantity: selectedVariant?.stock,
       productImages: product.data.productImages,
       color: selectedVariant?.color,
@@ -408,11 +420,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         <main>
           <div className="product-details pt-5 flex flex-col gap-8 px-4 sm:px-8 lg:px-16">
             <Toaster
-              position="top-center" // টোস্ট টপ সেন্টারে আসবে
-              gutter={10} // নেভবারের নিচ থেকে gap দিবে
+              position="top-center"
+              gutter={10}
               containerStyle={{
-                top: "70px", // নেভবারের উচ্চতার সমান করে নিন (আপনার নেভবারের height অনুযায়ী adjust করুন)
-                zIndex: 9999, // যেন অন্য কিছুর নিচে না চলে যায়
+                top: "70px",
+                zIndex: 9999,
               }}
               reverseOrder={false}
             />
@@ -427,8 +439,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                       <Image
                         src={selectedImage}
                         alt={product.data.name}
-                        width={500} // প্রয়োজন অনুযায়ী পরিবর্তন করো
-                        height={500} // প্রয়োজন অনুযায়ী পরিবর্তন করো
+                        width={500}
+                        height={500}
                         className="w-full h-full object-contain transition-all duration-300"
                         unoptimized={true}
                       />
@@ -457,23 +469,25 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               {/* Product Details */}
               <div className="w-full md:w-1/2">
                 <div className="flex flex-col gap-6">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-6">
                     {product.data.discountPrice ? (
                       <>
-                        <span className="text-xl font-semibold text-orange-600">
+                        <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
                           ৳ {product.data.discountPrice}
                         </span>
-                        <span className="text-lg text-gray-500 line-through">
+                        <span className="text-lg text-gray-500 line-through transition-all duration-300 ease-in-out">
                           ৳ {product.data.price}
                         </span>
                       </>
                     ) : (
-                      <span className="text-xl font-semibold text-orange-600">
+                      <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
                         ৳ {product.data.price}
                       </span>
                     )}
-                    <span className="text-sm text-gray-500">
-                      {product.data.stockQuantity} in stock
+                    <span className="text-sm text-gray-500 font-medium">
+                      {product.data.stockQuantity > 0
+                        ? `${product.data.stockQuantity} in stock`
+                        : "Out of stock"}
                     </span>
                   </div>
 
@@ -483,12 +497,19 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
                   {/* Brand and Tags */}
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span>Brand: {product.data.brand}</span>
-                    <span>Tags: {product.data.tags.join(", ")}</span>
+                    {product.data.brand && (
+                      <span>Brand: {product.data.brand}</span>
+                    )}
+
+                    {product.data.tags && product.data.tags.length > 0 && (
+                      <span>Tags: {product.data.tags.join(", ")}</span>
+                    )}
                   </div>
 
                   {/* Variants */}
-                  {product.data.variants && (
+                  {product.data.variants &&
+                  (product.data.variants.some((v) => v.color) ||
+                    product.data.variants.some((v) => v.size)) ? (
                     <div className="mt-6">
                       <h4 className="text-lg font-semibold mb-2">
                         Select Variants
@@ -509,24 +530,28 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                                       (t) => t.color === variant.color
                                     )
                                 )
-                                .map((variant, index) =>
-                                  variant.color ? (
-                                    <label
-                                      key={index}
-                                      className={`cursor-pointer w-10 h-10 border rounded-full ${
-                                        selectedVariant?.color === variant.color
-                                          ? "border-orange-600"
-                                          : "border-gray-300"
-                                      }`}
-                                      style={{ backgroundColor: variant.color }}
-                                      onClick={() =>
-                                        handleVariantChange(
-                                          "color",
+                                .map(
+                                  (variant, index) =>
+                                    variant.color && (
+                                      <label
+                                        key={index}
+                                        className={`cursor-pointer w-10 h-10 border rounded-full transition-all duration-300 ease-in-out transform ${
+                                          selectedVariant?.color ===
                                           variant.color
-                                        )
-                                      }
-                                    />
-                                  ) : null
+                                            ? "border-orange-600 ring-2 ring-orange-500 scale-110"
+                                            : "border-gray-300 hover:ring-2 hover:ring-orange-200"
+                                        }`}
+                                        style={{
+                                          backgroundColor: variant.color,
+                                        }}
+                                        onClick={() =>
+                                          handleVariantChange(
+                                            "color",
+                                            variant.color
+                                          )
+                                        }
+                                      />
+                                    )
                                 )}
                             </div>
                           </div>
@@ -547,47 +572,38 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                                       (t) => t.size === variant.size
                                     )
                                 )
-                                .map((variant, index) =>
-                                  variant.size ? (
-                                    <label
-                                      key={index}
-                                      className={`cursor-pointer px-4 py-2 border rounded-lg ${
-                                        selectedVariant?.size === variant.size
-                                          ? "bg-orange-600 text-white border-orange-600"
-                                          : "border-gray-300"
-                                      }`}
-                                      onClick={() =>
-                                        handleVariantChange(
-                                          "size",
-                                          variant.size
-                                        )
-                                      }
-                                    >
-                                      {variant.size}
-                                    </label>
-                                  ) : null
+                                .map(
+                                  (variant, index) =>
+                                    variant.size && (
+                                      <label
+                                        key={index}
+                                        className={`cursor-pointer px-4 py-2 border rounded-lg transition-all duration-300 ease-in-out ${
+                                          selectedVariant?.size === variant.size
+                                            ? "bg-orange-600 text-white border-orange-600 scale-110"
+                                            : "border-gray-300 hover:bg-orange-100"
+                                        }`}
+                                        onClick={() =>
+                                          handleVariantChange(
+                                            "size",
+                                            variant.size
+                                          )
+                                        }
+                                      >
+                                        {variant.size}
+                                      </label>
+                                    )
                                 )}
                             </div>
                           </div>
                         )}
                       </div>
                     </div>
+                  ) : (
+                    <p className="mt-6 text-gray-500 italic">
+                      This product comes as-is, with no selectable options. Just
+                      add it to your cart and enjoy your purchase!
+                    </p>
                   )}
-
-                  {/* Quantity Selector */}
-                  <div className="mt-4 flex items-center gap-2">
-                    <label className="text-sm">Quantity:</label>
-                    <input
-                      type="number"
-                      value={cartQuantity}
-                      min="1"
-                      max={selectedVariant ? selectedVariant.stock : 1}
-                      onChange={(e) =>
-                        setCartQuantity(parseInt(e.target.value))
-                      }
-                      className="w-20 p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
 
                   {/* Add to Cart & Buy Now Buttons */}
                   <div className="mt-6 flex flex-col gap-4">
@@ -617,6 +633,51 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                 </div>
               </div>
             </div>
+            {/* Additional Information */}
+            <div className="mt-8 text-gray-700 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
+              {product.data.longDescription ||
+              product.data.warranty ||
+              product.data.weight ? (
+                <>
+                  {product.data.longDescription && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Product Details
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.longDescription}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.data.warranty && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Warranty
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.warranty}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.data.weight && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Weight
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.weight} kg
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-base text-gray-600">
+                  No product details available at the moment.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="pt-10">
@@ -632,7 +693,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         </main>
       )}
 
-      <FloatingIcons />
+      <FloatingIcons sellerNumber={product.data.sellerNumber} />
     </>
   );
 };

@@ -295,7 +295,7 @@ const EditProductPage = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["admin"]}>
+    <WithAuth requiredRoles={["reseller"]}>
       <EditProductPage />
     </WithAuth>
   );

@@ -27,7 +27,7 @@ const CartButton = () => {
 
   return (
     <Link href="/cart" className="relative group">
-      <button className="flex items-center gap-2 bg-white text-[#F85606] px-1 lg:px-4 py-1 lg:py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+      <button className="flex items-center gap-2 bg-[#F85606] text-[white] px-1 lg:px-4 py-1 lg:py-2  rounded-full p-2 shadow-lg transform hover:scale-105 border border-white transition">
         <ShoppingBagIcon className="h-6 w-6" />
         <span className="hidden md:inline font-medium">Cart</span>
       </button>

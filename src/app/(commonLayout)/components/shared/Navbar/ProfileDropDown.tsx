@@ -1,28 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "@/app/lib/redux/features/authSlice";
+import { RootState } from "@/app/lib/redux/store";
 
 const ProfileDropdown = () => {
-  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const dispatch = useDispatch();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  // Get user from Redux store
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
     localStorage.removeItem("cart");
-    setUser(null);
+    dispatch(logoutUser());
     setIsOpen(false);
     router.push("/login");
   };
@@ -51,7 +48,9 @@ const ProfileDropdown = () => {
   const handleLinkClick = () => {
     setIsOpen(false);
   };
-
+  useEffect(() => {
+    console.log("Current User:", user);
+  }, [user]);
   return (
     <div ref={dropdownRef} className="dropdown dropdown-end">
       {/* 🔥 Desktop: Profile Icon, Mobile: 3-Line Button */}
@@ -148,27 +147,56 @@ const ProfileDropdown = () => {
                     </Link>
                   </li>
                 </>
+              ) : user?.role === "reseller" ? (
+                <>
+                  <li>
+                    <Link
+                      href="/reseller/addProduct"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Add Product
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/reseller/orders"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Order management
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/reseller/products"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Product Management
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/reseller/analytics"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Analytics
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/reseller/profile"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Profile Settings
+                    </Link>
+                  </li>
+                </>
               ) : (
                 <>
-                  {/* <li>
-                    <Link
-                      href="/dashboard"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
-                    >
-                      Dashboard
-                    </Link>
-                  </li> */}
-
-                  {/* <li>
-                    <Link
-                      href="/wishlist"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
-                    >
-                      Wishlist
-                    </Link>
-                  </li> */}
                   <li>
                     <Link
                       href="/product"
@@ -205,15 +233,15 @@ const ProfileDropdown = () => {
                       Order History
                     </Link>
                   </li>
-                  {/* <li>
+                  <li>
                     <Link
-                      href="/settings"
+                      href="/analytics"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
-                      Settings
+                      Analytics
                     </Link>
-                  </li> */}
+                  </li>
                 </>
               )}
               <li>

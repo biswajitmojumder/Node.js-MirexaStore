@@ -66,7 +66,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
     // Simulate a delay for loading
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1000); // Delay for 1 second to show loading (you can remove this when fetching actual data)
+    }); // Delay for 1 second to show loading (you can remove this when fetching actual data)
 
     return () => clearTimeout(timer); // Clear the timer when the component unmounts
   }, [currentPage]); // Re-run whenever the page changes

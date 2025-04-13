@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
+import { useAppSelector } from "@/app/lib/redux/hook";
 
 // Define the type for Shipping Details
 interface ShippingDetails {
@@ -24,11 +25,11 @@ interface Order {
   _id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
-  grandTotal: number;
+  totalPrice: number;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Canceled";
 }
 
-const AdminOrders: React.FC = () => {
+const ResellerOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +40,8 @@ const AdminOrders: React.FC = () => {
   useEffect(() => {
     const userRole = localStorage.getItem("role");
 
-    if (userRole !== "admin") {
-      setError("Access denied. Admins only.");
+    if (userRole !== "reseller") {
+      setError("Access denied. resellers only.");
       setLoading(false);
       return;
     }
@@ -48,6 +49,7 @@ const AdminOrders: React.FC = () => {
     fetchOrders();
   }, []);
 
+  const auth = useAppSelector((state) => state.auth);
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -63,14 +65,21 @@ const AdminOrders: React.FC = () => {
         }
       );
 
-      setOrders(response.data.data);
+      const allOrders = response.data.data;
+      const userEmail = auth?.user?.email; // redux theke email pawa
+
+      // ✅ Filter only the orders where this user is a seller of at least one item
+      const sellerOrders = allOrders.filter((order: any) =>
+        order.items.some((item: any) => item.sellerEmail === userEmail)
+      );
+
+      setOrders(sellerOrders);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch orders. Please try again.");
       setLoading(false);
     }
   };
-
   const updateOrderStatus = async (orderId: string, currentStatus: string) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -183,7 +192,7 @@ const AdminOrders: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto my-8 px-4">
       <h1 className="text-3xl font-semibold text-center mb-6">
-        Admin Order Management
+        Reseller Order Management
       </h1>
 
       {/* Search Bar */}
@@ -244,7 +253,7 @@ const AdminOrders: React.FC = () => {
                     {new Date(order.orderDate).toLocaleDateString()}
                   </td>
                   <td className="py-3 px-6 text-center">
-                    ${order.grandTotal.toFixed(2)}
+                    ৳{order.totalPrice.toFixed(2)}
                   </td>
                   <td className="py-3 px-6 text-center">
                     <span
@@ -328,8 +337,8 @@ const AdminOrders: React.FC = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["admin"]}>
-      <AdminOrders />
+    <WithAuth requiredRoles={["reseller"]}>
+      <ResellerOrders />
     </WithAuth>
   );
 }

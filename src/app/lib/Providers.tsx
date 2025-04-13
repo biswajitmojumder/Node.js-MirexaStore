@@ -1,14 +1,12 @@
-// Inside Providers.tsx
-
-"use client"; // This tells Next.js to treat this component as a client-side component.
-
-import * as React from "react";
-import { HeroUIProvider } from "@heroui/react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+// src/app/Providers.tsx
+"use client";
+import React from "react";
 import { Provider } from "react-redux";
 import { store } from "@/app/lib/redux/store";
+import { HeroUIProvider } from "@heroui/react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <HeroUIProvider>
@@ -19,5 +17,3 @@ function Providers({ children }: { children: React.ReactNode }) {
     </Provider>
   );
 }
-
-export default Providers;

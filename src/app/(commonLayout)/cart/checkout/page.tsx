@@ -9,26 +9,59 @@ import Loading from "@/app/loading";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 
+type CartItem = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  sellerEmail: string;
+  sellerName: string;
+  color?: string;
+  size?: string;
+  productImage?: string[];
+  productImages: string[];
+};
+
+type FormDataType = {
+  fullName: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  district: string;
+  deliveryNote: string;
+  country: string;
+};
+
+type UserType = {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+};
+
 const CheckoutPage = () => {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [shippingCost, setShippingCost] = useState(60); // Default shipping for Dhaka
-  const [user, setUser] = useState<any>(null);
-  const [formData, setFormData] = useState({
+  const [user, setUser] = useState<UserType | null>(null);
+  const [formData, setFormData] = useState<FormDataType>({
     fullName: "",
     phone: "",
     email: "",
     address: "",
-    city: "Dhaka", // Default city to Dhaka
-    district: "", // Added district field
+    city: "Dhaka",
+    district: "",
     deliveryNote: "",
-    country: "Bangladesh", // Default country
+    country: "Bangladesh",
   });
-  const [isFirstOrder, setIsFirstOrder] = useState(false); // Track if it's the user's first order
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
   const router = useRouter();
-
-  console.log(isFirstOrder);
+  type FormDataType = {
+    [key: string]: any;
+  };
   const cities = [
     "Dhaka",
     "Sylhet",
@@ -46,7 +79,8 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
-    const items = storedCart ? JSON.parse(storedCart) : [];
+    const items: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+
     setCartItems(items);
     calculateTotal(items);
 
@@ -59,18 +93,17 @@ const CheckoutPage = () => {
         phone: storedUser.phone,
         email: storedUser.email,
         address: storedUser.address,
-        city: "Dhaka", // Default to Dhaka
-        district: "", // Default to empty
+        city: "Dhaka",
+        district: "",
         deliveryNote: "",
-        country: "Bangladesh", // Assume Bangladesh as default
+        country: "Bangladesh",
       });
 
-      // Check if it's the user's first order
       checkFirstOrder(storedUser._id);
     }
   }, []);
 
-  const calculateTotal = (items: any[]) => {
+  const calculateTotal = (items: CartItem[]) => {
     const total = items.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0
@@ -78,27 +111,19 @@ const CheckoutPage = () => {
     setTotalAmount(total);
   };
 
-  // Check if it's the user's first order
   const checkFirstOrder = async (userId: string) => {
     try {
       const response = await axios.post(
         `https://mirexa-store-backend.vercel.app/api/checkout/check-first-order/${userId}`
       );
-      if (response.data.isFirstOrder) {
-        setIsFirstOrder(true);
-      } else {
-        setIsFirstOrder(false);
-      }
-    } catch (error) {
-      // Enhanced error handling
+      setIsFirstOrder(response.data.isFirstOrder);
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        // Axios error has a response property
         console.error(
           "Error checking first order:",
           error.response?.data || error.message
         );
       } else {
-        // Non-Axios errors (e.g., network issues)
         console.error("Unexpected error:", error);
       }
 
@@ -123,353 +148,341 @@ const CheckoutPage = () => {
     const userToken = localStorage.getItem("accessToken");
 
     if (!userToken) {
-      toast.error("You need to be logged in to place an order. Please log in.");
+      toast.error("You need to be logged in to place an order.");
       router.push("/login");
       return;
     }
 
     if (!cartItems || cartItems.length === 0) {
-      toast.error("Your cart is empty. Please add items before proceeding.");
+      toast.error("Your cart is empty.");
       return;
     }
 
     setLoading(true);
 
-    // Calculate the total amount before applying any discounts
-    const totalAmount = cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-
-    // Calculate the discount if it's the first order
-    const total = totalAmount + shippingCost;
-
-    // Calculate the grand total by adding the shipping cost
-    const grandTotal = total;
-
-    const orderData = {
-      userId: user?._id,
-      items: cartItems.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        color: item.color || "",
-        size: item.size || "",
-        name: item.name || "",
-        productImage: item.productImage || [],
-        // Add any additional item details like item name or image if needed
-      })),
-      totalPrice: total,
-      shippingCost: shippingCost, // Include shipping cost here
-      totalAmount: totalAmount, // The original total amount before discount
-      grandTotal: grandTotal, // Grand total including shipping cost
-      status: "Processing", // Update order status as per your business logic
-      orderDate: new Date().toISOString(),
-      shippingDetails: formData, // Shipping details from the form
-      deliveryNote: formData.deliveryNote, // Delivery note for the whole order
-    };
-
-    console.log("Order Data being posted:", orderData);
-
     try {
-      const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/checkout",
-        orderData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
+      const itemsGroupedBySeller: Record<string, CartItem[]> = {};
+      cartItems.forEach((item) => {
+        if (!itemsGroupedBySeller[item.sellerEmail]) {
+          itemsGroupedBySeller[item.sellerEmail] = [];
         }
-      );
+        itemsGroupedBySeller[item.sellerEmail].push(item);
+      });
 
-      if (response.status === 200) {
-        toast.success("✅ Order placed successfully!");
-        localStorage.removeItem("cart");
-        window.dispatchEvent(new Event("cartUpdated"));
-        setTimeout(() => {
-          router.push("/order-history");
-        }, 2000);
-      }
+      const sellerEmails = Object.keys(itemsGroupedBySeller);
+      const orderPromises = sellerEmails.map(async (sellerEmail) => {
+        const items = itemsGroupedBySeller[sellerEmail];
+        const totalAmount = items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        );
+        const shipping = shippingCost;
+        const grandTotal = totalAmount + shipping;
+
+        const orderData = {
+          userId: user?._id,
+          items: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            sellerEmail: item.sellerEmail,
+            sellerName: item.sellerName,
+            color: item.color || "",
+            size: item.size || "",
+            name: item.name || "",
+            productImage: item.productImages || [],
+          })),
+          totalPrice: grandTotal,
+          shippingCost: shipping,
+          totalAmount: totalAmount,
+          grandTotal: grandTotal,
+          status: "Processing",
+          orderDate: new Date().toISOString(),
+          shippingDetails: formData,
+          deliveryNote: formData.deliveryNote,
+        };
+
+        const response = await axios.post(
+          "https://mirexa-store-backend.vercel.app/api/checkout",
+          orderData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+
+        return response.data;
+      });
+
+      await Promise.all(orderPromises);
+
+      toast.success("✅ All orders placed successfully!");
+      localStorage.removeItem("cart");
+      window.dispatchEvent(new Event("cartUpdated"));
+      router.push("/order-history");
     } catch (error) {
-      // Check if the error is an Axios error
-      if (axios.isAxiosError(error)) {
-        // Log Axios-specific error details
-        console.error("Error:", error.response?.data || error.message);
-      } else {
-        // Log unexpected errors (e.g., network issues)
-        console.error("Unexpected error:", error);
-      }
-
-      // Show an error message to the user
-      toast.error(
-        "There was an error processing your order. Please try again later."
-      );
+      console.error("Order placement failed:", error);
+      toast.error("Order failed. Please try again.");
     } finally {
-      // Set loading state to false once the operation is done
       setLoading(false);
     }
   };
 
-  // Handle city selection to update shipping cost
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCity = e.target.value;
     setFormData({ ...formData, city: selectedCity });
 
-    // Update shipping cost based on city selection
     if (selectedCity === "Dhaka") {
-      setShippingCost(60); // Dhaka shipping cost
+      setShippingCost(60);
     } else {
-      setShippingCost(120); // Outside Dhaka shipping cost
+      setShippingCost(120);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-5xl">
+    <div className="container mx-auto px-4 py-10 max-w-6xl">
       <Toaster
         position="top-center"
         gutter={10}
-        containerStyle={{
-          top: "70px",
-          zIndex: 9999,
-        }}
+        containerStyle={{ top: "70px", zIndex: 9999 }}
         reverseOrder={false}
       />
+
       {loading ? (
         <Loading />
       ) : (
-        <div>
-          <h1 className="text-3xl font-semibold text-center mb-6">Checkout</h1>
+        <>
+          <>
+            <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
+              Checkout
+            </h1>
 
-          {/* First Order Discount */}
-          <div className="bg-blue-100 text-blue-800 p-6 rounded-lg mb-6 text-center shadow-lg">
-            <p className="font-semibold text-xl leading-tight">
-              Congratulations! Enjoy a{" "}
-              <span className="text-2xl font-bold text-blue-600">
-                10% discount
-              </span>{" "}
-              on your first order!
-            </p>
-            <p className="mt-3 text-md text-gray-700">
-              Don&apos;t miss out on this limited-time offer to save big. This
-              special discount is available for first-time customers only.
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              Thank you for choosing us. We look forward to serving you again
-              soon. Stay tuned for more exclusive offers!
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Billing & Shipping Information */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-medium text-gray-800 mb-4">
-                Shipping Information
-              </h2>
-              <div className="space-y-4">
-                {/* Name */}
-                <div>
-                  <label htmlFor="fullName" className="text-sm text-gray-600">
-                    Full Name
-                  </label>
-                  <input
-                    id="fullName"
-                    type="text"
-                    value={formData.fullName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label htmlFor="phone" className="text-sm text-gray-600">
-                    Phone
-                  </label>
-                  <input
-                    id="phone"
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" className="text-sm text-gray-600">
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Address */}
-                <div>
-                  <label htmlFor="address" className="text-sm text-gray-600">
-                    Address
-                  </label>
-                  <input
-                    id="address"
-                    type="text"
-                    value={
-                      formData.address === "Bangladesh" ? "" : formData.address
-                    }
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* City */}
-                <div>
-                  <label htmlFor="city" className="text-sm text-gray-600">
-                    City
-                  </label>
-                  <select
-                    id="city"
-                    value={formData.city}
-                    onChange={handleCityChange}
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  >
-                    {cities.map((city, index) => (
-                      <option key={index} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* District */}
-                <div>
-                  <label htmlFor="district" className="text-sm text-gray-600">
-                    District
-                  </label>
-                  <input
-                    id="district"
-                    type="text"
-                    value={formData.district}
-                    onChange={(e) =>
-                      setFormData({ ...formData, district: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Delivery Note */}
-                <div>
-                  <label
-                    htmlFor="deliveryNote"
-                    className="text-sm text-gray-600"
-                  >
-                    Delivery Note
-                  </label>
-                  <textarea
-                    id="deliveryNote"
-                    rows={4}
-                    value={formData.deliveryNote}
-                    onChange={(e) =>
-                      setFormData({ ...formData, deliveryNote: e.target.value })
-                    }
-                    className="mt-2 p-3 w-full rounded-md border-2 border-gray-300 focus:border-blue-500"
-                    placeholder="Any specific instruction about delivery..."
-                  ></textarea>
-                </div>
-              </div>
+            {/* First Order Discount Banner */}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-200 text-blue-900 p-6 rounded-lg mb-8 text-center shadow-md">
+              <p className="text-2xl font-bold">
+                🎁 Enjoy 10% Off on Your First Purchase!
+              </p>
+              <p className="text-sm mt-2">
+                Unlock your exclusive discount by subscribing to our newsletter.
+                This special offer is only available to first-time customers.
+              </p>
+              <p className="text-sm mt-1 font-medium text-blue-800">
+                Sign up today and start saving!
+              </p>
             </div>
 
-            {/* Order Summary */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-medium text-gray-800 mb-4">
-                Order Summary
-              </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Shipping Info Form */}
+              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+                  Shipping Information
+                </h2>
+                <div className="space-y-5">
+                  {/* Input Fields except District */}
+                  {[
+                    { id: "fullName", label: "Full Name" },
+                    { id: "phone", label: "Phone" },
+                    { id: "email", label: "Email", type: "email" },
+                    { id: "address", label: "Address" },
+                  ].map(({ id, label, type = "text" }) => (
+                    <div key={id}>
+                      <label
+                        htmlFor={id}
+                        className="block text-sm font-medium text-gray-600 mb-1"
+                      >
+                        {label}
+                      </label>
+                      <input
+                        id={id}
+                        type={type}
+                        value={formData[id]}
+                        onChange={(e) =>
+                          setFormData({ ...formData, [id]: e.target.value })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                      />
+                      {!formData[id] && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {label} is required.
+                        </p>
+                      )}
+                    </div>
+                  ))}
 
-              {/* Cart Items */}
-              <div className="space-y-4">
-                {cartItems.length > 0 ? (
-                  cartItems.map((item) => (
-                    <div
-                      key={item.productId}
-                      className="flex justify-between items-center bg-gray-50 p-3 rounded-md"
+                  {/* City Dropdown */}
+                  <div>
+                    <label
+                      htmlFor="city"
+                      className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={item.productImages[0]}
-                          alt={item.name}
-                          width={64}
-                          height={64}
-                          className="object-cover rounded-md"
-                          unoptimized
-                        />
-                        <div>
-                          <h4 className="font-medium">{item.name}</h4>
-                          <div className="text-sm text-gray-500">
-                            <p>
+                      City
+                    </label>
+                    <select
+                      id="city"
+                      value={formData.city}
+                      onChange={handleCityChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                    >
+                      {cities.map((city, index) => (
+                        <option key={index} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                    {!formData.city && (
+                      <p className="text-xs text-red-500 mt-1">
+                        City is required.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* District Field (after City) */}
+                  <div>
+                    <label
+                      htmlFor="district"
+                      className="block text-sm font-medium text-gray-600 mb-1"
+                    >
+                      District
+                    </label>
+                    <input
+                      id="district"
+                      type="text"
+                      value={formData.district}
+                      onChange={(e) =>
+                        setFormData({ ...formData, district: e.target.value })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                    />
+                    {!formData.district && (
+                      <p className="text-xs text-red-500 mt-1">
+                        District is required.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Delivery Note */}
+                  <div>
+                    <label
+                      htmlFor="deliveryNote"
+                      className="block text-sm font-medium text-gray-600 mb-1"
+                    >
+                      Delivery Note
+                    </label>
+                    <textarea
+                      id="deliveryNote"
+                      rows={4}
+                      value={formData.deliveryNote}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          deliveryNote: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                      placeholder="Any specific instructions about delivery..."
+                    />
+                    {!formData.deliveryNote && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Delivery note is required.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+                  Order Summary
+                </h2>
+
+                <div className="space-y-5">
+                  {cartItems.length > 0 ? (
+                    cartItems.map((item) => (
+                      <div
+                        key={item.productId}
+                        className="flex justify-between items-center bg-gray-50 p-4 rounded-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <Image
+                            src={item.productImages[0]}
+                            alt={item.name}
+                            width={60}
+                            height={60}
+                            className="rounded-lg object-cover border border-gray-200"
+                            unoptimized
+                          />
+                          <div>
+                            <h4 className="font-medium text-gray-800">
+                              {item.name}
+                            </h4>
+                            <p className="text-sm text-gray-500">
                               Color:{" "}
-                              <span className="capitalize">{item.color}</span>
-                            </p>
-                            <p>
+                              <span className="capitalize">{item.color}</span> |
                               Size:{" "}
                               <span className="uppercase">{item.size}</span>
                             </p>
                           </div>
                         </div>
+
+                        <div className="text-right">
+                          <p className="font-medium text-gray-700">
+                            {item.quantity} x ৳{item.price}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => handleRemoveItem(item.productId)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X size={20} />
+                        </button>
                       </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No items in the cart.</p>
+                  )}
+                </div>
 
-                      <div className="text-right">
-                        <p>
-                          {item.quantity} x ৳{item.price}
-                        </p>
-                      </div>
+                <div className="mt-6 border-t pt-4 space-y-2 text-sm text-gray-700">
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>{shippingCost}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
+                  </div>
+                </div>
 
-                      <button
-                        onClick={() => handleRemoveItem(item.productId)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X size={20} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p>No items in the cart.</p>
-                )}
+                <button
+                  onClick={() => {
+                    if (
+                      !formData.fullName ||
+                      !formData.phone ||
+                      !formData.email ||
+                      !formData.address ||
+                      !formData.city ||
+                      !formData.district ||
+                      !formData.deliveryNote
+                    ) {
+                      toast.error("Please fill out all required fields.");
+                      return;
+                    }
+                    handleOrder();
+                  }}
+                  className="mt-6 w-full py-3 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
+                  disabled={loading}
+                >
+                  {loading ? "Placing Order..." : "Place Order"}
+                </button>
               </div>
-
-              <div className="mt-4 flex justify-between items-center">
-                <span className="font-medium">Shipping</span>
-                <span>{shippingCost}</span>
-              </div>
-
-              <div className="mt-4 flex justify-between items-center font-semibold">
-                <span>Total</span>
-                <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
-              </div>
-
-              <button
-                onClick={handleOrder}
-                className="mt-6 w-full bg-blue-500 text-white py-3 rounded-md font-semibold hover:bg-blue-600 disabled:bg-gray-400"
-                disabled={loading}
-              >
-                {loading ? "Placing Order..." : "Place Order"}
-              </button>
             </div>
-          </div>
-        </div>
+          </>
+        </>
       )}
-
-      <FloatingIcons></FloatingIcons>
     </div>
   );
 };

@@ -384,7 +384,7 @@ const OrderHistory: React.FC = () => {
           ))
         )}
       </div>
-      <FloatingIcons />
+      {/* <FloatingIcons /> */}
     </div>
   );
 };

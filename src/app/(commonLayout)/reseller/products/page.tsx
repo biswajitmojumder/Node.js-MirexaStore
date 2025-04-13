@@ -24,29 +24,39 @@ const AdminProductPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // To track if the modal is open
   const router = useRouter();
 
+  const user = useSelector((state: RootState) => state.auth.user);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
           "https://mirexa-store-backend.vercel.app/api/product"
         );
-        setProducts(response.data.data);
-        setFilteredProducts(response.data.data);
+
+        const allProducts = response.data.data;
+        const loggedInUserEmail = user?.email;
+
+        const sellerProducts = allProducts.filter(
+          (product: any) => product.sellerEmail === loggedInUserEmail
+        );
+
+        setProducts(sellerProducts);
+        setFilteredProducts(sellerProducts);
         setLoading(false);
 
         const uniqueCategories = [
-          ...new Set(
-            response.data.data.map((product: any) => product.category)
-          ),
+          ...new Set(sellerProducts.map((product: any) => product.category)),
         ] as string[];
+
         setCategories(uniqueCategories);
       } catch (error) {
         toast.error("Error fetching products!");
         console.error("Error fetching products:", error);
       }
     };
+
     fetchProducts();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     // Filter products based on selected category, price range, and search query
@@ -221,7 +231,7 @@ const AdminProductPage = () => {
                   {product.name}
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
-                  ${product.price}
+                  ৳{product.price}
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
                   {product.category}
@@ -233,7 +243,7 @@ const AdminProductPage = () => {
                   <div className="flex justify-start gap-2">
                     <button
                       onClick={() =>
-                        router.push(`/admin/products/${product._id}`)
+                        router.push(`/reseller/products/${product._id}`)
                       }
                       className="text-blue-500 hover:text-blue-700 py-1 px-3 rounded-md border border-blue-500 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                     >
@@ -259,7 +269,7 @@ const AdminProductPage = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["admin"]}>
+    <WithAuth requiredRoles={["reseller"]}>
       <AdminProductPage />
     </WithAuth>
   );

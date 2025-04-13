@@ -1,12 +1,12 @@
-import { configureStore } from '@reduxjs/toolkit';
-import searchReducer from './features/searchSlice';  // Your search reducer
+// src/app/lib/redux/store.ts
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./features/authSlice";
 
 export const store = configureStore({
 	reducer: {
-		search: searchReducer,
+		auth: authReducer,
 	},
 });
 
-// Types for usage
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

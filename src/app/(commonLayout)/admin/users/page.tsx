@@ -4,42 +4,58 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify CSS
+import "react-toastify/dist/ReactToastify.css";
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import Loading from "@/app/loading";
+import { RootState } from "@/app/lib/redux/store";
+import { useSelector } from "react-redux";
+import WithAuth from "@/app/lib/utils/withAuth";
+
+// User type definition
+type UserType = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin" | "reseller";
+  phone?: string;
+  address?: string;
+};
 
 const UserViewPage = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([]); // For filtered users
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // Store search query
-  const [deleteUserId, setDeleteUserId] = useState<string | null>(null); // For storing user ID to delete
-  const [isModalOpen, setIsModalOpen] = useState(false); // To track if the modal is open
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const router = useRouter();
+
+  const accessToken = useSelector((state: RootState) => state.auth.token);
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        console.error("No accessToken found");
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
         router.push("/login");
         return;
       }
 
       try {
-        const response = await axios.get(
+        const response = await axios.get<{ data: UserType[] }>(
           "https://mirexa-store-backend.vercel.app/api/users",
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
-        setUsers(response.data.data); // Assuming response has 'data' key
-        setFilteredUsers(response.data.data); // Initially showing all users
-        setLoading(false);
+        setUsers(response.data.data);
+        setFilteredUsers(response.data.data);
       } catch (error) {
         console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -47,7 +63,6 @@ const UserViewPage = () => {
   }, [router]);
 
   useEffect(() => {
-    // Filter users by email whenever the search query changes
     if (searchQuery) {
       setFilteredUsers(
         users.filter((user) =>
@@ -55,72 +70,61 @@ const UserViewPage = () => {
         )
       );
     } else {
-      setFilteredUsers(users); // Reset to all users when search query is empty
+      setFilteredUsers(users);
     }
   }, [searchQuery, users]);
 
-  // Handling role promotion (making user an admin)
-  const handleMakeAdmin = async (userId: string) => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
+  const handleMakeReseller = async (userId: string) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
       console.error("No accessToken found");
       return;
     }
 
-    // Confirmation dialog before action with Toastify
     toast
       .promise(
         axios.patch(
-          `https://mirexa-store-backend.vercel.app/api/users/${userId}/role`,
+          `https://mirexa-store-backend.vercel.app/api/users/${userId}/reseller`,
           {},
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         ),
         {
-          pending: "Making user an admin...",
-          success: "User role updated to admin",
+          pending: "Making user a reseller...",
+          success: "User role updated to reseller",
           error: "Failed to update user role",
         }
       )
       .then(() => {
-        setUsers((prevUsers) =>
+        setUsers((prevUsers: UserType[]) =>
           prevUsers.map((user) =>
-            user._id === userId ? { ...user, role: "admin" } : user
+            user._id === userId ? { ...user, role: "reseller" } : user
           )
         );
       });
   };
 
-  // Open modal to confirm deletion
   const openDeleteModal = (userId: string) => {
-    setDeleteUserId(userId); // Set the user ID to be deleted
-    setIsModalOpen(true); // Open the confirmation modal
+    setDeleteUserId(userId);
+    setIsModalOpen(true);
   };
 
-  // Handling user deletion
   const handleDeleteUser = async () => {
-    if (!deleteUserId) return;
+    if (!deleteUserId || !accessToken) return;
 
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
-      console.error("No accessToken found");
-      return;
-    }
+    const userToDelete = users.find(
+      (user: { _id: any }) => user._id === deleteUserId
+    );
 
-    // Find the user to delete
-    const userToDelete = users.find((user) => user._id === deleteUserId);
-
-    // Check if the user to delete is an admin
     if (userToDelete?.role === "admin") {
       toast.error("Admins cannot delete other admins.");
       setIsModalOpen(false);
-      return; // Don't proceed with deletion if the user is an admin
+      return;
     }
 
-    // Proceed with deletion after confirmation
     toast
       .promise(
         axios.delete(
@@ -141,19 +145,16 @@ const UserViewPage = () => {
         setUsers((prevUsers) =>
           prevUsers.filter((user) => user._id !== deleteUserId)
         );
-        setIsModalOpen(false); // Close the modal after successful deletion
+        setIsModalOpen(false);
       });
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false); // Close the modal without deletion
+    setIsModalOpen(false);
   };
 
   return (
     <div className="pt-10">
-      {" "}
-      {/* Added padding-top to move the content lower */}
-      {/* Search bar */}
       <div className="mb-4 flex justify-center">
         <div className="flex items-center space-x-2">
           <input
@@ -161,7 +162,7 @@ const UserViewPage = () => {
             className="px-4 py-2 border rounded-md w-60 sm:w-1/2"
             placeholder="Search by email"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)} // Update search query
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
@@ -171,8 +172,9 @@ const UserViewPage = () => {
           </button>
         </div>
       </div>
+
       {loading ? (
-        <Loading></Loading>
+        <Loading />
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">
@@ -199,22 +201,22 @@ const UserViewPage = () => {
                     {user.role}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-800">
-                    {user.phone}
+                    {user.phone || "N/A"}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-800">
-                    {user.address}
+                    {user.address || "N/A"}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-800">
-                    {user.role !== "admin" && (
+                    {user.role !== "admin" && user.role !== "reseller" && (
                       <button
-                        className="px-3 py-1 bg-blue-500 text-white mr-2"
-                        onClick={() => handleMakeAdmin(user._id)}
+                        className="px-3 py-1 bg-green-600 text-white mr-2 rounded hover:bg-green-700"
+                        onClick={() => handleMakeReseller(user._id)}
                       >
-                        Make Admin
+                        Make Reseller
                       </button>
                     )}
                     <button
-                      className="px-3 py-1 bg-red-500 text-white"
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       onClick={() => openDeleteModal(user._id)}
                     >
                       Delete
@@ -226,17 +228,23 @@ const UserViewPage = () => {
           </table>
         </div>
       )}
-      {/* Modal */}
+
       <ConfirmationModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleDeleteUser}
         message="Are you sure you want to delete this user?"
       />
-      {/* ToastContainer to render Toast notifications */}
+
       <ToastContainer />
     </div>
   );
 };
 
-export default UserViewPage;
+export default function ProtectedPage() {
+  return (
+    <WithAuth requiredRoles={["admin"]}>
+      <UserViewPage />
+    </WithAuth>
+  );
+}

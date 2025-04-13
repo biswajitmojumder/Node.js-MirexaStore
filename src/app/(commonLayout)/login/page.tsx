@@ -4,13 +4,17 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAppDispatch } from "@/app/lib/redux/hook";
+import { loginUser } from "@/app/lib/redux/features/authSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const signUpEmail = localStorage.getItem("signUpEmail");
@@ -20,7 +24,6 @@ const Login = () => {
     }
   }, []);
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -28,30 +31,22 @@ const Login = () => {
     try {
       const response = await axios.post(
         "https://mirexa-store-backend.vercel.app/api/auth/login",
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
 
       const { token, data } = response.data;
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("role", data.role);
+
+      // Redux + LocalStorage save
+      dispatch(loginUser({ user: data, token }));
 
       toast.success("Login successful! Redirecting...", {
         position: "top-center",
         autoClose: 2000,
       });
 
-      // Redirect user based on their role
       setTimeout(() => {
         const role = data.role;
-        if (role === "admin") {
-          router.push("/");
-        } else {
-          router.push("/");
-        }
+        router.push("/"); // route based on role
       }, 2000);
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Invalid credentials.", {
@@ -63,7 +58,6 @@ const Login = () => {
     }
   };
 
-  // Handle Google login
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
     window.open(
