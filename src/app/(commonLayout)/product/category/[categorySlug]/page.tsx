@@ -43,7 +43,7 @@ const CategoryProductsPage = () => {
     if (categorySlug) {
       axios
         .get(
-          `https://mirexa-store-backend.vercel.app/api/product/category/${categorySlug}`
+          `https://e-commerce-backend-ashy-eight.vercel.app/api/product/category/${categorySlug}`
         )
         .then((res) => {
           if (Array.isArray(res.data.data)) {

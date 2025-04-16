@@ -30,7 +30,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/auth/login",
+        "https://e-commerce-backend-ashy-eight.vercel.app/api/auth/login",
         { email, password }
       );
 
@@ -61,7 +61,7 @@ const Login = () => {
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
     window.open(
-      "https://mirexa-store-backend.vercel.app/api/auth/google",
+      "https://e-commerce-backend-ashy-eight.vercel.app/api/auth/google",
       "_self"
     );
   };

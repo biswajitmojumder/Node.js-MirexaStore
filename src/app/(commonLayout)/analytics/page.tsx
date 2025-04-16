@@ -54,7 +54,7 @@ const UserAnalytics = () => {
         }
 
         const response = await Axios.get(
-          "https://mirexa-store-backend.vercel.app/api/checkout",
+          "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -65,7 +65,6 @@ const UserAnalytics = () => {
         const relevantOrders = allOrders.filter(
           (order: any) => order?.shippingDetails?.email === userEmail
         );
-        console.log(relevantOrders);
 
         const today = new Date().toDateString();
         let spend = 0,

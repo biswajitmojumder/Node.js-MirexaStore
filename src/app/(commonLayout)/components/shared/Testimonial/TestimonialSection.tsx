@@ -24,10 +24,8 @@ const Testimonials: FC = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
+          `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
         );
-
-        console.log("Backend Response:", response.data);
 
         const reviews = response.data.data.map((review: any) => ({
           userName: review.userName || "Anonymous", // Default name if not available

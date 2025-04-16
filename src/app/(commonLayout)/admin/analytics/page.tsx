@@ -1,58 +1,178 @@
 "use client";
+
 import WithAuth from "@/app/lib/utils/withAuth";
-import React from "react";
+import { useEffect, useState } from "react";
+import Axios from "axios";
+import { FaDollarSign, FaBox, FaChartLine, FaUsers } from "react-icons/fa";
+import { useAppSelector } from "@/app/lib/redux/hook";
+import { Bar } from "react-chartjs-2";
 import {
-  FaDollarSign,
-  FaBox,
-  FaChartLine,
-  FaTrophy,
-  FaUsers,
-} from "react-icons/fa";
-import { useSpring, animated } from "react-spring";
+  Chart,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+} from "chart.js";
+import Loading from "@/app/loading";
 
-const AnimatedNumber = ({
-  spring,
-  format,
-}: {
-  spring: any;
-  format: (n: number) => string;
-}) => {
-  return (
-    <animated.span>{spring.number.to((n: number) => format(n))}</animated.span>
-  );
-};
+Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
-const AdminAnalytics: React.FC = () => {
-  const totalSalesProps = useSpring({
-    number: 25340,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
+const AdminAnalytics = () => {
+  const auth = useAppSelector((state: { auth: any }) => state.auth);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalProductsSold, setTotalProductsSold] = useState(0);
+  const [uniqueSellers, setUniqueSellers] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0); // Track total users
+  const [totalResellers, setTotalResellers] = useState(0); // Track total resellers
+  const [sellerSalesMap, setSellerSalesMap] = useState<any>({});
+  const [sellerStatusMap, setSellerStatusMap] = useState<any>({});
+
+  const [chartData, setChartData] = useState<any>({
+    labels: [],
+    datasets: [],
   });
-  const totalOrdersProps = useSpring({
-    number: 1235,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
-  });
-  const totalProductsSoldProps = useSpring({
-    number: 1520,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
-  });
-  const avgOrderValueProps = useSpring({
-    number: 20.5,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
-  });
-  const activeUsersProps = useSpring({
-    number: 450,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
-  });
-  const topProductProps = useSpring({
-    number: 78,
-    from: { number: 0 },
-    config: { tension: 100, friction: 15 },
-  });
+
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10); // You can change this to any value for pagination
+
+  useEffect(() => {
+    const fetchOrdersAndUsers = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          setError("No token found. Please log in.");
+          return;
+        }
+
+        const [ordersResponse, usersResponse] = await Promise.all([
+          Axios.get(
+            "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+          Axios.get(
+            "https://e-commerce-backend-ashy-eight.vercel.app/api/users",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+        ]);
+
+        const allOrders = ordersResponse.data.data;
+        const allUsers = usersResponse.data.data;
+
+        const sellerMap: any = {};
+        const sellerStatus: any = {}; // Track status for each seller
+        let totalAmount = 0;
+        let totalItemCount = 0;
+        let totalUniqueSellers = new Set<string>();
+
+        // Track resellers by their email
+        const resellerEmails = new Set<string>();
+
+        allOrders.forEach((order: any) => {
+          order.items.forEach((item: any) => {
+            const sellerEmail = item.sellerEmail;
+            if (sellerEmail) {
+              resellerEmails.add(sellerEmail); // Collect resellers
+
+              totalAmount += item.price * item.quantity;
+              totalItemCount += item.quantity;
+              totalUniqueSellers.add(sellerEmail);
+
+              const sellerKey = sellerEmail;
+              if (!sellerMap[sellerKey]) sellerMap[sellerKey] = 0;
+              sellerMap[sellerKey] += item.price * item.quantity;
+
+              // Update seller order status counts
+              if (!sellerStatus[sellerKey]) {
+                sellerStatus[sellerKey] = {
+                  delivered: 0,
+                  Processing: 0,
+                  Shipped: 0,
+                };
+              }
+
+              if (order.status === "Delivered") {
+                sellerStatus[sellerKey].delivered += item.quantity;
+              } else if (order.status === "Processing") {
+                sellerStatus[sellerKey].Processing += item.quantity;
+              } else if (order.status === "Shipped") {
+                sellerStatus[sellerKey].Shipped += item.quantity;
+              }
+            }
+          });
+        });
+
+        // Count total users and resellers
+        setTotalUsers(allUsers.length);
+
+        // Filter users with role "reseller" and set total resellers
+        const resellers = allUsers.filter(
+          (user: { role: string }) => user.role === "reseller"
+        );
+        setTotalResellers(resellers.length);
+
+        setOrders(allOrders);
+        setUsers(allUsers);
+        setTotalSales(totalAmount);
+        setTotalOrders(allOrders.length);
+        setTotalProductsSold(totalItemCount);
+        setUniqueSellers(totalUniqueSellers.size);
+        setSellerSalesMap(sellerMap);
+        setSellerStatusMap(sellerStatus);
+
+        const sellerLabels = Object.keys(sellerMap);
+        const sellerData = Object.values(sellerMap);
+
+        setChartData({
+          labels: sellerLabels,
+          datasets: [
+            {
+              label: "Sales by Seller (৳)",
+              data: sellerData,
+              backgroundColor: "#F97316",
+            },
+          ],
+        });
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch data. Please try again.");
+        setLoading(false);
+      }
+    };
+
+    if (auth?.user?.role === "admin") {
+      fetchOrdersAndUsers();
+    } else {
+      setError("You are not authorized to view this page.");
+    }
+  }, [auth?.user?.role]);
+
+  if (loading)
+    return (
+      <div className="text-center mt-10">
+        <Loading />
+      </div>
+    );
+  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
+
+  // Get current users for pagination
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Pagination Handler
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
     <div className="container mx-auto p-6">
@@ -60,78 +180,179 @@ const AdminAnalytics: React.FC = () => {
         Admin Analytics Dashboard
       </h1>
 
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {/* Total Sales */}
         <Card
-          icon={<FaDollarSign className="text-3xl text-blue-600 mr-4" />}
-          label="Total Sales"
+          icon={<FaDollarSign />}
+          title="Total Sales"
+          value={`৳ ${totalSales}`}
           color="text-blue-600"
-        >
-          <AnimatedNumber
-            spring={totalSalesProps}
-            format={(n) => `৳ ${n.toFixed(0)}`}
-          />
-        </Card>
-
-        {/* Total Orders */}
+        />
         <Card
-          icon={<FaBox className="text-3xl text-green-600 mr-4" />}
-          label="Total Orders"
+          icon={<FaBox />}
+          title="Total Orders"
+          value={totalOrders.toString()}
           color="text-green-600"
-        >
-          <AnimatedNumber
-            spring={totalOrdersProps}
-            format={(n) => `${n.toFixed(0)}`}
-          />
-        </Card>
-
-        {/* Total Products Sold */}
+        />
         <Card
-          icon={<FaTrophy className="text-3xl text-yellow-600 mr-4" />}
-          label="Total Products Sold"
+          icon={<FaChartLine />}
+          title="Products Sold"
+          value={totalProductsSold.toString()}
           color="text-yellow-600"
-        >
-          <AnimatedNumber
-            spring={totalProductsSoldProps}
-            format={(n) => `${n.toFixed(0)}`}
-          />
-        </Card>
-
-        {/* Average Order Value */}
+        />
         <Card
-          icon={<FaChartLine className="text-3xl text-red-600 mr-4" />}
-          label="Avg Order Value"
+          icon={<FaUsers />}
+          title="Total Users"
+          value={totalUsers.toString()}
           color="text-red-600"
-        >
-          <AnimatedNumber
-            spring={avgOrderValueProps}
-            format={(n) => `৳ ${n.toFixed(2)}`}
-          />
-        </Card>
-
-        {/* Active Users */}
+        />
         <Card
-          icon={<FaUsers className="text-3xl text-purple-600 mr-4" />}
-          label="Active Users"
-          color="text-purple-600"
-        >
-          <AnimatedNumber
-            spring={activeUsersProps}
-            format={(n) => `${n.toFixed(0)}`}
-          />
-        </Card>
+          icon={<FaUsers />}
+          title="Total Resellers"
+          value={totalResellers.toString()}
+          color="text-teal-600"
+        />
+      </div>
 
-        {/* Top Products */}
-        <Card
-          icon={<FaTrophy className="text-3xl text-orange-600 mr-4" />}
-          label="Top Products"
-          color="text-orange-600"
-        >
-          <AnimatedNumber
-            spring={topProductProps}
-            format={(n) => `${n.toFixed(0)}`}
-          />
-        </Card>
+      {/* Sales Chart */}
+      <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          📈 Sales by Seller
+        </h2>
+        <Bar data={chartData} />
+      </div>
+
+      {/* Reseller Users Table */}
+      <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          👤 Reseller Information
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">Phone</th>
+                <th className="px-4 py-2">Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentUsers
+                .filter((user) => user.role === "reseller") // Only show resellers
+                .map((user, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="px-4 py-2">{user.name}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.phone}</td>
+                    <td className="px-4 py-2">{user.address}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md mr-2"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={indexOfLastUser >= users.length}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          👤 Users Information
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">Phone</th>
+                <th className="px-4 py-2">Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentUsers
+                .filter((user) => user.role === "user") // Only show resellers
+                .map((user, index) => (
+                  <tr key={index} className="border-t">
+                    <td className="px-4 py-2">{user.name}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.phone}</td>
+                    <td className="px-4 py-2">{user.address}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md mr-2"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={indexOfLastUser >= users.length}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      {/* Seller Product Status */}
+      <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          📦 Product Status by Seller
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">Seller</th>
+                <th className="px-4 py-2">Products Sold</th>
+                <th className="px-4 py-2">Delivered</th>
+                <th className="px-4 py-2">Processing</th>
+                <th className="px-4 py-2">Shipped</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(sellerSalesMap).map((sellerEmail, index) => {
+                const soldProducts = sellerSalesMap[sellerEmail];
+                const { delivered, Processing, Shipped } =
+                  sellerStatusMap[sellerEmail];
+
+                return (
+                  <tr key={index} className="border-t">
+                    <td className="px-4 py-2">{sellerEmail}</td>
+                    <td className="px-4 py-2">{soldProducts}</td>
+                    <td className="px-4 py-2">{delivered}</td>
+                    <td className="px-4 py-2">{Processing}</td>
+                    <td className="px-4 py-2">{Shipped}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -139,32 +360,28 @@ const AdminAnalytics: React.FC = () => {
 
 const Card = ({
   icon,
-  label,
-  children,
+  title,
+  value,
   color,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
+  icon: JSX.Element;
+  title: string;
+  value: string;
   color: string;
-}) => {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-      <div className="flex items-center mb-4">
-        {icon}
-        <h2 className="text-xl font-semibold text-gray-700">{label}</h2>
-      </div>
-      <p className={`text-3xl font-bold ${color}`}>{children}</p>
+}) => (
+  <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition duration-300">
+    <div className="flex items-center mb-3 text-xl font-semibold text-gray-700 gap-3">
+      <span className={`text-2xl ${color}`}>{icon}</span>
+      <h2>{title}</h2>
     </div>
-  );
-};
+    <p className={`text-3xl font-bold ${color}`}>{value}</p>
+  </div>
+);
 
-const ProtectedPage: React.FC = () => {
+export default function ProtectedPage() {
   return (
     <WithAuth requiredRoles={["admin"]}>
       <AdminAnalytics />
     </WithAuth>
   );
-};
-
-export default ProtectedPage;
+}

@@ -22,7 +22,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/auth/register",
+        "https://e-commerce-backend-ashy-eight.vercel.app/api/auth/register",
         {
           name,
           email,
@@ -32,7 +32,6 @@ const Register = () => {
           role: "user", // Fixed role set to 'user'
         }
       );
-      console.log("response", response);
 
       if (response.data) {
         localStorage.setItem("signUpEmail", email); // Save the email

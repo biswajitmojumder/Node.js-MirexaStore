@@ -52,7 +52,7 @@
 //     setLoading(true);
 //     try {
 //       const response = await fetch(
-//         `https://mirexa-store-backend.vercel.app/api/cart/${userId}`,
+//         `https://e-commerce-backend-ashy-eight.vercel.app/api/cart/${userId}`,
 //         {
 //           method: "GET",
 //           headers: {

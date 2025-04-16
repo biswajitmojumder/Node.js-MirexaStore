@@ -24,7 +24,7 @@ const ProfilePage = () => {
 
       try {
         const response = await Axios.get(
-          "https://mirexa-store-backend.vercel.app/api/users/me",
+          "https://e-commerce-backend-ashy-eight.vercel.app/api/users/me",
           {
             headers: {
               Authorization: `Bearer ${token}`,

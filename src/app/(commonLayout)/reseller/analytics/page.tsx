@@ -60,7 +60,7 @@ const ResellerAnalytics = () => {
         }
 
         const response = await Axios.get(
-          "https://mirexa-store-backend.vercel.app/api/checkout",
+          "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -43,7 +43,7 @@ const UserViewPage = () => {
 
       try {
         const response = await axios.get<{ data: UserType[] }>(
-          "https://mirexa-store-backend.vercel.app/api/users",
+          "https://e-commerce-backend-ashy-eight.vercel.app/api/users",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -84,7 +84,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.patch(
-          `https://mirexa-store-backend.vercel.app/api/users/${userId}/reseller`,
+          `https://e-commerce-backend-ashy-eight.vercel.app/api/users/${userId}/reseller`,
           {},
           {
             headers: {
@@ -128,7 +128,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.delete(
-          `https://mirexa-store-backend.vercel.app/api/users/${deleteUserId}`,
+          `https://e-commerce-backend-ashy-eight.vercel.app/api/users/${deleteUserId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

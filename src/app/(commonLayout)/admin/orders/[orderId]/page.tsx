@@ -4,12 +4,11 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import { useParams } from "next/navigation"; // ✅ Fix applied
 import Loading from "@/app/loading";
-import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import WithAuth from "@/app/lib/utils/withAuth";
-import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
+import { useAppSelector } from "@/app/lib/redux/hook";
 
 interface ShippingDetails {
   fullName: string;
@@ -73,7 +72,7 @@ const OrderDetails: React.FC = () => {
     fetchOrderDetails(orderId);
   }, [orderId]);
 
-  const token = useSelector((state: RootState) => state.auth.token);
+  const token = useAppSelector((state: RootState) => state.auth.token);
 
   const fetchOrderDetails = async (orderId: string) => {
     try {
@@ -87,7 +86,7 @@ const OrderDetails: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -99,7 +98,7 @@ const OrderDetails: React.FC = () => {
         orderData.items.map(async (item) => {
           try {
             const productRes = await Axios.get(
-              `https://mirexa-store-backend.vercel.app/api/product/${item.productId}`
+              `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${item.productId}`
             );
             return { ...item, product: productRes.data.data };
           } catch {
@@ -119,12 +118,7 @@ const OrderDetails: React.FC = () => {
   if (loading) return <Loading />;
 
   if (error)
-    return (
-      <div className="text-center text-red-500 mt-6">
-        {error}
-        <ToastContainer />
-      </div>
-    );
+    return <div className="text-center text-red-500 mt-6">{error}</div>;
 
   return (
     <div className="max-w-6xl mx-auto my-8 px-4">
@@ -257,8 +251,6 @@ const OrderDetails: React.FC = () => {
           </div>
         </div>
       )}
-
-      <ToastContainer />
     </div>
   );
 };

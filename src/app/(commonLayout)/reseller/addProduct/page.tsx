@@ -39,6 +39,8 @@ interface ProductData {
   category: string;
   brand: string;
   videoUrl: string;
+  type: "own" | "affiliate"; // ✅ Added product type field
+  affiliateLink?: string;
 }
 
 interface Variant {
@@ -71,6 +73,7 @@ const AddProduct = () => {
     category: "",
     brand: "",
     videoUrl: "",
+    type: "own",
   });
 
   const [productImages, setProductImages] = useState<string[]>([""]);
@@ -164,6 +167,7 @@ const AddProduct = () => {
       category: "",
       brand: "",
       videoUrl: "",
+      type: "own",
     });
     setProductImages([""]);
     setTags([""]);
@@ -187,6 +191,7 @@ const AddProduct = () => {
 
     const finalData = {
       ...productData,
+      type: productData.affiliateLink ? "affiliate" : "own",
       productImages,
       tags,
       colors,
@@ -203,7 +208,7 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/product",
+        "https://e-commerce-backend-ashy-eight.vercel.app/api/product",
         finalData,
         {
           headers: {
@@ -385,7 +390,7 @@ const AddProduct = () => {
         {renderArrayField("Colors", colors, setColors)}
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
-
+        {renderInputField("Affiliate Link", "affiliateLink")}
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-gray-700">
             <input

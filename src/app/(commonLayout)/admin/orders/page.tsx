@@ -10,31 +10,39 @@ import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 
-// Define the type for Shipping Details
 interface ShippingDetails {
   fullName: string;
+  email?: string;
   address?: string;
   city?: string;
   postalCode?: string;
   country?: string;
 }
 
-// Define the type for Order
+interface OrderItem {
+  sellerEmail: string;
+}
+
 interface Order {
   _id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
   grandTotal: number;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Canceled";
+  items: OrderItem[];
 }
 
 const AdminOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
-  const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sellerFilter, setSellerFilter] = useState<string>("");
+  const [userEmailFilter, setUserEmailFilter] = useState<string>("");
+
   const router = useRouter();
+  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
     const userRole = localStorage.getItem("role");
@@ -57,7 +65,7 @@ const AdminOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://mirexa-store-backend.vercel.app/api/checkout",
+        "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -77,17 +85,12 @@ const AdminOrders: React.FC = () => {
       if (!token) return;
 
       let newStatus = "";
-
-      if (currentStatus === "Pending") {
-        newStatus = "Processing";
-      } else if (currentStatus === "Processing") {
-        newStatus = "Shipped";
-      } else if (currentStatus === "Shipped") {
-        newStatus = "Delivered";
-      }
+      if (currentStatus === "Pending") newStatus = "Processing";
+      else if (currentStatus === "Processing") newStatus = "Shipped";
+      else if (currentStatus === "Shipped") newStatus = "Delivered";
 
       await Axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -96,12 +99,11 @@ const AdminOrders: React.FC = () => {
         }
       );
       toast.success(`Order status updated to ${newStatus}`);
-      fetchOrders(); // Refresh orders
+      fetchOrders();
     } catch (err) {
       toast.error("Failed to update order status. Please try again.");
     }
   };
-  const token = useSelector((state: RootState) => state.auth.token);
 
   const deleteOrder = async (orderId: string) => {
     toast.info(
@@ -125,7 +127,7 @@ const AdminOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+                  `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -140,12 +142,12 @@ const AdminOrders: React.FC = () => {
                   autoClose: 10000,
                 });
 
-                fetchOrders(); // Refresh orders
+                fetchOrders();
               } catch (err) {
                 toast.error("❌ Failed to cancel order. Please try again.");
               }
 
-              toast.dismiss(); // Close confirmation toast
+              toast.dismiss();
             }}
           >
             Yes
@@ -156,15 +158,38 @@ const AdminOrders: React.FC = () => {
     );
   };
 
-  // Filter orders by order ID and status based on the search query and selected status
-  const filteredOrders = orders.filter((order) => {
-    const matchesQuery = order._id
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "" || order.status === statusFilter;
+  // Group orders by first seller email
+  const groupBySeller = orders.reduce((acc, order) => {
+    const sellerEmail = order.items?.[0]?.sellerEmail || "Unknown";
+    if (!acc[sellerEmail]) acc[sellerEmail] = [];
+    acc[sellerEmail].push(order);
+    return acc;
+  }, {} as Record<string, Order[]>);
 
-    return matchesQuery && matchesStatus;
-  });
+  const filteredGroupedOrders = Object.entries(groupBySeller).map(
+    ([sellerEmail, sellerOrders]) => {
+      const filteredOrders = sellerOrders.filter((order) => {
+        const matchesQuery = order._id
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+        const matchesStatus =
+          statusFilter === "" || order.status === statusFilter;
+        const matchesSeller =
+          sellerFilter === "" || sellerEmail === sellerFilter;
+        const matchesUserEmail =
+          userEmailFilter === "" ||
+          (order.shippingDetails.email || "")
+            .toLowerCase()
+            .includes(userEmailFilter.toLowerCase());
+
+        return (
+          matchesQuery && matchesStatus && matchesSeller && matchesUserEmail
+        );
+      });
+
+      return { sellerEmail, orders: filteredOrders };
+    }
+  );
 
   if (loading) return <Loading />;
   if (error)
@@ -186,8 +211,7 @@ const AdminOrders: React.FC = () => {
         Admin Order Management
       </h1>
 
-      {/* Search Bar */}
-      <div className="mb-4 flex justify-center gap-4">
+      <div className="mb-4 flex flex-wrap gap-4 justify-center">
         <input
           type="text"
           placeholder="Search by Order ID"
@@ -195,8 +219,20 @@ const AdminOrders: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg"
         />
-
-        {/* Status Filter */}
+        <input
+          type="text"
+          placeholder="Filter by User Email"
+          value={userEmailFilter}
+          onChange={(e) => setUserEmailFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        />
+        <input
+          type="text"
+          placeholder="Filter by Seller Email"
+          value={sellerFilter}
+          onChange={(e) => setSellerFilter(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -211,116 +247,122 @@ const AdminOrders: React.FC = () => {
         </select>
       </div>
 
-      <div className="overflow-x-auto sm:overflow-x-visible">
-        <table className="min-w-full bg-white shadow-md rounded-lg">
-          <thead>
-            <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Order ID</th>
-              <th className="py-3 px-6 text-left">Customer</th>
-              <th className="py-3 px-6 text-center">Date</th>
-              <th className="py-3 px-6 text-center">Total</th>
-              <th className="py-3 px-6 text-center">Status</th>
-              <th className="py-3 px-6 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-700 text-sm">
-            {filteredOrders.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No orders found.
-                </td>
-              </tr>
-            ) : (
-              filteredOrders.map((order) => (
-                <tr
-                  key={order._id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td className="py-3 px-6">{order._id.slice(-6)}</td>
-                  <td className="py-3 px-6">
-                    {order.shippingDetails.fullName}
-                  </td>
-                  <td className="py-3 px-6 text-center">
-                    {new Date(order.orderDate).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-6 text-center">
-                    ${order.grandTotal.toFixed(2)}
-                  </td>
-                  <td className="py-3 px-6 text-center">
-                    <span
-                      className={`py-1 px-3 rounded-full text-xs font-semibold ${
-                        order.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : order.status === "Processing"
-                          ? "bg-blue-100 text-blue-600"
-                          : order.status === "Shipped"
-                          ? "bg-purple-100 text-purple-600"
-                          : order.status === "Delivered"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-6 text-center space-x-2">
-                    {order.status !== "Delivered" &&
-                      order.status !== "Canceled" && (
-                        <>
-                          {order.status === "Pending" && (
-                            <button
-                              className="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
-                              onClick={() =>
-                                updateOrderStatus(order._id, "Pending")
-                              }
-                            >
-                              Processing
-                            </button>
-                          )}
-                          {order.status === "Processing" && (
-                            <button
-                              className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
-                              onClick={() =>
-                                updateOrderStatus(order._id, "Processing")
-                              }
-                            >
-                              Shipped
-                            </button>
-                          )}
-                          {order.status === "Shipped" && (
-                            <button
-                              className="text-xs bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                              onClick={() =>
-                                updateOrderStatus(order._id, "Shipped")
-                              }
-                            >
-                              Delivered
-                            </button>
-                          )}
-                        </>
-                      )}
-
-                    {order.status !== "Delivered" && (
-                      <button
-                        className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                        onClick={() => deleteOrder(order._id)}
+      {filteredGroupedOrders.map(
+        ({ sellerEmail, orders }) =>
+          orders.length > 0 && (
+            <div key={sellerEmail} className="mb-8">
+              <h2 className="text-xl font-semibold mb-2">
+                Seller: {sellerEmail}
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white shadow-md rounded-lg">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                      <th className="py-3 px-6 text-left">Order ID</th>
+                      <th className="py-3 px-6 text-left">Customer</th>
+                      <th className="py-3 px-6 text-left">User Email</th>
+                      <th className="py-3 px-6 text-center">Date</th>
+                      <th className="py-3 px-6 text-center">Total</th>
+                      <th className="py-3 px-6 text-center">Status</th>
+                      <th className="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-700 text-sm">
+                    {orders.map((order) => (
+                      <tr
+                        key={order._id}
+                        className="border-b border-gray-200 hover:bg-gray-50"
                       >
-                        Cancel
-                      </button>
-                    )}
-                    <button
-                      className="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600"
-                      onClick={() => router.push(`orders/${order._id}`)}
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                        <td className="py-3 px-6">{order._id.slice(-6)}</td>
+                        <td className="py-3 px-6">
+                          {order.shippingDetails.fullName}
+                        </td>
+                        <td className="py-3 px-6">
+                          {order.shippingDetails.email || "N/A"}
+                        </td>
+                        <td className="py-3 px-6 text-center">
+                          {new Date(order.orderDate).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-6 text-center">
+                          ৳{order.grandTotal.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-6 text-center">
+                          <span
+                            className={`py-1 px-3 rounded-full text-xs font-semibold ${
+                              order.status === "Pending"
+                                ? "bg-yellow-100 text-yellow-600"
+                                : order.status === "Processing"
+                                ? "bg-blue-100 text-blue-600"
+                                : order.status === "Shipped"
+                                ? "bg-purple-100 text-purple-600"
+                                : order.status === "Delivered"
+                                ? "bg-green-100 text-green-600"
+                                : "bg-red-100 text-red-600"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-6 text-center space-x-2">
+                          {order.status !== "Delivered" &&
+                            order.status !== "Canceled" && (
+                              <>
+                                {order.status === "Pending" && (
+                                  <button
+                                    className="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                                    onClick={() =>
+                                      updateOrderStatus(order._id, "Pending")
+                                    }
+                                  >
+                                    Processing
+                                  </button>
+                                )}
+                                {order.status === "Processing" && (
+                                  <button
+                                    className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
+                                    onClick={() =>
+                                      updateOrderStatus(order._id, "Processing")
+                                    }
+                                  >
+                                    Shipped
+                                  </button>
+                                )}
+                                {order.status === "Shipped" && (
+                                  <button
+                                    className="text-xs bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                                    onClick={() =>
+                                      updateOrderStatus(order._id, "Shipped")
+                                    }
+                                  >
+                                    Delivered
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          {order.status !== "Delivered" && (
+                            <button
+                              className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                              onClick={() => deleteOrder(order._id)}
+                            >
+                              Cancel
+                            </button>
+                          )}
+                          <button
+                            className="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600"
+                            onClick={() => router.push(`orders/${order._id}`)}
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+      )}
+
       <ToastContainer />
     </div>
   );

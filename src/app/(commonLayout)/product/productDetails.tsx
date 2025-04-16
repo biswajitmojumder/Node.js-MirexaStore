@@ -15,7 +15,11 @@ import { HiPlus, HiMinus } from "react-icons/hi";
 
 interface ProductDetailsProps {
   product: {
+    type: string;
+    affiliateLink: string | undefined;
     data: {
+      affiliateLink: string | undefined;
+      type: string;
       sellerNumber: number;
       warranty: ReactNode;
       weight: React.JSX.Element;
@@ -90,6 +94,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   const [stockQuantity, setStockQuantity] = useState(
     product.data.stockQuantity
   );
+  const [resellerProfile, setResellerProfile] = useState<any | null>(null);
+  const [resellerRating, setResellerRating] = useState<{
+    averageRating: number;
+    totalReviews: number;
+  } | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(
     product.data.productImages[0]
@@ -108,12 +118,35 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         } as Variant)
     );
   };
+  useEffect(() => {
+    const fetchResellerData = async () => {
+      if (!product.data.sellerEmail) return;
+
+      try {
+        const [profileRes, ratingRes] = await Promise.all([
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/profile/${product.data.sellerEmail}`
+          ),
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/rating/${product.data.sellerEmail}`
+          ),
+        ]);
+
+        setResellerProfile(profileRes.data.data);
+        setResellerRating(ratingRes.data.data);
+      } catch (error) {
+        console.error("Failed to fetch reseller data:", error);
+      }
+    };
+
+    fetchResellerData();
+  }, [product.data.sellerEmail]);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/reviews/${product.data._id}`
+          `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/${product.data._id}`
         );
         setReviews(response.data.data);
       } catch (error) {
@@ -299,7 +332,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/reviews/like/${reviewId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/like/${reviewId}`,
         {},
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
@@ -326,7 +359,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/reviews/reply/${reviewId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/reply/${reviewId}`,
         { reply: replyComment, userName: auth.user.name },
         {
           headers: {
@@ -369,7 +402,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       await axios.delete(
-        `https://mirexa-store-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 
@@ -604,35 +637,123 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                       add it to your cart and enjoy your purchase!
                     </p>
                   )}
-
+                  {product?.data?.type === "affiliate" && (
+                    <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md text-sm mb-4">
+                      <strong>Disclaimer:</strong> This product contains
+                      affiliate links. We may earn a small commission if you
+                      make a purchase through our link — at no extra cost to
+                      you.
+                    </div>
+                  )}
                   {/* Add to Cart & Buy Now Buttons */}
                   <div className="mt-6 flex flex-col gap-4">
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={isLoading || stockQuantity <= 0}
-                      className={`w-full py-3 bg-orange-600 text-white font-semibold rounded-md transition-all duration-300 ${
-                        isLoading || stockQuantity <= 0
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {isLoading ? "Adding..." : "Add to Cart"}
-                    </button>
-                    <button
-                      onClick={handleBuyNow}
-                      disabled={isLoading || stockQuantity <= 0}
-                      className={`w-full py-3 bg-green-600 text-white font-semibold rounded-md transition-all duration-300 ${
-                        isLoading || stockQuantity <= 0
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {isLoading ? "Processing..." : "Buy Now"}
-                    </button>
+                    {product.data.type === "affiliate" ? (
+                      <a
+                        href={product.data.affiliateLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-3 bg-green-600 text-white text-center font-semibold rounded-md transition-all duration-300 hover:bg-green-700"
+                      >
+                        Buy Now
+                      </a>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleAddToCart}
+                          disabled={isLoading || stockQuantity <= 0}
+                          className={`w-full py-3 bg-orange-600 text-white font-semibold rounded-md transition-all duration-300 ${
+                            isLoading || stockQuantity <= 0
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:bg-orange-700"
+                          }`}
+                        >
+                          {isLoading ? "Adding..." : "Add to Cart"}
+                        </button>
+                        <button
+                          onClick={handleBuyNow}
+                          disabled={isLoading || stockQuantity <= 0}
+                          className={`w-full py-3 bg-green-600 text-white font-semibold rounded-md transition-all duration-300 ${
+                            isLoading || stockQuantity <= 0
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:bg-green-700"
+                          }`}
+                        >
+                          {isLoading ? "Processing..." : "Buy Now"}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
+            {/* reseller profile */}
+            {resellerProfile && (
+              <div className="border rounded-xl p-4 mt-8 shadow-md bg-white">
+                <div className="flex items-center gap-4">
+                  {resellerProfile.brand.logo && (
+                    <img
+                      src={resellerProfile.brand.logo}
+                      alt={resellerProfile.brand.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {resellerProfile.brand.name}
+                    </h2>
+                    <p className="text-gray-500">
+                      {resellerProfile.brand.tagline}
+                    </p>
+                    {resellerProfile.brand.verified && (
+                      <span className="text-green-600 text-sm font-medium">
+                        ✅ Verified Reseller
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {resellerProfile.brand.description && (
+                  <p className="mt-4 text-sm text-gray-600">
+                    {resellerProfile.brand.description}
+                  </p>
+                )}
+
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {resellerProfile.brand.location || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Rating:</strong> ⭐{" "}
+                    {resellerRating?.averageRating ?? "N/A"} (
+                    {resellerRating?.totalReviews ?? 0} reviews)
+                  </p>
+                </div>
+
+                {/* <div className="flex gap-4 mt-4">
+                  {resellerProfile.brand.socialLinks?.facebook && (
+                    <a
+                      href={resellerProfile.brand.socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Facebook
+                    </a>
+                  )}
+                  {resellerProfile.brand.socialLinks?.instagram && (
+                    <a
+                      href={resellerProfile.brand.socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pink-500 hover:underline"
+                    >
+                      Instagram
+                    </a>
+                  )}
+                </div> */}
+              </div>
+            )}
             {/* Additional Information */}
             <div className="mt-8 text-gray-700 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
               {product.data.longDescription ||

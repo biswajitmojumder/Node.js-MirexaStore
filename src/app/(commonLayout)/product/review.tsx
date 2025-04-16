@@ -72,7 +72,14 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
   const [replyInput, setReplyInput] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
-  const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const [loggedInUser, setLoggedInUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      setLoggedInUser(user);
+    }
+  }, []);
 
   // Calculate total reviews, comments, and average rating
   const totalReviews = reviews.length;
@@ -131,8 +138,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       return;
     }
 
-    console.log("Updating reply with:", { reviewId, replyId, newComment });
-
     try {
       console.log(
         `Making PUT request to: /api/reviews/edit-reply/${reviewId}/${replyId}`
@@ -142,8 +147,6 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         `/api/reviews/edit-reply/${reviewId}/${replyId}`,
         { updatedComment: newComment }
       );
-
-      console.log("Response from server:", response.data);
 
       const updatedReviews = reviews.map((review) => {
         if (review._id === reviewId) {

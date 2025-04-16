@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: tParams }) {
 
   try {
     const res = await fetch(
-      `https://mirexa-store-backend.vercel.app/api/product/${id}`
+      `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${id}`
     );
     if (!res.ok) {
       return {
@@ -54,7 +54,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
   const { id } = await params;
 
   try {
-    const apiUrl = `https://mirexa-store-backend.vercel.app/api/product/${id}`;
+    const apiUrl = `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${id}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
@@ -63,21 +63,18 @@ const ProductPage = async ({ params }: { params: tParams }) => {
     }
 
     const productData = await response.json();
-    console.log("Product Data:", productData);
 
     if (!productData || !productData.data || !productData.data.category) {
       notFound(); // Instead of throwing an error, redirect to notFound
       return; // Ensure the function exits here
     }
 
-    const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
+    const relatedProductsUrl = `https://e-commerce-backend-ashy-eight.vercel.app/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
 
-    console.log(relatedProductsUrl);
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
       : { data: [] };
-    console.log("Related Products:", relatedProducts);
 
     // ✅ Filter out the current product
     const currentProductId = productData.data._id;

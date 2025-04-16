@@ -59,7 +59,7 @@ const ResellerOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://mirexa-store-backend.vercel.app/api/checkout",
+        "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -96,7 +96,7 @@ const ResellerOrders: React.FC = () => {
       }
 
       await Axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -134,7 +134,7 @@ const ResellerOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+                  `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,

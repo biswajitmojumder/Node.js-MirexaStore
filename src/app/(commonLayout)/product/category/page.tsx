@@ -26,7 +26,7 @@
 
 //   useEffect(() => {
 //     axios
-//       .get("https://mirexa-store-backend.vercel.app/api/category")
+//       .get("https://e-commerce-backend-ashy-eight.vercel.app/api/category")
 //       .then((response) => {
 //         if (Array.isArray(response.data.data)) {
 //           setCategories(response.data.data);
@@ -136,7 +136,7 @@ const CategorySection = () => {
 
   useEffect(() => {
     axios
-      .get("https://mirexa-store-backend.vercel.app/api/category")
+      .get("https://e-commerce-backend-ashy-eight.vercel.app/api/category")
       .then((response) => {
         if (Array.isArray(response.data.data)) {
           setCategories(response.data.data);

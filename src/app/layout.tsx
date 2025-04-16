@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import Footer from "@/app/(commonLayout)/components/shared/Footer";
 import Providers from "./lib/Providers";
+import Script from "next/script"; // ✅ import Script for GA4
 
 const roboto = Roboto({
   weight: "400",
@@ -23,6 +24,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="light">
+      <head>
+        {/* ✅ Google Analytics 4 Tracking Script */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-RWY5TMX717"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-RWY5TMX717');
+          `}
+        </Script>
+      </head>
       <body className={roboto.className}>
         <div className="min-h-screen">
           <Providers>{children}</Providers>

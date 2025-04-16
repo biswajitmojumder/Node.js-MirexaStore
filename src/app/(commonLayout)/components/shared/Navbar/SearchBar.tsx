@@ -17,7 +17,7 @@ const SearchBar = () => {
       if (searchTerm.trim()) {
         try {
           const response = await fetch(
-            `https://mirexa-store-backend.vercel.app/api/product/search-suggestions?query=${searchTerm}`
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/product/search-suggestions?query=${searchTerm}`
           );
           const data = await response.json();
           setSuggestions(data); // Assuming the API returns an array of suggestions

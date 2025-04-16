@@ -48,9 +48,7 @@ const ProfileDropdown = () => {
   const handleLinkClick = () => {
     setIsOpen(false);
   };
-  useEffect(() => {
-    console.log("Current User:", user);
-  }, [user]);
+
   return (
     <div ref={dropdownRef} className="dropdown dropdown-end">
       {/* 🔥 Desktop: Profile Icon, Mobile: 3-Line Button */}
