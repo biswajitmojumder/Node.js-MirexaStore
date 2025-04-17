@@ -99,6 +99,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     averageRating: number;
     totalReviews: number;
   } | null>(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  console.log(followersCount, isFollowing);
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(
@@ -123,6 +127,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       if (!product.data.sellerEmail) return;
 
       try {
+        // Step 1: Get profile & rating
         const [profileRes, ratingRes] = await Promise.all([
           axios.get(
             `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/profile/${product.data.sellerEmail}`
@@ -132,8 +137,29 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           ),
         ]);
 
-        setResellerProfile(profileRes.data.data);
+        const profile = profileRes.data.data;
+        setResellerProfile(profile);
         setResellerRating(ratingRes.data.data);
+
+        const resellerId = profile._id;
+
+        // Step 2: Get followers count & isFollowing
+        const [followersRes, isFollowingRes] = await Promise.all([
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/followers/${resellerId}` // ✅ fixed
+          ),
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/is-following?resellerId=${resellerId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            }
+          ),
+        ]);
+
+        setFollowersCount(followersRes.data.followers); // ✅ key is 'followers'
+        setIsFollowing(isFollowingRes.data.isFollowing); // ✅ key is 'isFollowing'
       } catch (error) {
         console.error("Failed to fetch reseller data:", error);
       }
@@ -141,6 +167,26 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     fetchResellerData();
   }, [product.data.sellerEmail]);
+
+  const handleFollowToggle = async () => {
+    try {
+      const url = isFollowing ? "unfollow" : "follow";
+      await axios.post(
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/${url}`,
+        { resellerId: resellerProfile._id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      setIsFollowing(!isFollowing);
+      setFollowersCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+    } catch (error) {
+      console.error("Follow action failed:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -688,72 +734,77 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
             </div>
             {/* reseller profile */}
             {resellerProfile && (
-              <div className="border rounded-xl p-4 mt-8 shadow-md bg-white">
-                <div className="flex items-center gap-4">
-                  {resellerProfile.brand.logo && (
-                    <img
-                      src={resellerProfile.brand.logo}
-                      alt={resellerProfile.brand.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {resellerProfile.brand.name}
-                    </h2>
-                    <p className="text-gray-500">
-                      {resellerProfile.brand.tagline}
-                    </p>
-                    {resellerProfile.brand.verified && (
-                      <span className="text-green-600 text-sm font-medium">
-                        ✅ Verified Reseller
-                      </span>
+              <div className="border rounded-2xl p-6 mt-8 shadow-lg bg-white w-full">
+                {/* Top Section: Profile Info + Button */}
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  {/* Left side: Logo + Brand Info */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    {resellerProfile.brand.logo && (
+                      <img
+                        src={resellerProfile.brand.logo}
+                        alt={resellerProfile.brand.name}
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
+                      />
                     )}
+                    <div className="truncate">
+                      <h2 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">
+                        {resellerProfile.brand.name}
+                      </h2>
+                      <p className="text-gray-500 text-sm truncate">
+                        {resellerProfile.brand.tagline}
+                      </p>
+                      {resellerProfile.brand.verified && (
+                        <span className="inline-block mt-1 text-green-600 text-sm font-medium">
+                          ✅ Verified Reseller
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right side: Follow/Unfollow + Count */}
+                  <div className="flex flex-col items-end justify-start gap-1 sm:gap-2 text-right">
+                    <button
+                      onClick={handleFollowToggle}
+                      className={`group px-4 py-1 sm:px-5 sm:py-2 rounded-full text-sm sm:text-base font-medium shadow-md transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+                        isFollowing
+                          ? "bg-red-500 hover:bg-red-600 active:scale-95 text-white"
+                          : "bg-blue-600 hover:bg-blue-700 active:scale-95 text-white"
+                      }`}
+                    >
+                      {isFollowing ? <>Unfollow</> : <>Follow</>}
+                    </button>
+
+                    <p className="text-[11px] sm:text-sm text-gray-600 font-medium tracking-wide">
+                      <span className="font-semibold text-gray-800">
+                        {followersCount}
+                      </span>{" "}
+                      follower{followersCount !== 1 && "s"}
+                    </p>
                   </div>
                 </div>
 
+                {/* Description */}
                 {resellerProfile.brand.description && (
-                  <p className="mt-4 text-sm text-gray-600">
+                  <p className="mt-5 text-sm text-gray-700 leading-relaxed">
                     {resellerProfile.brand.description}
                   </p>
                 )}
 
-                <div className="mt-4 text-sm text-gray-500">
+                {/* Location & Rating */}
+                <div className="mt-4 text-sm text-gray-500 space-y-1">
                   <p>
-                    <strong>Location:</strong>{" "}
+                    <strong>📍 Location:</strong>{" "}
                     {resellerProfile.brand.location || "N/A"}
                   </p>
                   <p>
-                    <strong>Rating:</strong> ⭐{" "}
+                    <strong>⭐ Rating:</strong>{" "}
                     {resellerRating?.averageRating ?? "N/A"} (
                     {resellerRating?.totalReviews ?? 0} reviews)
                   </p>
                 </div>
-
-                {/* <div className="flex gap-4 mt-4">
-                  {resellerProfile.brand.socialLinks?.facebook && (
-                    <a
-                      href={resellerProfile.brand.socialLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Facebook
-                    </a>
-                  )}
-                  {resellerProfile.brand.socialLinks?.instagram && (
-                    <a
-                      href={resellerProfile.brand.socialLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-pink-500 hover:underline"
-                    >
-                      Instagram
-                    </a>
-                  )}
-                </div> */}
               </div>
             )}
+
             {/* Additional Information */}
             <div className="mt-8 text-gray-700 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
               {product.data.longDescription ||
