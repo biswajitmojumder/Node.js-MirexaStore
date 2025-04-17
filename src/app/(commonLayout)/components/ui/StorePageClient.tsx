@@ -1,0 +1,261 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import ProductCart from "./ProductCart"; // Make sure this path is correct
+import Image from "next/image";
+
+interface Brand {
+  name: string;
+  slug: string;
+  tagline?: string;
+  description?: string;
+  logo?: string;
+  banner?: string;
+  location?: string;
+  verified?: boolean;
+  joinedAt?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+  };
+}
+
+interface ResellerProfile {
+  _id: string;
+  userEmail: string;
+  brand: Brand;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+  description?: string;
+  sellerEmail: string;
+  stockQuantity: number;
+  stock: number; // ✅ FIXED: should be number to match ProductCart
+  category: string;
+  productImages: string[];
+  slug: string;
+  [key: string]: any;
+}
+
+export default function StorePageClient({
+  reseller,
+}: {
+  reseller: ResellerProfile;
+}) {
+  const [followersCount, setFollowersCount] = useState<number>(0);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  console.log(products);
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) setIsAuthenticated(true);
+
+    const fetchFollowData = async () => {
+      if (!token) return;
+
+      try {
+        const [followersRes, isFollowingRes] = await Promise.all([
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/followers/${reseller._id}`
+          ),
+          axios.get(
+            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/is-following?resellerId=${reseller._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          ),
+        ]);
+
+        setFollowersCount(followersRes.data.followers || 0);
+        setIsFollowing(isFollowingRes.data.isFollowing || false);
+      } catch (err) {
+        console.error("Error fetching follow state:", err);
+      }
+    };
+
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(
+          "https://e-commerce-backend-ashy-eight.vercel.app/api/product"
+        );
+
+        const allProducts = res.data.data || [];
+
+        const filtered = allProducts
+          .filter(
+            (product: any) =>
+              product.sellerEmail === reseller.userEmail &&
+              product.status === "active" // ✅ Only isFeatured products
+          )
+          .map((product: any) => ({
+            ...product,
+            stockQuantity: product.stockQuantity ?? 0,
+            stock: typeof product.stock === "number" ? product.stock : 1, // ✅ ensure it's number
+            category: product.category ?? "Uncategorized",
+            productImages: product.productImages ?? [product.image],
+            slug:
+              product.slug ?? product.name.toLowerCase().replace(/\s+/g, "-"),
+          }));
+
+        setProducts(filtered);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+
+    fetchFollowData();
+    fetchProducts();
+  }, [reseller._id, reseller.userEmail]);
+
+  const handleFollowToggle = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    const url = isFollowing ? "unfollow" : "follow";
+
+    try {
+      await axios.post(
+        `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/${url}`,
+        { resellerId: reseller._id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setIsFollowing((prev) => !prev);
+      setFollowersCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+    } catch (err) {
+      console.error("Follow/Unfollow failed:", err);
+    }
+  };
+
+  const brand = reseller.brand;
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      {brand.banner && (
+        <div className="rounded-2xl overflow-hidden mb-6">
+          <Image
+            src={brand.banner}
+            alt={`${brand.name} banner`}
+            width={1200} // Adjust based on your layout
+            height={288} // 72 * 4 (sm:h-72)
+            className="w-full h-56 sm:h-72 object-cover"
+            style={{ width: "100%" }}
+            priority // optional: speeds up loading for above-the-fold images
+          />
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
+        {brand.logo && (
+          <Image
+            src={brand.logo}
+            alt={brand.name}
+            width={96} // 24 * 4 (sm:w-24)
+            height={96}
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border border-gray-300 shadow"
+            style={{ height: "auto" }}
+          />
+        )}
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            {brand.name}
+          </h1>
+          {brand.tagline && (
+            <p className="text-gray-600 mt-1">{brand.tagline}</p>
+          )}
+          {brand.verified && (
+            <p className="text-green-600 font-medium mt-1">
+              ✅ Verified Reseller
+            </p>
+          )}
+          <div className="flex items-center gap-4 mt-2 justify-center sm:justify-start">
+            <span className="text-sm text-gray-500">
+              👥 {followersCount} follower{followersCount !== 1 && "s"}
+            </span>
+            {isAuthenticated && (
+              <button
+                onClick={handleFollowToggle}
+                className={`px-4 py-1 rounded-full text-sm font-medium border ${
+                  isFollowing
+                    ? "bg-gray-100 text-gray-800 border-gray-300"
+                    : "bg-blue-600 text-white border-blue-600"
+                } transition`}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {brand.description && (
+        <p className="text-gray-700 leading-relaxed text-base mb-8 max-w-2xl">
+          {brand.description}
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-700 mb-12">
+        <p>
+          <strong>📍 Location:</strong> {brand.location || "N/A"}
+        </p>
+        <p>
+          <strong>🔗 Facebook:</strong>{" "}
+          {brand.socialLinks?.facebook ? (
+            <a
+              href={brand.socialLinks.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              {brand.socialLinks.facebook}
+            </a>
+          ) : (
+            "N/A"
+          )}
+        </p>
+        <p>
+          <strong>📅 Joined:</strong>{" "}
+          {brand.joinedAt
+            ? new Date(brand.joinedAt).toLocaleDateString()
+            : "N/A"}
+        </p>
+        <p>
+          <strong>📸 Instagram:</strong>{" "}
+          {brand.socialLinks?.instagram ? (
+            <a
+              href={brand.socialLinks.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-500 hover:underline"
+            >
+              {brand.socialLinks.instagram}
+            </a>
+          ) : (
+            "N/A"
+          )}
+        </p>
+      </div>
+
+      <div className="mb-10">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Products</h2>
+        {products.length > 0 ? (
+          <ProductCart products={products} />
+        ) : (
+          <p className="text-gray-500">No products found for this reseller.</p>
+        )}
+      </div>
+    </div>
+  );
+}

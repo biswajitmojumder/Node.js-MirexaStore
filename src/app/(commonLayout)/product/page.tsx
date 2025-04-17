@@ -15,11 +15,13 @@ const Product = async () => {
 
   // Filter for featured products
   const featuredProducts = products.filter(
-    (product: { isFeatured: any }) => product.isFeatured
+    (product: { status: string; isFeatured: any }) =>
+      product.isFeatured && product.status === "active"
   );
   // Filter for new arrival products
   const newArrivalProducts = products.filter(
-    (product: { isNewArrival: any }) => product.isNewArrival
+    (product: { status: string; isNewArrival: any }) =>
+      product.isNewArrival && product.status === "active"
   );
 
   return (

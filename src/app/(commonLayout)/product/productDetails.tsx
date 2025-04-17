@@ -12,6 +12,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 import Loading from "@/app/loading";
 import { HiPlus, HiMinus } from "react-icons/hi";
+import Link from "next/link";
 
 interface ProductDetailsProps {
   product: {
@@ -738,19 +739,22 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                 {/* Top Section: Profile Info + Button */}
                 <div className="flex items-start justify-between flex-wrap gap-4">
                   {/* Left side: Logo + Brand Info */}
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <Link
+                    href={`/store/${resellerProfile.brand.slug}`}
+                    className="flex items-center gap-4 flex-1 min-w-0 group"
+                  >
                     {resellerProfile.brand.logo && (
                       <img
                         src={resellerProfile.brand.logo}
                         alt={resellerProfile.brand.name}
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0 transition-transform group-hover:scale-105"
                       />
                     )}
                     <div className="truncate">
-                      <h2 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">
+                      <h2 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate group-hover:underline">
                         {resellerProfile.brand.name}
                       </h2>
-                      <p className="text-gray-500 text-sm truncate">
+                      <p className="text-gray-500 text-sm truncate group-hover:text-blue-600 transition">
                         {resellerProfile.brand.tagline}
                       </p>
                       {resellerProfile.brand.verified && (
@@ -759,17 +763,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                         </span>
                       )}
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Right side: Follow/Unfollow + Count */}
                   <div className="flex flex-col items-end justify-start gap-1 sm:gap-2 text-right">
                     <button
                       onClick={handleFollowToggle}
-                      className={`group px-4 py-1 sm:px-5 sm:py-2 rounded-full text-sm sm:text-base font-medium shadow-md transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+                      className={`px-4 py-1 rounded-full text-sm font-medium border ${
                         isFollowing
-                          ? "bg-red-500 hover:bg-red-600 active:scale-95 text-white"
-                          : "bg-blue-600 hover:bg-blue-700 active:scale-95 text-white"
-                      }`}
+                          ? "bg-gray-100 text-gray-800 border-gray-300"
+                          : "bg-blue-600 text-white border-blue-600"
+                      } transition`}
                     >
                       {isFollowing ? <>Unfollow</> : <>Follow</>}
                     </button>
