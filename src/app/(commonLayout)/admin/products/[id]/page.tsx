@@ -23,7 +23,7 @@ const EditProductPage = () => {
       const fetchProduct = async () => {
         try {
           const response = await axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/product/details/${id}`
+            `https://campus-needs-backend.vercel.app/api/product/details/${id}`
           );
           setProduct(response.data.data);
           setLoading(false);
@@ -73,7 +73,7 @@ const EditProductPage = () => {
 
     try {
       await axios.put(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${id}`,
+        `https://campus-needs-backend.vercel.app/api/product/${id}`,
         product,
         {
           headers: {

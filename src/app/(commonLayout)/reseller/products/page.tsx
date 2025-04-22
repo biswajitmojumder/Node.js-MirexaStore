@@ -30,7 +30,7 @@ const AdminProductPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://e-commerce-backend-ashy-eight.vercel.app/api/product"
+          "https://campus-needs-backend.vercel.app/api/product"
         );
 
         const allProducts = response.data.data;
@@ -104,7 +104,7 @@ const AdminProductPage = () => {
 
     try {
       await axios.patch(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
+        `https://campus-needs-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
         {},
         {
           headers: {

@@ -61,7 +61,7 @@ const OrderHistory: React.FC = () => {
   const fetchProductDetails = async (productId: string) => {
     try {
       const response = await Axios.get(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/product/history/${productId}`
+        `https://campus-needs-backend.vercel.app/api/product/history/${productId}`
       );
       return response.data.data;
     } catch (err) {
@@ -82,7 +82,7 @@ const OrderHistory: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/order/${userId}`,
+        `https://campus-needs-backend.vercel.app/api/checkout/order/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -152,7 +152,7 @@ const OrderHistory: React.FC = () => {
 
       // Send the review to the backend with the necessary data
       const response = await Axios.post(
-        "https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/create",
+        "https://campus-needs-backend.vercel.app/api/reviews/create",
         {
           productId,
           userId: orderId, // Assuming userId is orderId for simplicity here, adjust accordingly.

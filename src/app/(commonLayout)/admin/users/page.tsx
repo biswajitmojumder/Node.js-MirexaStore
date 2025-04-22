@@ -43,7 +43,7 @@ const UserViewPage = () => {
 
       try {
         const response = await axios.get<{ data: UserType[] }>(
-          "https://e-commerce-backend-ashy-eight.vercel.app/api/users",
+          "https://campus-needs-backend.vercel.app/api/users",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -84,7 +84,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.patch(
-          `https://e-commerce-backend-ashy-eight.vercel.app/api/users/${userId}/reseller`,
+          `https://campus-needs-backend.vercel.app/api/users/${userId}/role/reseller`,
           {},
           {
             headers: {
@@ -128,7 +128,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.delete(
-          `https://e-commerce-backend-ashy-eight.vercel.app/api/users/${deleteUserId}`,
+          `https://campus-needs-backend.vercel.app/api/users/${deleteUserId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

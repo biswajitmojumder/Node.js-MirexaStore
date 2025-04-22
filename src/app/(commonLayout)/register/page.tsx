@@ -22,7 +22,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "https://e-commerce-backend-ashy-eight.vercel.app/api/auth/register",
+        "https://campus-needs-backend.vercel.app/api/auth/register",
         {
           name,
           email,

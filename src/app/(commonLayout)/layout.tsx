@@ -2,9 +2,9 @@ import Header from "@/app/(commonLayout)/components/shared/Header";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MirexaStore",
+  title: "CampusNeeds",
   description:
-    "Welcome to e_commerce_web_application – where innovation meets imagination in the dynamic realm of technology, offering a thrilling journey through the latest trends and groundbreaking discoveries in the world of tech!",
+    "Welcome to CampusNeeds – your one-stop destination for all student essentials. From study tools to campus-friendly gadgets, we've got everything you need to power through your academic journey!",
 };
 
 export default function dashboardLayout({

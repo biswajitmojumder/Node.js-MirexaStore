@@ -201,7 +201,7 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://e-commerce-backend-ashy-eight.vercel.app/api/product",
+        "https://campus-needs-backend.vercel.app/api/product",
         finalData,
         {
           headers: {

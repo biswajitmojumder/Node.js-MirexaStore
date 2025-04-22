@@ -101,6 +101,13 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
+                      href="/admin/resellerrequest"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg"
+                    >
+                      Reseller Request
+                    </Link>
+                    <Link
                       href="/admin/users"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"

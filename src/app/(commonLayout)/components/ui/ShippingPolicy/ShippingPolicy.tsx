@@ -11,12 +11,12 @@ const ShippingPolicy = () => {
         <div className="space-y-12 bg-white shadow-lg rounded-2xl p-8 md:p-12">
           <p className="text-gray-600 leading-relaxed text-lg">
             Thank you for shopping at{" "}
-            <span className="font-semibold text-gray-800">MirexaStore</span>. We
+            <span className="font-semibold text-gray-800">CampusNeeds</span>. We
             want you to receive your order as quickly as possible. Please read
             our Shipping Policy carefully for more information.
             <br />
             <br />
-            <span className="font-semibold text-gray-800">MirexaStore</span>
+            <span className="font-semibold text-gray-800">CampusNeeds</span>
             -এ কেনাকাটা করার জন্য আপনাকে ধন্যবাদ। আমরা চাই আপনি দ্রুত আপনার
             অর্ডারটি পেয়ে যান। আরও তথ্যের জন্য আমাদের শিপিং পলিসি внимিতভাবে
             পড়ুন।
@@ -139,10 +139,10 @@ const ShippingPolicy = () => {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@mirexastore.com"
+                  href="mailto:support@CampusNeeds.com"
                   className="text-blue-600 hover:underline"
                 >
-                  support@mirexastore.com
+                  support@CampusNeeds.com
                 </a>
               </li>
               <li>

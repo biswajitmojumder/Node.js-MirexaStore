@@ -11,12 +11,12 @@ const ReturnRefundPolicy = () => {
         <div className="space-y-12 bg-white shadow-lg rounded-2xl p-8 md:p-12">
           <p className="text-gray-600 leading-relaxed text-lg">
             Thank you for shopping at{" "}
-            <span className="font-semibold text-gray-800">MirexaStore</span>. If
+            <span className="font-semibold text-gray-800">CampusNeeds</span>. If
             you are not entirely satisfied with your purchase, we&apos;re here
             to help you. Please read our Return & Refund Policy carefully.
             <br />
             ধন্যবাদ,{" "}
-            <span className="font-semibold text-gray-800">MirexaStore</span> এ
+            <span className="font-semibold text-gray-800">CampusNeeds</span> এ
             কেনাকাটা করার জন্য। আপনি যদি আপনার কেনাকাটা নিয়ে পুরোপুরি সন্তুষ্ট
             না হন, আমরা আপনাকে সাহায্য করতে এখানে আছি। দয়া করে আমাদের রিটার্ন ও
             রিফান্ড পলিসিটি সতর্কতার সাথে পড়ুন।
@@ -119,10 +119,10 @@ const ReturnRefundPolicy = () => {
               <li>
                 Email:{" "}
                 <a
-                  href="mailto:support@mirexastore.com"
+                  href="mailto:support@CampusNeeds.com"
                   className="text-blue-600 hover:underline"
                 >
-                  support@mirexastore.com
+                  support@campusneeds.com
                 </a>
               </li>
               <li>

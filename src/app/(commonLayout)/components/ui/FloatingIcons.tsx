@@ -3,11 +3,13 @@ import { FaWhatsapp } from "react-icons/fa";
 import { MdLocalPhone } from "react-icons/md";
 
 interface FloatingIconsProps {
-  sellerNumber: number;
+  sellerNumber: string;
+  phone: string;
 }
 
 const FloatingIcons: React.FC<FloatingIconsProps> = ({
-  sellerNumber
+  sellerNumber,
+  phone,
 }) => {
   return (
     <div className="fixed bottom-5 right-5 flex flex-col items-center space-y-2 md:space-y-3 lg:space-y-4 z-50">
@@ -24,7 +26,7 @@ const FloatingIcons: React.FC<FloatingIconsProps> = ({
 
       {/* Phone Call Icon */}
       <a
-        href={`tel:${sellerNumber}`} // Dynamic Phone number
+        href={`tel:${phone}`} // Dynamic Phone number
         className="bg-blue-500 text-white p-2 rounded-full shadow-lg hover:scale-110 hover:bg-blue-600 transition-all duration-500 text-2xl md:text-3xl lg:text-4xl animate-bounce delay-200"
         aria-label="Call us"
       >

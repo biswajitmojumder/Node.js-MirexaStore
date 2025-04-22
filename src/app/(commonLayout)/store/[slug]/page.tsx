@@ -38,7 +38,7 @@ async function getResellerBySlug(
 ): Promise<ResellerProfile | null> {
   try {
     const res = await fetch(
-      `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/slug/${slug}`,
+      `https://campus-needs-backend.vercel.app/api/reseller/slug/${slug}`,
       { cache: "no-store" }
     );
 
@@ -65,7 +65,7 @@ export async function generateMetadata({
 
   if (!reseller) {
     return {
-      title: "Store Not Found - MirexaStore",
+      title: "Store Not Found - CampusNeeds",
       description:
         "The store you're looking for does not exist or is currently unavailable.",
     };
@@ -74,7 +74,7 @@ export async function generateMetadata({
   const { name, description, logo, socialLinks } = reseller.brand;
 
   return {
-    title: `${name} Store | MirexaStore`,
+    title: `${name} Store | CampusNeeds`,
     description:
       description?.slice(0, 160) || "Explore products from this store.",
     openGraph: {

@@ -13,12 +13,8 @@ export default function Loading() {
         {/* Your content goes here (e.g., products, website elements) */}
         <div className="h-full bg-gray-100 p-4">
           {/* Example content */}
-          <h1 className="text-center text-2xl text-gray-700">
-            Website or Products
-          </h1>
-          <p className="text-center mt-4">
-            Content that remains visible beneath the blur effect.
-          </p>
+          <h1 className="text-center text-2xl text-gray-700">.</h1>
+          <p className="text-center mt-4">.</p>
         </div>
       </div>
 

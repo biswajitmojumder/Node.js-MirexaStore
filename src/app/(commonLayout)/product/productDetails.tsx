@@ -103,8 +103,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   const [followersCount, setFollowersCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  console.log(followersCount, isFollowing);
-
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(
     product.data.productImages[0]
@@ -131,10 +129,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         // Step 1: Get profile & rating
         const [profileRes, ratingRes] = await Promise.all([
           axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/profile/${product.data.sellerEmail}`
+            `https://campus-needs-backend.vercel.app/api/reseller/profile/${product.data.sellerEmail}`
           ),
           axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/rating/${product.data.sellerEmail}`
+            `https://campus-needs-backend.vercel.app/api/reseller/rating/${product.data.sellerEmail}`
           ),
         ]);
 
@@ -144,23 +142,27 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
         const resellerId = profile._id;
 
-        // Step 2: Get followers count & isFollowing
-        const [followersRes, isFollowingRes] = await Promise.all([
-          axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/followers/${resellerId}` // ✅ fixed
-          ),
-          axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/is-following?resellerId=${resellerId}`,
+        // Step 2: Get followers count
+        const followersRes = await axios.get(
+          `https://campus-needs-backend.vercel.app/api/reseller/followers/${resellerId}`
+        );
+        setFollowersCount(followersRes.data.followers); // always show this ✅
+
+        // Step 3: Conditionally check isFollowing if user is logged in
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+          const isFollowingRes = await axios.get(
+            `https://campus-needs-backend.vercel.app/api/reseller/is-following?resellerId=${resellerId}`,
             {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                Authorization: `Bearer ${token}`,
               },
             }
-          ),
-        ]);
-
-        setFollowersCount(followersRes.data.followers); // ✅ key is 'followers'
-        setIsFollowing(isFollowingRes.data.isFollowing); // ✅ key is 'isFollowing'
+          );
+          setIsFollowing(isFollowingRes.data.isFollowing);
+        } else {
+          setIsFollowing(false); // fallback for unauthenticated user
+        }
       } catch (error) {
         console.error("Failed to fetch reseller data:", error);
       }
@@ -168,16 +170,24 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     fetchResellerData();
   }, [product.data.sellerEmail]);
-
+  console.log(resellerProfile?.data?.whatsapp);
   const handleFollowToggle = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    // If user is not logged in, redirect to login page
+    if (!token) {
+      window.location.href = "/login"; // You can also use a route like "/auth/login" if needed
+      return;
+    }
+
     try {
       const url = isFollowing ? "unfollow" : "follow";
       await axios.post(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/${url}`,
+        `https://campus-needs-backend.vercel.app/api/reseller/${url}`,
         { resellerId: resellerProfile._id },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -193,7 +203,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/${product.data._id}`
+          `https://campus-needs-backend.vercel.app/api/reviews/${product.data._id}`
         );
         setReviews(response.data.data);
       } catch (error) {
@@ -379,7 +389,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/like/${reviewId}`,
+        `https://campus-needs-backend.vercel.app/api/reviews/like/${reviewId}`,
         {},
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
@@ -406,7 +416,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/reply/${reviewId}`,
+        `https://campus-needs-backend.vercel.app/api/reviews/reply/${reviewId}`,
         { reply: replyComment, userName: auth.user.name },
         {
           headers: {
@@ -449,7 +459,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       await axios.delete(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
+        `https://campus-needs-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 
@@ -780,7 +790,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
                     <p className="text-[11px] sm:text-sm text-gray-600 font-medium tracking-wide">
                       <span className="font-semibold text-gray-800">
-                        {followersCount}
+                        👥 {followersCount}
                       </span>{" "}
                       follower{followersCount !== 1 && "s"}
                     </p>
@@ -869,7 +879,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         </main>
       )}
 
-      <FloatingIcons sellerNumber={product.data.sellerNumber} />
+      <FloatingIcons
+        sellerNumber={resellerProfile?.brand?.whatsapp}
+        phone={resellerProfile?.brand?.phone}
+      />
     </>
   );
 };

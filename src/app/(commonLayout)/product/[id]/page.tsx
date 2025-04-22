@@ -10,11 +10,11 @@ export async function generateMetadata({ params }: { params: tParams }) {
 
   try {
     const res = await fetch(
-      `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${id}`
+      `https://campus-needs-backend.vercel.app/api/product/${id}`
     );
     if (!res.ok) {
       return {
-        title: "Product Not Found - MirexaStore",
+        title: "Product Not Found - CampusNeeds",
         description:
           "The product you're looking for does not exist or is currently unavailable.",
       };
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: { params: tParams }) {
     const product = productData.data;
 
     return {
-      title: product.name || "Product - MirexaStore",
+      title: product.name || "Product - CampusNeeds",
       description:
         product.description?.slice(0, 160) ||
-        "Explore premium products from MirexaStore.",
+        "Explore premium products from CampusNeeds.",
       openGraph: {
         title: product.name,
         description: product.description,
@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: { params: tParams }) {
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Product Page - MirexaStore",
-      description: "Explore the finest products at MirexaStore.",
+      title: "Product Page - CampusNeeds",
+      description: "Explore the finest products at CampusNeeds.",
     };
   }
 }
@@ -54,7 +54,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
   const { id } = await params;
 
   try {
-    const apiUrl = `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${id}`;
+    const apiUrl = `https://campus-needs-backend.vercel.app/api/product/${id}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
@@ -69,7 +69,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
       return; // Ensure the function exits here
     }
 
-    const relatedProductsUrl = `https://e-commerce-backend-ashy-eight.vercel.app/api/product/category/${productData.data.category}`;
+    const relatedProductsUrl = `https://campus-needs-backend.vercel.app/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
 
     const relatedProducts = relatedProductsResponse.ok

@@ -3,7 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import Footer from "@/app/(commonLayout)/components/shared/Footer";
 import Providers from "./lib/Providers";
-import Script from "next/script"; // ✅ import Script for GA4
+import Script from "next/script";
 
 const roboto = Roboto({
   weight: "400",
@@ -12,9 +12,9 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "MireXaStore",
+  title: "CampusNeeds",
   description:
-    "Welcome to e_commerce_web_application – where innovation meets imagination in the dynamic realm of technology, offering a thrilling journey through the latest trends and groundbreaking discoveries in the world of tech!",
+    "Welcome to CampusNeeds – your trusted platform for essential student products. From gadgets to gear, find everything you need to thrive in school, college, or university life.",
 };
 
 export default function RootLayout({
@@ -40,10 +40,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={roboto.className}>
-        <div className="min-h-screen">
-          <Providers>{children}</Providers>
-        </div>
-        <Footer />
+        <Providers>
+          <div className="min-h-screen">{children}</div>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

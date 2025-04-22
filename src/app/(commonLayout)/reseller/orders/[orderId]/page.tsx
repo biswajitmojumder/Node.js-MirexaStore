@@ -86,7 +86,7 @@ const OrderDetails: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/${orderId}`,
+        `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -98,7 +98,7 @@ const OrderDetails: React.FC = () => {
         orderData.items.map(async (item) => {
           try {
             const productRes = await Axios.get(
-              `https://e-commerce-backend-ashy-eight.vercel.app/api/product/${item.productId}`
+              `https://campus-needs-backend.vercel.app/api/product/${item.productId}`
             );
             return { ...item, product: productRes.data.data };
           } catch {

@@ -7,20 +7,17 @@ import Image from "next/image";
 const Navbar = () => {
   return (
     <header className="bg-[#F85606] shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto flex items-center justify-between px-3 py-2 lg:py-3">
+      <div className="container mx-auto flex items-center justify-between px-2 py-2 lg:py-3">
         {/* Left Section: Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-1 lg:gap-2 text-2xl font-bold text-white"
-        >
+        <Link href="/" className="flex items-center min-w-[160px]">
           <Image
             src="/favicon.ico"
-            alt="MirexaStore Logo"
-            className="h-10 w-10"
-            width={40}
-            height={40}
+            alt="CampusNeeds Logo"
+            width={160}
+            height={50}
+            className="h-[48px] w-auto object-contain"
+            priority
           />
-          <span className=" text-lg lg:text-2xl">MirexaStore</span>
         </Link>
 
         {/* Navigation Links */}
@@ -42,16 +39,10 @@ const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Right Section: Search, Theme, Cart, Profile */}
+        {/* Right Section: Search, Cart, Profile */}
         <div className="flex items-center gap-2">
           <SearchBar />
-
-          {/* Theme Toggle */}
-
-          {/* Cart Button Styled & Positioned before Profile */}
           <CartButton />
-
-          {/* Profile Icon Moved to the Right */}
           <div className="ml-auto">
             <ProfileDropdown />
           </div>

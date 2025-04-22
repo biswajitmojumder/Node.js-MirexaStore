@@ -24,7 +24,7 @@ const Testimonials: FC = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://e-commerce-backend-ashy-eight.vercel.app/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
+          `https://campus-needs-backend.vercel.app/api/reviews/all?page=${currentPage}&limit=${reviewsPerPage}`
         );
 
         const reviews = response.data.data.map((review: any) => ({

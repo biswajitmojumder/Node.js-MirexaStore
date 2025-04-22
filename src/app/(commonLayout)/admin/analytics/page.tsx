@@ -52,18 +52,12 @@ const AdminAnalytics = () => {
         }
 
         const [ordersResponse, usersResponse] = await Promise.all([
-          Axios.get(
-            "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          ),
-          Axios.get(
-            "https://e-commerce-backend-ashy-eight.vercel.app/api/users",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          ),
+          Axios.get("https://campus-needs-backend.vercel.app/api/checkout", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          Axios.get("https://campus-needs-backend.vercel.app/api/users", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
 
         const allOrders = ordersResponse.data.data;

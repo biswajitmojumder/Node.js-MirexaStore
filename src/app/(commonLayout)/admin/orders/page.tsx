@@ -65,7 +65,7 @@ const AdminOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://e-commerce-backend-ashy-eight.vercel.app/api/checkout",
+        "https://campus-needs-backend.vercel.app/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -90,7 +90,7 @@ const AdminOrders: React.FC = () => {
       else if (currentStatus === "Shipped") newStatus = "Delivered";
 
       await Axios.patch(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://campus-needs-backend.vercel.app/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -127,7 +127,7 @@ const AdminOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://e-commerce-backend-ashy-eight.vercel.app/api/checkout/${orderId}`,
+                  `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,

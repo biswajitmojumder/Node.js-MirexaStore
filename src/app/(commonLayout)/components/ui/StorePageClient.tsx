@@ -57,25 +57,27 @@ export default function StorePageClient({
     if (token) setIsAuthenticated(true);
 
     const fetchFollowData = async () => {
-      if (!token) return;
-
       try {
-        const [followersRes, isFollowingRes] = await Promise.all([
-          axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/followers/${reseller._id}`
-          ),
-          axios.get(
-            `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/is-following?resellerId=${reseller._id}`,
+        // Always get followers count
+        const followersRes = await axios.get(
+          `https://campus-needs-backend.vercel.app/api/reseller/followers/${reseller._id}`
+        );
+        setFollowersCount(followersRes.data.followers || 0);
+
+        // Conditionally get isFollowing only if token exists
+        if (token) {
+          const isFollowingRes = await axios.get(
+            `https://campus-needs-backend.vercel.app/api/reseller/is-following?resellerId=${reseller._id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }
-          ),
-        ]);
-
-        setFollowersCount(followersRes.data.followers || 0);
-        setIsFollowing(isFollowingRes.data.isFollowing || false);
+          );
+          setIsFollowing(isFollowingRes.data.isFollowing || false);
+        } else {
+          setIsFollowing(false); // fallback
+        }
       } catch (err) {
         console.error("Error fetching follow state:", err);
       }
@@ -84,7 +86,7 @@ export default function StorePageClient({
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "https://e-commerce-backend-ashy-eight.vercel.app/api/product"
+          "https://campus-needs-backend.vercel.app/api/product"
         );
 
         const allProducts = res.data.data || [];
@@ -93,12 +95,12 @@ export default function StorePageClient({
           .filter(
             (product: any) =>
               product.sellerEmail === reseller.userEmail &&
-              product.status === "active" // ✅ Only isFeatured products
+              product.status === "active" // ✅ active only
           )
           .map((product: any) => ({
             ...product,
             stockQuantity: product.stockQuantity ?? 0,
-            stock: typeof product.stock === "number" ? product.stock : 1, // ✅ ensure it's number
+            stock: typeof product.stock === "number" ? product.stock : 1, // ✅ ensure number
             category: product.category ?? "Uncategorized",
             productImages: product.productImages ?? [product.image],
             slug:
@@ -117,13 +119,17 @@ export default function StorePageClient({
 
   const handleFollowToggle = async () => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return;
+
+    if (!token) {
+      window.location.href = "/login"; // You can also use a route like "/auth/login" if needed
+      return;
+    }
 
     const url = isFollowing ? "unfollow" : "follow";
 
     try {
       await axios.post(
-        `https://e-commerce-backend-ashy-eight.vercel.app/api/reseller/${url}`,
+        `https://campus-needs-backend.vercel.app/api/reseller/${url}`,
         { resellerId: reseller._id },
         {
           headers: {
@@ -184,18 +190,17 @@ export default function StorePageClient({
             <span className="text-sm text-gray-500">
               👥 {followersCount} follower{followersCount !== 1 && "s"}
             </span>
-            {isAuthenticated && (
-              <button
-                onClick={handleFollowToggle}
-                className={`px-4 py-1 rounded-full text-sm font-medium border ${
-                  isFollowing
-                    ? "bg-gray-100 text-gray-800 border-gray-300"
-                    : "bg-blue-600 text-white border-blue-600"
-                } transition`}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </button>
-            )}
+
+            <button
+              onClick={handleFollowToggle}
+              className={`px-4 py-1 rounded-full text-sm font-medium border ${
+                isFollowing
+                  ? "bg-gray-100 text-gray-800 border-gray-300"
+                  : "bg-blue-600 text-white border-blue-600"
+              } transition`}
+            >
+              {isFollowing ? "Following" : "Follow"}
+            </button>
           </div>
         </div>
       </div>
@@ -210,41 +215,12 @@ export default function StorePageClient({
         <p>
           <strong>📍 Location:</strong> {brand.location || "N/A"}
         </p>
-        <p>
-          <strong>🔗 Facebook:</strong>{" "}
-          {brand.socialLinks?.facebook ? (
-            <a
-              href={brand.socialLinks.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              {brand.socialLinks.facebook}
-            </a>
-          ) : (
-            "N/A"
-          )}
-        </p>
+
         <p>
           <strong>📅 Joined:</strong>{" "}
           {brand.joinedAt
             ? new Date(brand.joinedAt).toLocaleDateString()
             : "N/A"}
-        </p>
-        <p>
-          <strong>📸 Instagram:</strong>{" "}
-          {brand.socialLinks?.instagram ? (
-            <a
-              href={brand.socialLinks.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-pink-500 hover:underline"
-            >
-              {brand.socialLinks.instagram}
-            </a>
-          ) : (
-            "N/A"
-          )}
         </p>
       </div>
 
