@@ -7,14 +7,15 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/app/lib/redux/features/authSlice";
 import { RootState } from "@/app/lib/redux/store";
+import axios from "axios";
 
 const ProfileDropdown = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [resellerSlug, setResellerSlug] = useState("");
 
-  // Get user from Redux store
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleLogout = () => {
@@ -28,7 +29,11 @@ const ProfileDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  // Close dropdown when clicking outside
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
+
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -45,19 +50,32 @@ const ProfileDropdown = () => {
     };
   }, []);
 
-  const handleLinkClick = () => {
-    setIsOpen(false);
-  };
+  // Fetch reseller profile on load (if user is reseller)
+  useEffect(() => {
+    const fetchResellerProfile = async () => {
+      if (!user?.email || user.role !== "reseller") return;
+
+      try {
+        const res = await axios.get(
+          `https://campus-needs-backend.vercel.app/api/reseller/profile/${user.email}`
+        );
+        setResellerSlug(res.data?.data?.brand?.slug || "");
+        console.log(res)
+      } catch (error) {
+        console.error("Failed to fetch reseller profile", error);
+      }
+    };
+
+    fetchResellerProfile();
+  }, [user?.email, user?.role]);
 
   return (
     <div ref={dropdownRef} className="dropdown dropdown-end">
-      {/* 🔥 Desktop: Profile Icon, Mobile: 3-Line Button */}
       <button
         onClick={handleToggle}
         tabIndex={0}
         className="btn btn-ghost btn-circle"
       >
-        {/* ✅ Desktop: Fully Rounded Profile Icon */}
         <div className="hidden sm:block w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-white overflow-hidden">
           <Image
             className="w-full h-full object-cover"
@@ -70,8 +88,6 @@ const ProfileDropdown = () => {
             width={500}
           />
         </div>
-
-        {/* ✅ Mobile: 3-Line Menu Button */}
         <div className="block sm:hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -169,7 +185,7 @@ const ProfileDropdown = () => {
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
-                      Order management
+                      Order Management
                     </Link>
                   </li>
                   <li>
@@ -197,6 +213,15 @@ const ProfileDropdown = () => {
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
                       Profile Settings
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={`/store/${resellerSlug}`}
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
+                    >
+                      My Store
                     </Link>
                   </li>
                 </>
@@ -245,6 +270,15 @@ const ProfileDropdown = () => {
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
                       Analytics
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/reseller-request"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
+                    >
+                      Become a Reseller
                     </Link>
                   </li>
                 </>
