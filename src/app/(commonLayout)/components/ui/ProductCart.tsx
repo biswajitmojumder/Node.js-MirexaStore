@@ -106,16 +106,17 @@ const ProductCart = ({ products }: ProductCartProps) => {
                                 {discountPercentage}% Off
                               </span>
                             )}
-                            <div className="relative">
-                              <Image
-                                src={product.productImages[0]}
-                                alt={product.name}
-                                width={200} // Specify width to prevent layout shift
-                                height={200} // Specify height to maintain aspect ratio
-                                className="object-contain mx-auto"
-                                unoptimized={true}
-                              />
-                            </div>
+  
+                        <div className="relative w-[200px] h-[220px] mx-auto flex items-center justify-center overflow-hidden">
+                          <Image
+                            src={product.productImages[0]}
+                            alt={product.name}
+                            width={200}
+                            height={200}
+                            className="object-contain"
+                            unoptimized={true}
+                          />
+                        </div>
                           </span>
                         ) : (
                           <span className="text-3xl font-bold text-gray-500">

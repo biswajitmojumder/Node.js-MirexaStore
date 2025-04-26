@@ -110,6 +110,7 @@ const ProfileDropdown = () => {
         <ul
           tabIndex={0}
           className="menu menu-sm dropdown-content bg-white text-black rounded-lg shadow-lg mt-3 w-48"
+          
         >
           {user ? (
             <>

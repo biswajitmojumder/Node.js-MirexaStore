@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductCart from "./ProductCart"; // Make sure this path is correct
 import Image from "next/image";
+import { MdVerified } from "react-icons/md";
 
 interface Brand {
   name: string;
@@ -182,9 +183,10 @@ export default function StorePageClient({
             <p className="text-gray-600 mt-1">{brand.tagline}</p>
           )}
           {brand.verified && (
-            <p className="text-green-600 font-medium mt-1">
-              ✅ Verified Reseller
-            </p>
+           <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+            <MdVerified className="h-4 w-4" />
+            <span>Verified Reseller</span>
+          </div>
           )}
           <div className="flex items-center gap-4 mt-2 justify-center sm:justify-start">
             <span className="text-sm text-gray-500">

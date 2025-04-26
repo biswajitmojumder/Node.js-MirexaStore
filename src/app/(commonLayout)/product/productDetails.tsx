@@ -13,6 +13,7 @@ import Image from "next/image";
 import Loading from "@/app/loading";
 import { HiPlus, HiMinus } from "react-icons/hi";
 import Link from "next/link";
+import { MdVerified } from "react-icons/md";
 
 interface ProductDetailsProps {
   product: {
@@ -768,10 +769,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                         {resellerProfile.brand.tagline}
                       </p>
                       {resellerProfile.brand.verified && (
-                        <span className="inline-block mt-1 text-green-600 text-sm font-medium">
-                          ✅ Verified Reseller
-                        </span>
-                      )}
+                      <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                        <MdVerified className="h-4 w-4" />
+                        <span>Verified Reseller</span>
+                      </div>
+                    )}
+
+
+
                     </div>
                   </Link>
 
