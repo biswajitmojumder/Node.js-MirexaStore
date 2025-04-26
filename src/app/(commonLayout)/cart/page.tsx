@@ -1,9 +1,10 @@
 "use client";
+
 import { useState, useEffect, useCallback } from "react";
-import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
+import toast, { Toaster } from "react-hot-toast";
+import "react-toastify/dist/ReactToastify.css";
 
 type CartItem = {
   userId: string;
@@ -19,14 +20,50 @@ type CartItem = {
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<string | null>(null);
-  const [quantityUpdated, setQuantityUpdated] = useState<boolean>(false); // State to track quantity update
+  const [quantityUpdated, setQuantityUpdated] = useState<boolean>(false);
+  const [couponCode, setCouponCode] = useState<string>("");
+  const [couponError, setCouponError] = useState<string>("");
+  const [couponSuccess, setCouponSuccess] = useState<string>("");
+  const [discountApplied, setDiscountApplied] = useState<boolean>(false);
+
   const router = useRouter();
+
+  const totalPriceBeforeDiscount = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
+  const totalPrice = discountApplied
+    ? totalPriceBeforeDiscount * 0.9
+    : totalPriceBeforeDiscount;
 
   const handleCheckoutRedirect = () => {
     router.push("/cart/checkout");
+  };
+
+  const handleApplyCoupon = () => {
+    const validCoupon = "DISCOUNT10";
+
+    if (couponCode.trim() === "") {
+      setCouponError("Please enter a coupon code.");
+      setCouponSuccess("");
+      return;
+    }
+
+    if (couponCode === validCoupon && !discountApplied) {
+      setCouponError("");
+      setCouponSuccess("Coupon applied successfully! 10% discount.");
+      setDiscountApplied(true);
+    } else if (discountApplied) {
+      setCouponError("Coupon already applied.");
+      setCouponSuccess("");
+    } else {
+      setCouponError("Invalid coupon code.");
+      setCouponSuccess("");
+    }
   };
 
   useEffect(() => {
@@ -40,9 +77,9 @@ const CartPage = () => {
 
     try {
       const parsedUserData = JSON.parse(userData);
-      const userId = parsedUserData._id;
-      setUserId(userId);
-      fetchCartData(userId);
+      const userIdFromStorage: string = parsedUserData._id;
+      setUserId(userIdFromStorage);
+      fetchCartData(userIdFromStorage);
     } catch (error) {
       console.error("Error parsing user data:", error);
       toast.error("Invalid user data. Please log in again.");
@@ -52,54 +89,36 @@ const CartPage = () => {
   const fetchCartData = useCallback(async (userId: string) => {
     const cartData = localStorage.getItem("cart");
     if (cartData) {
-      const parsedCart = JSON.parse(cartData);
-      const userCart = parsedCart.filter(
-        (item: CartItem) => item.userId === userId
-      );
+      const parsedCart: CartItem[] = JSON.parse(cartData);
+      const userCart = parsedCart.filter((item) => item.userId === userId);
       setCartItems(userCart);
-    } else {
-      toast.error("No cart data found.");
     }
   }, []);
 
-  const handleQuantityChange = useCallback(
-    (id: string, delta: number) => {
-      setCartItems((prevItems) => {
-        const updatedItems = prevItems.map((item) =>
-          item.productId === id
-            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item
-        );
+  const handleQuantityChange = useCallback((id: string, delta: number) => {
+    setCartItems((prevItems) => {
+      const updatedItems = prevItems.map((item) =>
+        item.productId === id
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      );
 
-        // Set the updated items in localStorage
-        setTimeout(() => {
-          localStorage.setItem("cart", JSON.stringify(updatedItems));
-        }, 0); // Set with a small delay to prevent multiple updates
+      setTimeout(() => {
+        localStorage.setItem("cart", JSON.stringify(updatedItems));
+      }, 0);
 
-        // Trigger quantity updated flag
-        setQuantityUpdated(true); // Mark that quantity was updated
+      setQuantityUpdated(true);
+      return updatedItems;
+    });
+  }, []);
 
-        return updatedItems;
-      });
-    },
-    [] // Ensure this callback doesn't change unnecessarily
-  );
-
-  const handleRemoveItem = useCallback(
-    (id: string) => {
-      const updatedCart = cartItems.filter((item) => item.productId !== id);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      setCartItems(updatedCart);
-      toast.success("Item removed from cart!");
-      window.dispatchEvent(new Event("cartUpdated"));
-    },
-    [cartItems]
-  );
-
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  const handleRemoveItem = useCallback((id: string) => {
+    const updatedCart = cartItems.filter((item) => item.productId !== id);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCartItems(updatedCart);
+    toast.success("Item removed from cart!");
+    window.dispatchEvent(new Event("cartUpdated"));
+  }, [cartItems]);
 
   const showConfirmationModal = (id: string) => {
     setShowConfirmation(id);
@@ -112,22 +131,16 @@ const CartPage = () => {
     setShowConfirmation(null);
   };
 
-  // Show toast success notification after quantity update
   useEffect(() => {
     if (quantityUpdated) {
       toast.success("Quantity updated successfully!");
-      setQuantityUpdated(false); // Reset the state after showing the toast
+      setQuantityUpdated(false);
     }
   }, [quantityUpdated]);
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <Toaster
-        position="top-center"
-        gutter={10}
-        containerStyle={{ top: "70px", zIndex: 9999 }}
-        reverseOrder={false}
-      />
+      <Toaster position="top-center" gutter={10} containerStyle={{ top: "70px", zIndex: 9999 }} />
 
       <div className="container mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
@@ -142,6 +155,7 @@ const CartPage = () => {
               width={192}
               height={192}
               className="opacity-80"
+              unoptimized
             />
             <h2 className="text-2xl font-semibold text-gray-700 mt-4">
               Your Shopping Cart is Empty
@@ -237,12 +251,44 @@ const CartPage = () => {
               <h3 className="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">
                 Order Summary
               </h3>
+
+              {/* Coupon */}
+              <div className="mb-6">
+                <label className="block text-gray-700 text-sm font-medium mb-2">
+                  Have a coupon code?
+                </label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter coupon code"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                  <button
+                    onClick={handleApplyCoupon}
+                    className="px-5 py-2 bg-orange-500 text-white font-semibold rounded-r-lg hover:bg-orange-600 transition"
+                  >
+                    Apply
+                  </button>
+                </div>
+                {couponError && (
+                  <p className="text-red-500 text-sm mt-2">{couponError}</p>
+                )}
+                {couponSuccess && (
+                  <p className="text-green-600 text-sm mt-2">{couponSuccess}</p>
+                )}
+              </div>
+
+              {/* Total */}
               <div className="text-lg text-gray-700 mb-6 flex justify-between">
                 <span>Total:</span>
                 <span className="font-semibold text-orange-600">
                   ৳{totalPrice.toFixed(2)}
                 </span>
               </div>
+
+              {/* Checkout Button */}
               <button
                 onClick={handleCheckoutRedirect}
                 className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"

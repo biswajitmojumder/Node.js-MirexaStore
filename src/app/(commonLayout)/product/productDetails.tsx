@@ -20,6 +20,7 @@ interface ProductDetailsProps {
     type: string;
     affiliateLink: string | undefined;
     data: {
+      features: boolean;
       affiliateLink: string | undefined;
       type: string;
       sellerNumber: number;
@@ -830,39 +831,55 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               product.data.warranty ||
               product.data.weight ? (
                 <>
-                  {product.data.longDescription && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Product Details
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        {product.data.longDescription}
-                      </p>
-                    </div>
-                  )}
+                {product.data.longDescription && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Product Details
+                    </h4>
+                    <p className="text-base text-gray-600">
+                      {product.data.longDescription}
+                    </p>
+                  </div>
+                )}
+              
+                {product.data.warranty && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Warranty
+                    </h4>
+                    <p className="text-base text-gray-600">
+                      {product.data.warranty}
+                    </p>
+                  </div>
+                )}
+              
+                {product.data.weight && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Weight
+                    </h4>
+                    <p className="text-base text-gray-600">
+                      {product.data.weight} kg
+                    </p>
+                  </div>
+                )}
+              
+                {/* Features List (only if exists) */}
+                {Array.isArray(product.data.features) && product.data.features.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      Features
+                    </h4>
+                    <ul className="list-disc list-inside text-base text-gray-600">
+                      {product.data.features.map((feature: string, index: number) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-                  {product.data.warranty && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Warranty
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        {product.data.warranty}
-                      </p>
-                    </div>
-                  )}
-
-                  {product.data.weight && (
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Weight
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        {product.data.weight} kg
-                      </p>
-                    </div>
-                  )}
-                </>
+              </>
+              
               ) : (
                 <p className="text-base text-gray-600">
                   No product details available at the moment.

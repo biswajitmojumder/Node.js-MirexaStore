@@ -88,13 +88,13 @@ const SearchBar = () => {
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSearch(); // Enter press handle
         }}
-        className="pl-14 pr-4 py-3 rounded-full border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-[#F85606] text-gray-700 placeholder-gray-400 shadow-sm transition"
+        className="pl-14 pr-4 py-2 rounded-full border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-[#F85606] text-gray-700 placeholder-gray-400 shadow-sm transition"
       />
       <button
         onClick={handleSearch}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white text-[#F85606] border border-[#F85606] p-2 rounded-full shadow-sm hover:bg-[#F85606] hover:text-white transition-all duration-300 ease-in-out"
+        className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white text-[#F85606] border border-[#F85606] p-1 rounded-full shadow-sm hover:bg-[#F85606] hover:text-white transition-all duration-300 ease-in-out"
       >
-        <FaSearch size={18} />
+        <FaSearch size={14} />
       </button>
     </div>
 

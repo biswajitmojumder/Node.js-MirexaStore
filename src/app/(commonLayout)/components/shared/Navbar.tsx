@@ -21,23 +21,23 @@ const Navbar = () => {
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex gap-8 text-lg font-medium">
-          <Link href="/" className="text-white hover:text-gray-200 transition">
-            Home
-          </Link>
-          <Link
-            href="/product"
-            className="text-white hover:text-gray-200 transition"
-          >
-            Product
-          </Link>
-          <Link
-            href="/cart"
-            className="text-white hover:text-gray-200 transition"
-          >
-            Cart
-          </Link>
-        </nav>
+        <nav className="hidden md:flex gap-10 text-lg  items-center">
+  {[
+    { href: "/", label: "Home" },
+    { href: "/product", label: "Product" },
+    { href: "/cart", label: "Cart" },
+  ].map((item, idx) => (
+    <Link
+      key={idx}
+      href={item.href}
+      className="relative text-white hover:text-gray-200 transition-all duration-300 ease-in-out group"
+    >
+      {item.label}
+      <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white transition-all group-hover:w-full"></span>
+    </Link>
+  ))}
+</nav>
+
 
         {/* Right Section: Search, Cart, Profile */}
         <div className="flex items-center gap-2">
