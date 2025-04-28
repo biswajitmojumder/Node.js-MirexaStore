@@ -302,7 +302,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
           </div>
         ))
       ) : (
-        <p>No reviews yet.</p>
+        ""
       )}
 
       {/* Pagination */}

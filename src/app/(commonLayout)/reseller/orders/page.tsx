@@ -11,7 +11,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import { useAppSelector } from "@/app/lib/redux/hook";
 
-// Define the type for Shipping Details
 interface ShippingDetails {
   fullName: string;
   address?: string;
@@ -20,7 +19,6 @@ interface ShippingDetails {
   country?: string;
 }
 
-// Define the type for Order
 interface Order {
   _id: string;
   shippingDetails: ShippingDetails;
@@ -33,9 +31,12 @@ const ResellerOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
-  const [statusFilter, setStatusFilter] = useState<string>(""); // State for status filter
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const router = useRouter();
+
+  const auth = useAppSelector((state) => state.auth);
+  const token = useSelector((state: RootState) => state.auth.token);
 
   useEffect(() => {
     const userRole = localStorage.getItem("role");
@@ -49,7 +50,6 @@ const ResellerOrders: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const auth = useAppSelector((state) => state.auth);
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -66,9 +66,8 @@ const ResellerOrders: React.FC = () => {
       );
 
       const allOrders = response.data.data;
-      const userEmail = auth?.user?.email; // redux theke email pawa
+      const userEmail = auth?.user?.email;
 
-      // ✅ Filter only the orders where this user is a seller of at least one item
       const sellerOrders = allOrders.filter((order: any) =>
         order.items.some((item: any) => item.sellerEmail === userEmail)
       );
@@ -80,6 +79,7 @@ const ResellerOrders: React.FC = () => {
       setLoading(false);
     }
   };
+
   const updateOrderStatus = async (orderId: string, currentStatus: string) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -105,12 +105,11 @@ const ResellerOrders: React.FC = () => {
         }
       );
       toast.success(`Order status updated to ${newStatus}`);
-      fetchOrders(); // Refresh orders
+      fetchOrders();
     } catch (err) {
       toast.error("Failed to update order status. Please try again.");
     }
   };
-  const token = useSelector((state: RootState) => state.auth.token);
 
   const deleteOrder = async (orderId: string) => {
     toast.info(
@@ -149,12 +148,12 @@ const ResellerOrders: React.FC = () => {
                   autoClose: 10000,
                 });
 
-                fetchOrders(); // Refresh orders
+                fetchOrders();
               } catch (err) {
                 toast.error("❌ Failed to cancel order. Please try again.");
               }
 
-              toast.dismiss(); // Close confirmation toast
+              toast.dismiss();
             }}
           >
             Yes
@@ -165,7 +164,94 @@ const ResellerOrders: React.FC = () => {
     );
   };
 
-  // Filter orders by order ID and status based on the search query and selected status
+  // ✅✅ NEW FUNCTION: Courier Request
+  const courierRequest = async (orderId: string) => {
+    let loadingToastId: string | number | undefined;
+  
+    try {
+      if (!token) {
+        toast.error("❌ You must be logged in to request a courier.");
+        return;
+      }
+  
+      loadingToastId = toast.loading("Requesting Courier...");
+  
+      // Fetch order details
+      const { data } = await Axios.get(
+        `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const order = data?.data;
+  
+      if (!order) {
+        throw new Error("Order details not found");
+      }
+  
+      // Prepare simplified payload
+      const courierPayload = {
+        orderId: order._id,
+        customer: {
+          fullName: order.shippingDetails.fullName,
+          phone: order.shippingDetails.phone,
+          email: order.shippingDetails.email,
+        },
+        codAmount: order.totalPrice,
+        orderItems: order.items.map((item: any) => ({
+          productName: item.productName,
+          quantity: item.quantity,
+          price: item.price,
+          color: item.color,
+          size: item.size,
+          productImage: item.productImage[0], // Use first image URL
+        })),
+      };
+  
+      console.log("Simplified Courier Payload:", JSON.stringify(courierPayload, null, 2));
+  
+      // Send the request
+      const response = await Axios.post(
+        `https://campus-needs-backend.vercel.app/api/courier/request`,
+        courierPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      toast.update(loadingToastId, {
+        render: "✅ Courier Requested Successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+      });
+  
+    } catch (err: any) {
+      console.error("API Error:", err.response?.data);
+      const errorMessage =
+        err?.response?.data?.message || "❌ Failed to request courier. Try again.";
+  
+      if (loadingToastId) {
+        toast.update(loadingToastId, {
+          render: errorMessage,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+        });
+      }
+    }
+  };
+  
+  
+  
+  
+  
+
   const filteredOrders = orders.filter((order) => {
     const matchesQuery = order._id
       .toLowerCase()
@@ -195,7 +281,7 @@ const ResellerOrders: React.FC = () => {
         Reseller Order Management
       </h1>
 
-      {/* Search Bar */}
+      {/* Search & Filter */}
       <div className="mb-4 flex justify-center gap-4">
         <input
           type="text"
@@ -204,8 +290,6 @@ const ResellerOrders: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg"
         />
-
-        {/* Status Filter */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -276,6 +360,7 @@ const ResellerOrders: React.FC = () => {
                     {order.status !== "Delivered" &&
                       order.status !== "Canceled" && (
                         <>
+                          {/* Update Status Buttons */}
                           {order.status === "Pending" && (
                             <button
                               className="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
@@ -287,14 +372,23 @@ const ResellerOrders: React.FC = () => {
                             </button>
                           )}
                           {order.status === "Processing" && (
-                            <button
-                              className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
-                              onClick={() =>
-                                updateOrderStatus(order._id, "Processing")
-                              }
-                            >
-                              Shipped
-                            </button>
+                            <>
+                              <button
+                                className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
+                                onClick={() =>
+                                  updateOrderStatus(order._id, "Processing")
+                                }
+                              >
+                                Shipped
+                              </button>
+                              {/* Courier Request Button */}
+                              <button
+                                className="text-xs bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600"
+                                onClick={() => courierRequest(order._id)}
+                              >
+                                Courier Request
+                              </button>
+                            </>
                           )}
                           {order.status === "Shipped" && (
                             <button
@@ -330,6 +424,7 @@ const ResellerOrders: React.FC = () => {
           </tbody>
         </table>
       </div>
+
       <ToastContainer />
     </div>
   );
