@@ -169,15 +169,16 @@ const ResellerOrders: React.FC = () => {
     let loadingToastId: string | number | undefined;
   
     try {
-      if (!token) {
+      // Check if the user is logged in
+      if (!token || !auth?.user?.email) {
         toast.error("❌ You must be logged in to request a courier.");
         return;
       }
   
       loadingToastId = toast.loading("Requesting Courier...");
   
-      // Fetch order details
-      const { data } = await Axios.get(
+      // 1. Fetch Order details
+      const { data: orderRes } = await Axios.get(
         `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
         {
           headers: {
@@ -186,35 +187,67 @@ const ResellerOrders: React.FC = () => {
         }
       );
   
-      const order = data?.data;
-  
+      const order = orderRes?.data;
       if (!order) {
-        throw new Error("Order details not found");
+        throw new Error("Order details not found. Please check the order ID and try again.");
       }
   
-      // Prepare simplified payload
+      // 2. Fetch Reseller Profile
+      const { data: resellerRes } = await Axios.get(
+        `https://campus-needs-backend.vercel.app/api/reseller/profile/${auth.user.email}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const reseller = resellerRes?.data;
+      if (!reseller || !reseller.brand) {
+        throw new Error("Reseller profile not found or incomplete. Please check the profile details.");
+      }
+  
+      // 3. Build Courier Payload
       const courierPayload = {
         orderId: order._id,
         customer: {
           fullName: order.shippingDetails.fullName,
           phone: order.shippingDetails.phone,
           email: order.shippingDetails.email,
+          address: order.shippingDetails.address,
+          city: order.shippingDetails.city,
+          district: order.shippingDetails.district,
+          country: order.shippingDetails.country,
+          deliveryNote: order.shippingDetails.deliveryNote || "",
+        },
+        seller: {
+          name: reseller.brand.name || "",
+          email: reseller.userEmail || "",
+          phone: reseller.brand.phone || "",
+          location: reseller.brand.location || "",
+          whatsapp: reseller.brand.whatsapp || "",
+          socialLinks: {
+            facebook: reseller.brand.socialLinks?.facebook || "",
+            instagram: reseller.brand.socialLinks?.instagram || "",
+          },
         },
         codAmount: order.totalPrice,
         orderItems: order.items.map((item: any) => ({
-          productName: item.productName,
-          quantity: item.quantity,
-          price: item.price,
-          color: item.color,
-          size: item.size,
-          productImage: item.productImage[0], // Use first image URL
+          productName: item?.name || "Unknown Product", // Default to "Unknown Product" if name is missing
+          quantity: item?.quantity || 1,
+          price: item?.price || 0,
+          color: item?.color || "Not specified",
+          size: item?.size || "Not specified",
+          productImage: Array.isArray(item.productImage)
+            ? item.productImage
+            : [item.productImage || "No image available"], // always array
         })),
       };
   
-      console.log("Simplified Courier Payload:", JSON.stringify(courierPayload, null, 2));
+      console.log("Courier Payload:", JSON.stringify(courierPayload, null, 2));
   
-      // Send the request
-      const response = await Axios.post(
+      // 4. Send Courier Request
+      await Axios.post(
         `https://campus-needs-backend.vercel.app/api/courier/request`,
         courierPayload,
         {
@@ -224,28 +257,41 @@ const ResellerOrders: React.FC = () => {
         }
       );
   
-      toast.update(loadingToastId, {
-        render: "✅ Courier Requested Successfully!",
-        type: "success",
-        isLoading: false,
-        autoClose: 5000,
-      });
-  
-    } catch (err: any) {
-      console.error("API Error:", err.response?.data);
-      const errorMessage =
-        err?.response?.data?.message || "❌ Failed to request courier. Try again.";
-  
       if (loadingToastId) {
         toast.update(loadingToastId, {
-          render: errorMessage,
+          render: "✅ Courier Requested Successfully!",
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+        });
+      }
+  
+    } catch (err: any) {
+      console.error("API Error:", err?.response?.data || err);
+  
+      // Handle MongoDB duplicate key error
+      let errorMessage = "❌ Something went wrong. Please try again later.";
+  
+      if (err?.response?.data?.code === 11000) {
+        errorMessage = "⚠️ This order has already been processed for a courier. Please check the status or contact support for more details.";
+      } else if (err?.response?.data?.message) {
+        errorMessage = err?.response?.data?.message;
+      }
+  
+      // Provide a more user-friendly error message in the toast
+      if (loadingToastId) {
+        toast.update(loadingToastId, {
+          render: `${errorMessage}`,
           type: "error",
           isLoading: false,
           autoClose: 5000,
         });
+      } else {
+        toast.error(`${errorMessage}`);
       }
     }
   };
+  
   
   
   
