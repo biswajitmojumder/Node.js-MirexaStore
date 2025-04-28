@@ -9,18 +9,18 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import WithAuth from "@/app/lib/utils/withAuth";
 
-// ✅ SKU generator
+// SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>
   `${slug}-${color}-${size}`;
 
-// ✅ Slug generator from name
+// Slug generator
 const generateSlug = (name: string) =>
   name
     .toLowerCase()
     .replace(/ /g, "-")
     .replace(/[^\w-]+/g, "");
 
-// ✅ Interfaces
+// Interfaces
 interface ProductData {
   name: string;
   slug: string;
@@ -39,7 +39,7 @@ interface ProductData {
   category: string;
   brand: string;
   videoUrl: string;
-  type: "own" | "affiliate"; // ✅ Added product type field
+  type: "own" | "affiliate";
   affiliateLink?: string;
 }
 
@@ -52,9 +52,32 @@ interface Variant {
   images: string[];
 }
 
+// 🌟 Cloudinary Upload Function
+const uploadImageToCloudinary = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "campus-needs-upload"); // ✅ Your upload preset
+  // cloud_name field ekhane append korar dorkar nai formData te
+
+  try {
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/dwg8d0bfp/image/upload`, // ✅ Your cloud name in URL
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data = await res.json();
+    return data.secure_url; // eta hocche upload hoye jawa image er URL
+  } catch (error) {
+    console.error("Upload failed:", error);
+    throw error;
+  }
+};
+
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
-  const [slugEdited, setSlugEdited] = useState(false); // Track if slug was edited manually
+  const [slugEdited, setSlugEdited] = useState(false);
   const [productData, setProductData] = useState<ProductData>({
     name: "",
     slug: "",
@@ -76,7 +99,7 @@ const AddProduct = () => {
     type: "own",
   });
 
-  const [productImages, setProductImages] = useState<string[]>([""]);
+  const [productImages, setProductImages] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([""]);
   const [colors, setColors] = useState<string[]>([""]);
   const [sizes, setSizes] = useState<string[]>([""]);
@@ -85,7 +108,9 @@ const AddProduct = () => {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
 
-  // ✅ Auto-generate slug when name changes (unless manually edited)
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
+
   useEffect(() => {
     if (!slugEdited) {
       setProductData((prev) => ({
@@ -95,32 +120,29 @@ const AddProduct = () => {
     }
   }, [productData.name, slugEdited]);
 
-  // ✅ Input Change Handler
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-
-    if (name === "slug") setSlugEdited(true); // User manually edited slug
-
+    if (name === "slug") setSlugEdited(true);
     setProductData((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
     }));
   };
 
-  // ✅ Array Handlers
   const handleArrayChange = (setter: any, index: number, value: string) => {
     setter((prev: string[]) =>
       prev.map((item, idx) => (idx === index ? value : item))
     );
   };
+
   const addArrayItem = (setter: any) =>
     setter((prev: string[]) => [...prev, ""]);
+
   const removeArrayItem = (setter: any, index: number) =>
     setter((prev: string[]) => prev.filter((_, idx) => idx !== index));
 
-  // ✅ Variant Handling
   const handleVariantChange = (color: string, size: string) => {
     const sku = generateSKU(productData.slug, color, size);
     if (!variants.some((v) => v.color === color && v.size === size)) {
@@ -146,7 +168,6 @@ const AddProduct = () => {
     );
   };
 
-  // ✅ Form Reset
   const resetForm = () => {
     setProductData({
       name: "",
@@ -159,7 +180,6 @@ const AddProduct = () => {
       additionalInfo: "",
       weight: 0,
       warranty: "",
-
       sellerEmail: "",
       price: 0,
       discountPrice: 0,
@@ -169,7 +189,7 @@ const AddProduct = () => {
       videoUrl: "",
       type: "own",
     });
-    setProductImages([""]);
+    setProductImages([]);
     setTags([""]);
     setColors([""]);
     setSizes([""]);
@@ -179,9 +199,7 @@ const AddProduct = () => {
     setIsNewArrival(false);
     setSlugEdited(false);
   };
-  const user = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
-  // ✅ Form Submit
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -226,7 +244,6 @@ const AddProduct = () => {
       }
     } catch (err: any) {
       console.error("Error adding product:", err);
-
       if (err.response && err.response.status === 400) {
         toast.error(
           `❌ ${err.response.data.message || "Slug already exists."}`
@@ -239,7 +256,22 @@ const AddProduct = () => {
     }
   };
 
-  // ✅ Render Fields
+  // 🌟 Updated Image Upload Handler
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setLoading(true);
+    try {
+      const uploadPromises = files.map((file) => uploadImageToCloudinary(file));
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setProductImages((prev) => [...prev, ...uploadedUrls]);
+      toast.success("✅ Images uploaded!");
+    } catch (error) {
+      toast.error("❌ Image upload failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderInputField = (
     label: string,
     name: keyof ProductData,
@@ -260,33 +292,55 @@ const AddProduct = () => {
   const renderArrayField = (label: string, state: string[], setter: any) => (
     <div className="flex flex-col gap-2">
       <label className="font-medium text-gray-700">{label}</label>
-      {state.map((val, idx) => (
-        <div key={idx} className="flex gap-2 items-center">
+      {label === "Product Images" ? (
+        <>
           <input
-            value={val}
-            onChange={(e) => handleArrayChange(setter, idx, e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="file"
+            multiple
+            onChange={handleImageUpload}
+            className="w-full p-3 border border-gray-300 rounded-md"
           />
+          <div className="flex flex-wrap gap-4 mt-4">
+            {state.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt="Uploaded Preview"
+                className="w-24 h-24 object-cover rounded-md border"
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          {state.map((val, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <input
+                value={val}
+                onChange={(e) => handleArrayChange(setter, idx, e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => removeArrayItem(setter, idx)}
+                className="bg-red-500 text-white px-3 py-1 rounded-md"
+              >
+                X
+              </button>
+            </div>
+          ))}
           <button
             type="button"
-            onClick={() => removeArrayItem(setter, idx)}
-            className="bg-red-500 text-white px-3 py-1 rounded-md"
+            onClick={() => addArrayItem(setter)}
+            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md text-gray-700"
           >
-            X
+            Add {label}
           </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() => addArrayItem(setter)}
-        className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md text-gray-700"
-      >
-        Add {label}
-      </button>
+        </>
+      )}
     </div>
   );
 
-  // ✅ Variants Render
   const renderVariants = () =>
     colors.flatMap((color) =>
       sizes.map((size) => (
@@ -358,7 +412,6 @@ const AddProduct = () => {
       ))
     );
 
-  // ✅ Return Form
   return (
     <div className="p-8 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <ToastContainer />
@@ -377,14 +430,12 @@ const AddProduct = () => {
         {renderInputField("Additional Info", "additionalInfo")}
         {renderInputField("Weight", "weight", "number")}
         {renderInputField("Warranty", "warranty")}
-
         {renderInputField("Price", "price")}
         {renderInputField("Discount Price", "discountPrice", "number")}
         {renderInputField("Stock Quantity", "stockQuantity", "number")}
         {renderInputField("Category", "category")}
         {renderInputField("Brand", "brand")}
         {renderInputField("Video URL", "videoUrl")}
-
         {renderArrayField("Product Images", productImages, setProductImages)}
         {renderArrayField("Tags", tags, setTags)}
         {renderArrayField("Colors", colors, setColors)}
@@ -409,12 +460,10 @@ const AddProduct = () => {
             New Arrival
           </label>
         </div>
-
         <h3 className="text-lg font-semibold mt-6 text-gray-800">
           Variants (Color + Size)
         </h3>
         {renderVariants()}
-
         <button
           type="submit"
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 w-full"
