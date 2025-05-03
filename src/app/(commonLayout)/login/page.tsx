@@ -1,11 +1,13 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppDispatch } from "@/app/lib/redux/hook";
 import { loginUser } from "@/app/lib/redux/features/authSlice";
+import { FaGoogle } from "react-icons/fa";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +17,10 @@ const Login = () => {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+
+  // Properly decode the redirect path from query params
+  const redirectPath = decodeURIComponent(searchParams.get("redirect") || "/");
 
   useEffect(() => {
     const signUpEmail = localStorage.getItem("signUpEmail");
@@ -22,7 +28,54 @@ const Login = () => {
       setEmail(signUpEmail);
       localStorage.removeItem("signUpEmail");
     }
-  }, []);
+
+    const token = searchParams.get("token");
+    const redirectPathFromGoogle = decodeURIComponent(
+      searchParams.get("redirect") || "/"
+    );
+
+    const checkGoogleLogin = async () => {
+      if (!token) return;
+
+      try {
+        const response = await axios.get(
+          "https://campus-needs-backend.vercel.app/api/users/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const user = response.data?.data;
+
+        if (!user || !user.role) {
+          toast.error("Login failed: Missing user info.");
+          return;
+        }
+
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", user.role);
+
+        dispatch(loginUser({ user, token }));
+
+        toast.success("Google login successful!", {
+          position: "top-center",
+          autoClose: 1500,
+        });
+
+        setTimeout(() => {
+          router.push(redirectPathFromGoogle);
+        }, 1500);
+      } catch (error) {
+        console.error("Google login failed:", error);
+        toast.error("Google login failed.", {
+          position: "top-center",
+        });
+      }
+    };
+
+    checkGoogleLogin();
+  }, [searchParams, dispatch, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +89,10 @@ const Login = () => {
 
       const { token, data } = response.data;
 
-      // Redux + LocalStorage save
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("role", data.role);
+
       dispatch(loginUser({ user: data, token }));
 
       toast.success("Login successful! Redirecting...", {
@@ -45,10 +101,10 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        const role = data.role;
-        router.push("/"); // route based on role
+        router.push(redirectPath);
       }, 2000);
     } catch (error: any) {
+      console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Invalid credentials.", {
         position: "top-center",
         autoClose: 3000,
@@ -60,21 +116,25 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
+    const currentPath = window.location.pathname + window.location.search;
+
     window.open(
-      "https://campus-needs-backend.vercel.app/api/auth/google",
+      `https://campus-needs-backend.vercel.app/api/auth/google?redirect=${encodeURIComponent(
+        currentPath
+      )}`,
       "_self"
     );
   };
 
   return (
-    <div className="max-w-md mx-auto p-8 bg-white rounded-lg shadow-xl">
-      <h1 className="text-3xl font-bold mb-4 text-center text-orange-600">
-        Login
+    <div className="max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
+      <h1 className="text-4xl font-bold mb-8 text-center text-orange-600">
+        Welcome Back!
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-gray-700 font-medium">Email</label>
+          <label className="block text-gray-700 font-medium mb-2">Email</label>
           <input
             type="email"
             value={email}
@@ -86,7 +146,9 @@ const Login = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700 font-medium">Password</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Password
+          </label>
           <input
             type="password"
             value={password}
@@ -109,10 +171,16 @@ const Login = () => {
       <div className="mt-6 text-center">
         <button
           onClick={handleGoogleLogin}
-          disabled={true}
-          className="w-full p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
+          disabled={isGoogleLoading}
+          className="w-full p-4 bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition duration-300 disabled:opacity-50"
         >
-          {isGoogleLoading ? "Redirecting..." : "Login with Google"}
+          {isGoogleLoading ? (
+            "Redirecting..."
+          ) : (
+            <>
+              <FaGoogle /> Login with Google
+            </>
+          )}
         </button>
       </div>
 
@@ -122,7 +190,6 @@ const Login = () => {
         </a>
       </div>
 
-      {/* Toastify Container */}
       <ToastContainer />
     </div>
   );

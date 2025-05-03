@@ -57,7 +57,6 @@ const uploadImageToCloudinary = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", "campus-needs-upload"); // ✅ Your upload preset
-  // cloud_name field ekhane append korar dorkar nai formData te
 
   try {
     const res = await fetch(

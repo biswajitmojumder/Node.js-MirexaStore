@@ -178,7 +178,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     // If user is not logged in, redirect to login page
     if (!token) {
-      window.location.href = "/login"; // You can also use a route like "/auth/login" if needed
+      const currentPath = window.location.pathname + window.location.search;
+      window.location.href = `/login?redirect=${encodeURIComponent(
+        currentPath
+      )}`;
       return;
     }
 
@@ -225,8 +228,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       toast.error("Please log in to add items to the cart.");
       setIsLoading(false);
 
+      const currentPath = window.location.pathname + window.location.search;
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
       }, 1500);
 
       return;
@@ -307,8 +311,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       toast.error("Please log in to proceed to checkout.");
+      const currentPath = window.location.pathname + window.location.search;
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
       }, 1500);
       return;
     }
@@ -376,8 +381,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     if (!storedUser || !token) {
       toast.error("Please log in first.");
+      const currentPath = window.location.pathname + window.location.search;
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
       }, 1500);
       return null;
     }
@@ -770,14 +776,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                         {resellerProfile.brand.tagline}
                       </p>
                       {resellerProfile.brand.verified && (
-                      <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        <MdVerified className="h-4 w-4" />
-                        <span>Verified Reseller</span>
-                      </div>
-                    )}
-
-
-
+                        <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                          <MdVerified className="h-4 w-4" />
+                          <span>Verified Reseller</span>
+                        </div>
+                      )}
                     </div>
                   </Link>
 
@@ -831,55 +834,56 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               product.data.warranty ||
               product.data.weight ? (
                 <>
-                {product.data.longDescription && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Product Details
-                    </h4>
-                    <p className="text-base text-gray-600">
-                      {product.data.longDescription}
-                    </p>
-                  </div>
-                )}
-              
-                {product.data.warranty && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Warranty
-                    </h4>
-                    <p className="text-base text-gray-600">
-                      {product.data.warranty}
-                    </p>
-                  </div>
-                )}
-              
-                {product.data.weight && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Weight
-                    </h4>
-                    <p className="text-base text-gray-600">
-                      {product.data.weight} kg
-                    </p>
-                  </div>
-                )}
-              
-                {/* Features List (only if exists) */}
-                {Array.isArray(product.data.features) && product.data.features.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                      Features
-                    </h4>
-                    <ul className="list-disc list-inside text-base text-gray-600">
-                      {product.data.features.map((feature: string, index: number) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {product.data.longDescription && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Product Details
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.longDescription}
+                      </p>
+                    </div>
+                  )}
 
-              </>
-              
+                  {product.data.warranty && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Warranty
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.warranty}
+                      </p>
+                    </div>
+                  )}
+
+                  {product.data.weight && (
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        Weight
+                      </h4>
+                      <p className="text-base text-gray-600">
+                        {product.data.weight} kg
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Features List (only if exists) */}
+                  {Array.isArray(product.data.features) &&
+                    product.data.features.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                          Features
+                        </h4>
+                        <ul className="list-disc list-inside text-base text-gray-600">
+                          {product.data.features.map(
+                            (feature: string, index: number) => (
+                              <li key={index}>{feature}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </>
               ) : (
                 <p className="text-base text-gray-600">
                   No product details available at the moment.

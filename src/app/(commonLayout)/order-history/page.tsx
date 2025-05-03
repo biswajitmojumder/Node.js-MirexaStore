@@ -7,7 +7,10 @@ import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 import FloatingIcons from "../components/ui/FloatingIcons";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
-
+type MediaType = {
+  url: string;
+  type: "image" | "video"; // media type can only be image or video
+};
 interface OrderItem {
   color: ReactNode;
   size: ReactNode;
@@ -56,7 +59,8 @@ interface Product {
 const OrderHistory: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // State to store media URLs
+  const [media, setMedia] = useState<MediaType[]>([]);
 
   const fetchProductDetails = async (productId: string) => {
     try {
@@ -77,7 +81,6 @@ const OrderHistory: React.FC = () => {
 
       if (!token || !userId) {
         setError("No token or user ID found. Please log in.");
-
         return;
       }
 
@@ -123,6 +126,47 @@ const OrderHistory: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Handle file selection (image/video upload)
+  const handleMediaUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check the file type to differentiate between image or video
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+
+      if (!isImage && !isVideo) {
+        toast.error("Only images and videos are allowed.");
+        return;
+      }
+
+      // Prepare the form data to upload the file
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "campus-needs-upload"); // Replace with your actual Cloudinary upload preset
+
+      try {
+        // Make a POST request to upload the media (both images and videos)
+        const { data } = await Axios.post(
+          "https://api.cloudinary.com/v1_1/dwg8d0bfp/upload", // Replace with your actual Cloudinary cloud name
+          formData
+        );
+
+        // Add the uploaded media URL to the state
+        const mediaType = file.type.startsWith("image/") ? "image" : "video";
+        setMedia((prev) => [
+          ...prev,
+          { url: data.secure_url, type: mediaType }, // Store both the URL and type
+        ]);
+        toast.success("Media uploaded successfully!");
+      } catch (error) {
+        console.error("Error uploading media:", error);
+        toast.error("Failed to upload media.");
+      }
+    }
+  };
+
   const handleReviewSubmit = async (
     productId: string,
     orderId: string,
@@ -150,18 +194,25 @@ const OrderHistory: React.FC = () => {
         return;
       }
 
+      // Prepare the review data to be sent to the backend
+      const reviewData = {
+        productId,
+        userId: orderId, // Assuming userId is orderId for simplicity here, adjust accordingly.
+        userName, // Include the userName field here
+        rating,
+        comment,
+        media, // Send the media URLs to the backend
+        likes: [],
+        replies: [],
+      };
+
+      // Log the review data to the console before submitting it
+      console.log("Review Data Being Submitted:", reviewData);
+
       // Send the review to the backend with the necessary data
       const response = await Axios.post(
         "https://campus-needs-backend.vercel.app/api/reviews/create",
-        {
-          productId,
-          userId: orderId, // Assuming userId is orderId for simplicity here, adjust accordingly.
-          userName, // Include the userName field here
-          rating,
-          comment,
-          likes: [],
-          replies: [],
-        },
+        reviewData,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Include token in headers
@@ -228,8 +279,7 @@ const OrderHistory: React.FC = () => {
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <h3 className="text-2xl font-semibold text-blue-600 mb-2 sm:mb-0">
-                  Order ID:{" "}
-                  <span className="">{order._id.slice(-6)}</span>
+                  Order ID: <span className="">{order._id.slice(-6)}</span>
                 </h3>
                 <p className="text-lg text-gray-500">
                   {new Date(order.orderDate).toLocaleDateString()}
@@ -348,6 +398,13 @@ const OrderHistory: React.FC = () => {
                           className="w-full p-2 mt-2 border border-gray-300 rounded-md"
                           onChange={(e) => (item.review = e.target.value)}
                         />
+                        {/* Media upload */}
+                        <input
+                          type="file"
+                          onChange={handleMediaUpload}
+                          accept="image/*,video/*"
+                          className="mt-2"
+                        />
                         <button
                           onClick={() =>
                             handleReviewSubmit(
@@ -365,20 +422,6 @@ const OrderHistory: React.FC = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-6">
-                <h4 className="text-xl font-semibold">Shipping Details</h4>
-                <div className="text-gray-700 text-sm mt-2">
-                  {Object.entries(order.shippingDetails).map(([key, value]) => (
-                    <p key={key} className="mb-1">
-                      <strong>
-                        {key.charAt(0).toUpperCase() + key.slice(1)}:
-                      </strong>{" "}
-                      {value}
-                    </p>
-                  ))}
-                </div>
               </div>
             </div>
           ))

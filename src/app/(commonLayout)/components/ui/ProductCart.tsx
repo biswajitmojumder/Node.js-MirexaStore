@@ -106,17 +106,18 @@ const ProductCart = ({ products }: ProductCartProps) => {
                                 {discountPercentage}% Off
                               </span>
                             )}
-  
-                        <div className="relative w-[200px] h-[220px] mx-auto flex items-center justify-center overflow-hidden">
-                          <Image
-                            src={product.productImages[0]}
-                            alt={product.name}
-                            width={200}
-                            height={200}
-                            className="object-contain"
-                            unoptimized={true}
-                          />
-                        </div>
+
+                            <div className="relative w-[200px] h-[220px] mx-auto flex items-center justify-center overflow-hidden">
+                              <div className="relative w-40 h-44 sm:w-48 sm:h-52 md:w-56 md:h-60 mx-auto flex items-center justify-center overflow-hidden">
+                                <Image
+                                  src={product.productImages[0]}
+                                  alt={product.name}
+                                  fill
+                                  className="object-contain"
+                                  unoptimized
+                                />
+                              </div>
+                            </div>
                           </span>
                         ) : (
                           <span className="text-3xl font-bold text-gray-500">
