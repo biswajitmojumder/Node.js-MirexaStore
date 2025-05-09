@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Axios from "axios";
-import { useParams } from "next/navigation"; // ✅ Fix applied
+import { useParams } from "next/navigation";
 import Loading from "@/app/loading";
-import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { RootState } from "@/app/lib/redux/store";
 import { useAppSelector } from "@/app/lib/redux/hook";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface ShippingDetails {
   fullName: string;
@@ -63,6 +64,9 @@ const OrderDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const token = useAppSelector((state: RootState) => state.auth.token);
+
   useEffect(() => {
     if (!orderId) {
       setError("Order ID is not available.");
@@ -71,8 +75,6 @@ const OrderDetails: React.FC = () => {
     }
     fetchOrderDetails(orderId);
   }, [orderId]);
-
-  const token = useAppSelector((state: RootState) => state.auth.token);
 
   const fetchOrderDetails = async (orderId: string) => {
     try {
@@ -115,140 +117,167 @@ const OrderDetails: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading />;
+  const handleDownloadInvoice = async () => {
+    if (!invoiceRef.current) return;
 
+    const style = document.createElement("style");
+    style.innerHTML = `
+      * {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    try {
+      const canvas = await html2canvas(invoiceRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${order?._id.slice(-6)}.pdf`);
+    } catch (err) {
+      console.error("Invoice generation failed:", err);
+      setError("Invoice download failed. Please try again.");
+    } finally {
+      document.head.removeChild(style);
+    }
+  };
+
+  if (loading) return <Loading />;
   if (error)
     return <div className="text-center text-red-500 mt-6">{error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto my-8 px-4">
-      <h1 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-        Order Details
-      </h1>
+    <div className="max-w-5xl mx-auto my-8 px-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Invoice</h1>
+        <button
+          onClick={handleDownloadInvoice}
+          className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+        >
+          Download PDF
+        </button>
+      </div>
 
       {order && (
-        <div>
-          {/* Shipping Details Section */}
-          <div className="mb-6 border-b pb-4">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Shipping Details
-            </h2>
-            <div className="space-y-3 text-lg text-gray-700">
-              <p>
-                <strong>Name:</strong> {order.shippingDetails.fullName}
-              </p>
-              {order.shippingDetails.email && (
-                <p>
-                  <strong>Email:</strong> {order.shippingDetails.email}
-                </p>
-              )}
-              {order.shippingDetails.phone && (
-                <p>
-                  <strong>Phone:</strong> {order.shippingDetails.phone}
-                </p>
-              )}
-              {order.shippingDetails.address && (
-                <p>
-                  <strong>Address:</strong> {order.shippingDetails.address}
-                </p>
-              )}
-              {order.shippingDetails.city && (
-                <p>
-                  <strong>City:</strong> {order.shippingDetails.city}
-                </p>
-              )}
-              {order.shippingDetails.district && (
-                <p>
-                  <strong>District:</strong> {order.shippingDetails.district}
-                </p>
-              )}
-              {order.shippingDetails.country && (
-                <p>
-                  <strong>Country:</strong> {order.shippingDetails.country}
-                </p>
-              )}
-              {order.shippingDetails.deliveryNote && (
-                <p>
-                  <strong>Delivery Note:</strong>{" "}
-                  {order.shippingDetails.deliveryNote}
-                </p>
-              )}
+        <div
+          ref={invoiceRef}
+          className="bg-white p-8 shadow-xl rounded-md text-gray-800 border border-gray-200"
+        >
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Campus Needs</h2>
+              <p className="text-sm">www.campusneeds.com</p>
+              <p className="text-sm">support@campusneeds.com</p>
             </div>
-          </div>
-
-          {/* Order Summary Section */}
-          <div className="mb-6 border-b pb-4 flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div className="flex flex-col">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                Order Summary
-              </h2>
+            <div className="text-sm text-right space-y-1">
               <p>
-                <strong>Order ID:</strong> {order._id.slice(-6)}
+                <strong>Invoice ID:</strong> #{order._id.slice(-6)}
               </p>
               <p>
-                <strong>Order Date:</strong>{" "}
+                <strong>Date:</strong>{" "}
                 {new Date(order.orderDate).toLocaleDateString()}
               </p>
               <p>
                 <strong>Status:</strong> {order.status}
               </p>
             </div>
-            <div className="flex flex-col justify-center items-center md:items-end mt-4 md:mt-0 space-y-2">
-              <p className="text-lg text-gray-600">
-                <strong>Price:</strong> ৳{order.totalAmount.toFixed(2)}
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Shipping To:</h3>
+              <p>{order.shippingDetails.fullName}</p>
+              {order.shippingDetails.email && (
+                <p>{order.shippingDetails.email}</p>
+              )}
+              {order.shippingDetails.phone && (
+                <p>{order.shippingDetails.phone}</p>
+              )}
+              {order.shippingDetails.address && (
+                <p>{order.shippingDetails.address}</p>
+              )}
+              <p>
+                {[
+                  order.shippingDetails.city,
+                  order.shippingDetails.district,
+                  order.shippingDetails.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
               </p>
-              <p className="text-lg text-gray-600">
-                <strong>Shipping Cost:</strong> ৳{order.shippingCost.toFixed(2)}
-              </p>
-              <p className="text-xl font-bold text-gray-900">
-                <strong>Total Amount:</strong> ৳{order.totalPrice.toFixed(2)}
+            </div>
+
+            <div className="text-sm text-right md:text-left">
+              <h3 className="text-lg font-semibold mb-2">Payment Summary:</h3>
+              <p>Subtotal: ৳{order.totalAmount.toFixed(2)}</p>
+              <p>Shipping: ৳{order.shippingCost.toFixed(2)}</p>
+              <p className="font-bold text-lg">
+                Total: ৳{order.totalPrice.toFixed(2)}
               </p>
             </div>
           </div>
 
-          {/* Ordered Items Section */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Items Ordered
-            </h2>
-            <ul className="space-y-4">
-              {order.items.map((item, index) => (
-                <li
-                  key={index}
-                  className="flex flex-col md:flex-row items-center bg-white rounded-lg shadow-lg p-4 hover:shadow-2xl transition-shadow duration-300 ease-in-out"
-                >
-                  {/* Product Image */}
-                  {item.productImage?.[0] ? (
-                    <Image
-                      src={item.productImage[0]}
-                      alt={item.name}
-                      width={120}
-                      height={120}
-                      className="object-cover rounded-md mr-4"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded-md mr-4">
-                      No Image
-                    </div>
-                  )}
-
-                  {/* Product Details */}
-                  <div className="flex flex-col justify-between space-y-2">
-                    <h3 className="font-semibold text-lg text-gray-700">
-                      {item.name || "Unknown Product"}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      <strong>Price:</strong> ৳{item.price.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <strong>Quantity:</strong> {item.quantity}
-                    </p>
-                  </div>
-                </li>
+          <h3 className="text-lg font-semibold mb-3">Order Items</h3>
+          <table className="w-full text-sm border-collapse">
+            <thead className="bg-gray-100 text-left">
+              <tr>
+                <th className="p-2 border">Image</th>
+                <th className="p-2 border">Product</th>
+                <th className="p-2 border">Price</th>
+                <th className="p-2 border">Qty</th>
+                <th className="p-2 border">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((item, i) => (
+                <tr key={i} className="border-t hover:bg-gray-50">
+                  <td className="p-2 border">
+                    {item.productImage?.[0] ? (
+                      <Image
+                        src={item.productImage[0]}
+                        alt={item.name}
+                        width={50}
+                        height={50}
+                        className="rounded object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-300 flex items-center justify-center text-xs">
+                        No Image
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-2 border">{item.name}</td>
+                  <td className="p-2 border">৳{item.price.toFixed(2)}</td>
+                  <td className="p-2 border">{item.quantity}</td>
+                  <td className="p-2 border">
+                    ৳{(item.price * item.quantity).toFixed(2)}
+                  </td>
+                </tr>
               ))}
-            </ul>
-          </div>
+            </tbody>
+          </table>
+
+          {order.shippingDetails.deliveryNote && (
+            <div className="mt-6">
+              <h4 className="font-semibold">Delivery Note:</h4>
+              <p className="text-sm text-gray-700">
+                {order.shippingDetails.deliveryNote}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

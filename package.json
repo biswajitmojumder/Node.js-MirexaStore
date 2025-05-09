@@ -23,6 +23,8 @@
     "font-awesome": "^4.7.0",
     "framer-motion": "^12.6.5",
     "heroicons": "^2.2.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.474.0",
     "nexios-http": "^1.1.21",
