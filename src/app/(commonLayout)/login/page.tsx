@@ -7,8 +7,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppDispatch } from "@/app/lib/redux/hook";
 import { loginUser } from "@/app/lib/redux/features/authSlice";
-import { FaGoogle } from "react-icons/fa";
-
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import clsx from "clsx";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +19,6 @@ const Login = () => {
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
 
-  // Properly decode the redirect path from query params
   const redirectPath = decodeURIComponent(searchParams.get("redirect") || "/");
 
   useEffect(() => {
@@ -172,13 +171,24 @@ const Login = () => {
         <button
           onClick={handleGoogleLogin}
           disabled={isGoogleLoading}
-          className="w-full p-4 bg-blue-600 text-white rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition duration-300 disabled:opacity-50"
+          className={clsx(
+            "w-full bg-blue-600 text-white rounded-lg flex items-center justify-center gap-3 hover:bg-blue-700 transition duration-300 disabled:opacity-50",
+            isGoogleLoading ? "py-4 px-4" : "p-0"
+          )}
         >
           {isGoogleLoading ? (
             "Redirecting..."
           ) : (
             <>
-              <FaGoogle /> Login with Google
+              <div className="w-14 h-14">
+                <DotLottieReact
+                  src="https://lottie.host/2813fd69-6326-4035-a1ee-bac91495e432/CCR4vrA6n4.lottie"
+                  autoplay
+                  loop
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </div>
+              <span className="text-base font-medium">Login with Google</span>
             </>
           )}
         </button>
