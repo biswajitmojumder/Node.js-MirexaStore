@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Loading from "@/app/loading";
+import { Pagination } from "@heroui/react";
 
 export type Product = {
   stockQuantity: number;
@@ -182,43 +183,18 @@ const ProductCart = ({ products }: ProductCartProps) => {
           </div>
 
           {/* ✅ Pagination Controls */}
+
           {totalPages > 1 && (
-            <div className="flex justify-center mt-6 gap-2">
-              {/* Previous Button */}
-              <button
-                className="btn btn-sm btn-outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Previous
-              </button>
-
-              {/* Page Numbers */}
-              {Array.from(
-                { length: Math.min(3, totalPages) },
-                (_, index) => currentPage - 1 + index
-              )
-                .filter((page) => page > 0 && page <= totalPages)
-                .map((page) => (
-                  <button
-                    key={page}
-                    className={`btn btn-sm ${
-                      currentPage === page ? "btn-primary" : "btn-outline"
-                    }`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-              {/* Next Button */}
-              <button
-                className="btn btn-sm btn-outline"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </button>
+            <div className="mt-6 flex justify-center">
+              <Pagination
+                showControls
+                total={totalPages}
+                page={currentPage}
+                onChange={setCurrentPage}
+                classNames={{
+                  cursor: "bg-[#F85606] text-white", // active page style
+                }}
+              />
             </div>
           )}
         </main>

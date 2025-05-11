@@ -9,13 +9,12 @@ const Banner: React.FC = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="https://i.ibb.co/mLcnZG3/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047.jpg"
+            src="https://res.cloudinary.com/dwg8d0bfp/image/upload/v1746954223/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047_hlwc79.jpg"
             alt="CampusNeeds Banner"
-            layout="fill"
-            objectFit="cover"
+            fill // ✅ replaces layout="fill"
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 100vw"
-            className="z-0"
+            className="object-cover z-0"
           />
         </div>
 

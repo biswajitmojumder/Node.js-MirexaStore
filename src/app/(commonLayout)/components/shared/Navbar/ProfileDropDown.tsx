@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "@/app/lib/redux/features/authSlice";
 import { RootState } from "@/app/lib/redux/store";
 import axios from "axios";
+import { Avatar, AvatarIcon } from "@heroui/react";
 
 const ProfileDropdown = () => {
   const router = useRouter();
@@ -17,6 +18,18 @@ const ProfileDropdown = () => {
   const [resellerSlug, setResellerSlug] = useState("");
 
   const user = useSelector((state: RootState) => state.auth.user);
+
+  // Handle fallback image logic
+  const [imgSrc, setImgSrc] = useState(
+    user?.photo || "https://img.icons8.com/ios-glyphs/30/user--v1.png"
+  );
+
+  useEffect(() => {
+    // Update imgSrc when user data changes
+    setImgSrc(
+      user?.photo || "https://img.icons8.com/ios-glyphs/30/user--v1.png"
+    );
+  }, [user?.photo]);
 
   const handleLogout = () => {
     localStorage.removeItem("cart");
@@ -60,7 +73,7 @@ const ProfileDropdown = () => {
           `https://campus-needs-backend.vercel.app/api/reseller/profile/${user.email}`
         );
         setResellerSlug(res.data?.data?.brand?.slug || "");
-        console.log(res)
+        console.log(res);
       } catch (error) {
         console.error("Failed to fetch reseller profile", error);
       }
@@ -76,18 +89,20 @@ const ProfileDropdown = () => {
         tabIndex={0}
         className="btn btn-ghost btn-circle"
       >
+        {/* Desktop avatar */}
         <div className="hidden sm:block w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-white overflow-hidden">
-          <Image
-            className="w-full h-full object-cover"
-            src={
-              user?.photo || "https://img.icons8.com/ios-glyphs/30/user--v1.png"
-            }
-            alt="Profile"
-            layout="responsive"
-            height={500}
-            width={500}
-          />
+          <div className="flex items-center">
+            <Avatar
+              classNames={{
+                base: "bg-gradient-to-br from-[#FFB457] to-[#FF705B]",
+                icon: "text-black/80",
+              }}
+              icon={<AvatarIcon />}
+            />
+          </div>
         </div>
+
+        {/* Mobile menu icon */}
         <div className="block sm:hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,11 +121,11 @@ const ProfileDropdown = () => {
         </div>
       </button>
 
+      {/* Dropdown menu */}
       {isOpen && (
         <ul
           tabIndex={0}
           className="menu menu-sm dropdown-content bg-white text-black rounded-lg shadow-lg mt-3 w-48"
-          
         >
           {user ? (
             <>
@@ -118,7 +133,7 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
-                      href="/admin/resellerrequest"
+                      href="/admin/reseller-request"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >

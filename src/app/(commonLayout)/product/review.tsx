@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { Dialog } from "@headlessui/react";
 import Image from "next/image";
+import { Pagination } from "@heroui/react";
 
 interface MediaItem {
   url: string;
@@ -336,11 +337,14 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                     &times;
                   </button>
                   {selectedMedia?.type === "image" && (
-                    <img
-                      src={selectedMedia.url}
-                      alt="modal-preview"
-                      className="w-full h-auto rounded-lg"
-                    />
+                    <div className="relative w-full h-auto aspect-video">
+                      <Image
+                        src={selectedMedia.url}
+                        alt="modal-preview"
+                        fill
+                        className="object-contain rounded-lg"
+                      />
+                    </div>
                   )}
                 </Dialog.Panel>
               </Dialog>
@@ -423,19 +427,16 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
       ))}
 
       {/* Pagination */}
-      <div className="mt-6 flex justify-center gap-2">
-        <button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-          className="btn btn-sm btn-outline"
-        >
-          Previous
-        </button>
-        <button
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-          className="btn btn-sm btn-outline"
-        >
-          Next
-        </button>
+      <div className="mt-6 flex justify-center">
+        <Pagination
+          showControls
+          total={totalPages}
+          page={currentPage}
+          onChange={setCurrentPage}
+          classNames={{
+            cursor: "bg-[#F85606] text-white", // active page style
+          }}
+        />
       </div>
     </div>
   );

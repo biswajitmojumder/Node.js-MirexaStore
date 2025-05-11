@@ -2,6 +2,7 @@
 import { FC, useEffect, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
+import { Pagination } from "@heroui/react";
 
 interface Testimonial {
   createdAt: string;
@@ -94,63 +95,16 @@ const Testimonials: FC = () => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6 gap-2">
-          <button
-            className="btn btn-sm btn-outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
-            Previous
-          </button>
-
-          {currentPage > 3 && (
-            <>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => setCurrentPage(1)}
-              >
-                1
-              </button>
-              <span className="btn btn-sm btn-outline">...</span>
-            </>
-          )}
-
-          {Array.from(
-            { length: Math.min(3, totalPages) },
-            (_, index) => currentPage - 1 + index
-          )
-            .filter((page) => page > 0 && page <= totalPages)
-            .map((page) => (
-              <button
-                key={page}
-                className={`btn btn-sm ${
-                  currentPage === page ? "btn-primary" : "btn-outline"
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-
-          {currentPage < totalPages - 2 && (
-            <>
-              <span className="btn btn-sm btn-outline">...</span>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={() => setCurrentPage(totalPages)}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
-
-          <button
-            className="btn btn-sm btn-outline"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-          >
-            Next
-          </button>
+        <div className="mt-6 flex justify-center">
+          <Pagination
+            showControls
+            total={totalPages}
+            page={currentPage}
+            onChange={setCurrentPage}
+            classNames={{
+              cursor: "bg-[#F85606] text-white", // active page style
+            }}
+          />
         </div>
       )}
     </div>
