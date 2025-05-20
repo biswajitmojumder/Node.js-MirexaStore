@@ -1,5 +1,6 @@
 import Header from "@/app/(commonLayout)/components/shared/Header";
 import type { Metadata } from "next";
+import ClickSparkWrapper from "./components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
 
 export const metadata: Metadata = {
   title: "CampusNeeds",
@@ -14,8 +15,10 @@ export default function dashboardLayout({
 }>) {
   return (
     <div>
-      <Header />
-      {children}
+      <ClickSparkWrapper>
+        <Header />
+        {children}
+      </ClickSparkWrapper>
     </div>
   );
 }

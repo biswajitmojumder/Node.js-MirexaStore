@@ -1,6 +1,7 @@
-"use client";
 import React from "react";
 import Image from "next/image";
+import ShinyText from "../reactbit/ShinyText/ShinyText";
+import { Link } from "lucide-react";
 
 const Banner: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ const Banner: React.FC = () => {
 
         {/* Text Content */}
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">
+          <h1 className="text-3xl sm:text-2xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">
             Welcome to CampusNeeds
           </h1>
           <p className="text-sm sm:text-lg lg:text-2xl font-light mb-6 sm:mb-8 animate__animated animate__fadeIn animate__delay-1s">
@@ -35,7 +36,12 @@ const Banner: React.FC = () => {
               href="/product"
               className="inline-block px-8 sm:px-10 py-4 bg-gradient-to-r from-[#F85606] to-[#E14003] text-white rounded-full text-sm sm:text-xl font-semibold transition-transform transform hover:scale-105 hover:shadow-lg"
             >
-              Shop Now
+              <ShinyText
+                text="Shop Now"
+                disabled={false}
+                speed={3}
+                className="custom-class"
+              />
             </a>
             <a
               href="#"

@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "@/app/(commonLayout)/components/shared/Footer";
 import Providers from "./lib/Providers";
 import Script from "next/script";
+import ClickSparkWrapper from "./(commonLayout)/components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
 
 const roboto = Roboto({
   weight: "400",
@@ -19,18 +20,30 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" data-theme="light">
       <head>
-        {/* ✅ Google Analytics 4 Tracking Script */}
+        {/* Viewport and theme color meta */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#F85606" />
+
+        {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Preconnect GA domain to speed up loading */}
+        <link
+          rel="preconnect"
+          href="https://www.googletagmanager.com"
+          crossOrigin="anonymous"
+        />
+
+        {/* Google Analytics 4 - load lazily after main content */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-RWY5TMX717"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga4-init" strategy="afterInteractive">
+        <Script id="ga4-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -40,10 +53,12 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={roboto.className}>
-        <Providers>
-          <div className="min-h-screen">{children}</div>
-          <Footer />
-        </Providers>
+        <ClickSparkWrapper>
+          <Providers>
+            {children}
+            <Footer />
+          </Providers>
+        </ClickSparkWrapper>
       </body>
     </html>
   );
