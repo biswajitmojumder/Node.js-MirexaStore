@@ -11,9 +11,9 @@ const FAQs = () => {
 
   const faqs = [
     {
-      question: "What is CampusNeeds? / CampusNeeds কি?",
+      question: "What is MirexaStore? / MirexaStore কি?",
       answer:
-        "CampusNeeds is an online e-commerce platform where you can shop for a variety of products, including electronics, clothing, accessories, and more. We aim to provide the best shopping experience with fast delivery and secure payment methods. / CampusNeeds একটি অনলাইন ই-কমার্স প্ল্যাটফর্ম, যেখানে আপনি বিভিন্ন ধরনের পণ্য কিনতে পারবেন, যেমন ইলেকট্রনিক্স, পোশাক, অ্যাকসেসরিজ, এবং আরও অনেক কিছু। আমরা দ্রুত ডেলিভারি এবং নিরাপদ পেমেন্ট পদ্ধতির মাধ্যমে সেরা শপিং অভিজ্ঞতা প্রদান করার লক্ষ্য রাখি।",
+        "MirexaStore is an online e-commerce platform where you can shop for a variety of products, including electronics, clothing, accessories, and more. We aim to provide the best shopping experience with fast delivery and secure payment methods. / MirexaStore একটি অনলাইন ই-কমার্স প্ল্যাটফর্ম, যেখানে আপনি বিভিন্ন ধরনের পণ্য কিনতে পারবেন, যেমন ইলেকট্রনিক্স, পোশাক, অ্যাকসেসরিজ, এবং আরও অনেক কিছু। আমরা দ্রুত ডেলিভারি এবং নিরাপদ পেমেন্ট পদ্ধতির মাধ্যমে সেরা শপিং অভিজ্ঞতা প্রদান করার লক্ষ্য রাখি।",
     },
     {
       question: "How do I place an order? / আমি কীভাবে অর্ডার দেব?",
@@ -42,7 +42,7 @@ const FAQs = () => {
       question:
         "How can I contact customer support? / আমি কীভাবে গ্রাহক সাপোর্টের সাথে যোগাযোগ করতে পারি?",
       answer:
-        "You can reach out to our customer support team via email at support@CampusNeeds.com or by calling +880-1405671742. We are available to assist you with any questions or issues you may have. / আপনি আমাদের গ্রাহক সাপোর্ট টিমের সাথে ইমেইল বা ফোনের মাধ্যমে যোগাযোগ করতে পারেন। ইমেইল: support@CampusNeeds.com এবং ফোন: +880-1405671742। আমাদের টিম আপনার যেকোনো প্রশ্ন বা সমস্যা সমাধানে সহায়ক হতে প্রস্তুত।",
+        "You can reach out to our customer support team via email at support@MirexaStore.com or by calling +880-1405671742. We are available to assist you with any questions or issues you may have. / আপনি আমাদের গ্রাহক সাপোর্ট টিমের সাথে ইমেইল বা ফোনের মাধ্যমে যোগাযোগ করতে পারেন। ইমেইল: support@MirexaStore.com এবং ফোন: +880-1405671742। আমাদের টিম আপনার যেকোনো প্রশ্ন বা সমস্যা সমাধানে সহায়ক হতে প্রস্তুত।",
     },
   ];
 

@@ -178,8 +178,8 @@ const OrderDetails: React.FC = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-xl font-semibold mb-2">Campus Needs</h2>
-              <p className="text-sm">www.campusneeds.com</p>
-              <p className="text-sm">support@campusneeds.com</p>
+              <p className="text-sm">www.MirexaStore.com</p>
+              <p className="text-sm">support@MirexaStore.com</p>
             </div>
             <div className="text-sm text-right space-y-1">
               <p>

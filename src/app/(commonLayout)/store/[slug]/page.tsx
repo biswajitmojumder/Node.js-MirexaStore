@@ -65,7 +65,7 @@ export async function generateMetadata({
 
   if (!reseller) {
     return {
-      title: "Store Not Found - CampusNeeds",
+      title: "Store Not Found - MirexaStore",
       description:
         "The store you're looking for does not exist or is currently unavailable.",
     };
@@ -74,7 +74,7 @@ export async function generateMetadata({
   const { name, description, logo, socialLinks } = reseller.brand;
 
   return {
-    title: `${name} Store | CampusNeeds`,
+    title: `${name} Store | MirexaStore`,
     description:
       description?.slice(0, 160) || "Explore products from this store.",
     openGraph: {

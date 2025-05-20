@@ -15,7 +15,7 @@ const Navbar = () => {
           <Link href="/" className="flex items-center min-w-[160px]">
             <Image
               src="/favicon.ico"
-              alt="CampusNeeds Logo"
+              alt="MirexaStore Logo"
               width={160}
               height={50}
               className="h-[48px] w-auto object-contain"

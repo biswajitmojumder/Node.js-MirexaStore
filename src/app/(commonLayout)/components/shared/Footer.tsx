@@ -11,7 +11,7 @@ const FooterSSR = () => {
           <Link href="/" className="flex items-center min-w-[160px]">
             <Image
               src="/favicon.ico"
-              alt="CampusNeeds Logo"
+              alt="MirexaStore Logo"
               width={160}
               height={50}
               className="h-[48px] w-auto object-contain"
@@ -101,7 +101,7 @@ const FooterSSR = () => {
 
       <div className="mt-10 border-t border-white pt-4 text-center text-xs">
         <p>
-          &copy; {new Date().getFullYear()} CampusNeeds. All Rights Reserved.
+          &copy; {new Date().getFullYear()} MirexaStore. All Rights Reserved.
         </p>
       </div>
     </footer>

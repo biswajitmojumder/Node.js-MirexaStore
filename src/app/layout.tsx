@@ -13,9 +13,9 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "CampusNeeds",
+  title: "MirexaStore",
   description:
-    "Welcome to CampusNeeds – your trusted platform for essential student products. From gadgets to gear, find everything you need to thrive in school, college, or university life.",
+    "Welcome to MirexaStore – your trusted platform for essential student products. From gadgets to gear, find everything you need to thrive in school, college, or university life.",
 };
 
 export default function RootLayout({

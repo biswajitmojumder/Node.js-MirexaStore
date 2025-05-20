@@ -11,7 +11,7 @@ const Banner: React.FC = () => {
         <div className="absolute inset-0">
           <Image
             src="https://res.cloudinary.com/dwg8d0bfp/image/upload/v1746954223/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047_hlwc79.jpg"
-            alt="CampusNeeds Banner"
+            alt="MirexaStore Banner"
             fill // ✅ replaces layout="fill"
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 100vw"
@@ -25,10 +25,10 @@ const Banner: React.FC = () => {
         {/* Text Content */}
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <h1 className="text-3xl sm:text-2xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">
-            Welcome to CampusNeeds
+            Welcome to MirexaStore
           </h1>
           <p className="text-sm sm:text-lg lg:text-2xl font-light mb-6 sm:mb-8 animate__animated animate__fadeIn animate__delay-1s">
-            Everything your campus life needs – one store, endless convenience.
+            Everything your your life needs – one store, endless convenience.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-6 sm:mb-8">

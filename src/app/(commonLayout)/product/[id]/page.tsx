@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: tParams }) {
     );
     if (!res.ok) {
       return {
-        title: "Product Not Found - CampusNeeds",
+        title: "Product Not Found - MirexaStore",
         description:
           "The product you're looking for does not exist or is currently unavailable.",
       };
@@ -24,10 +24,10 @@ export async function generateMetadata({ params }: { params: tParams }) {
     const product = productData.data;
 
     return {
-      title: product.name || "Product - CampusNeeds",
+      title: product.name || "Product - MirexaStore",
       description:
         product.description?.slice(0, 160) ||
-        "Explore premium products from CampusNeeds.",
+        "Explore premium products from MirexaStore.",
       openGraph: {
         title: product.name,
         description: product.description,
@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: { params: tParams }) {
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: "Product Page - CampusNeeds",
-      description: "Explore the finest products at CampusNeeds.",
+      title: "Product Page - MirexaStore",
+      description: "Explore the finest products at MirexaStore.",
     };
   }
 }

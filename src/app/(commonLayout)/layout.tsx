@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import ClickSparkWrapper from "./components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
 
 export const metadata: Metadata = {
-  title: "CampusNeeds",
+  title: "MirexaStore",
   description:
-    "Welcome to CampusNeeds – your one-stop destination for all student essentials. From study tools to campus-friendly gadgets, we've got everything you need to power through your academic journey!",
+    "Welcome to MirexaStore – your one-stop destination for all student essentials. From study tools to campus-friendly gadgets, we've got everything you need to power through your academic journey!",
 };
 
 export default function dashboardLayout({
