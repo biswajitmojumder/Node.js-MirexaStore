@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import StorePageClient from "../../components/ui/StorePageClient";
 
-// Define the types for Brand and ResellerProfile
+// Define the types for Brand and sellerProfile
 interface Brand {
   name: string;
   slug: string;
@@ -21,7 +21,7 @@ interface Brand {
   };
 }
 
-interface ResellerProfile {
+interface SellerProfile {
   _id: string;
   userEmail: string;
   brand: Brand;
@@ -32,13 +32,11 @@ interface PageProps {
   params: Promise<{ slug: string }>; // params is a Promise, so you need to await it
 }
 
-// ✅ Helper function to fetch reseller data by slug
-async function getResellerBySlug(
-  slug: string
-): Promise<ResellerProfile | null> {
+// ✅ Helper function to fetch seller data by slug
+async function getsellerBySlug(slug: string): Promise<SellerProfile | null> {
   try {
     const res = await fetch(
-      `https://campus-needs-backend.vercel.app/api/reseller/slug/${slug}`,
+      `https://mirexa-store-backend.vercel.app/api/seller/slug/${slug}`,
       { cache: "no-store" }
     );
 
@@ -47,7 +45,7 @@ async function getResellerBySlug(
     const json = await res.json();
     return json?.data || null;
   } catch (error) {
-    console.error("Error fetching reseller:", error);
+    console.error("Error fetching seller:", error);
     return null;
   }
 }
@@ -61,9 +59,9 @@ export async function generateMetadata({
   // Await the params to get the slug
   const { slug } = await params;
 
-  const reseller = await getResellerBySlug(slug);
+  const seller = await getsellerBySlug(slug);
 
-  if (!reseller) {
+  if (!seller) {
     return {
       title: "Store Not Found - MirexaStore",
       description:
@@ -71,7 +69,7 @@ export async function generateMetadata({
     };
   }
 
-  const { name, description, logo, socialLinks } = reseller.brand;
+  const { name, description, logo, socialLinks } = seller.brand;
 
   return {
     title: `${name} Store | MirexaStore`,
@@ -97,9 +95,9 @@ export default async function StorePage({ params }: PageProps) {
   // Await params to get the slug
   const { slug } = await params;
 
-  const reseller = await getResellerBySlug(slug);
+  const seller = await getsellerBySlug(slug);
 
-  if (!reseller) return notFound(); // Redirect to notFound page if reseller is not found
+  if (!seller) return notFound(); // Redirect to notFound page if seller is not found
 
-  return <StorePageClient reseller={reseller} />;
+  return <StorePageClient seller={seller} />;
 }

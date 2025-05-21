@@ -6,7 +6,7 @@ import LoadingCard from "../../components/ui/LoadingCard";
 import Loading from "@/app/loading";
 
 // Define types
-interface ResellerRequest {
+interface sellerRequest {
   _id: string;
   productType: string;
   phone?: string;
@@ -18,11 +18,9 @@ interface ResellerRequest {
   };
 }
 
-const AdminResellerRequests: React.FC = () => {
-  const [requests, setRequests] = useState<ResellerRequest[]>([]);
-  const [filteredRequests, setFilteredRequests] = useState<ResellerRequest[]>(
-    []
-  );
+const AdminsellerRequests: React.FC = () => {
+  const [requests, setRequests] = useState<sellerRequest[]>([]);
+  const [filteredRequests, setFilteredRequests] = useState<sellerRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -32,7 +30,7 @@ const AdminResellerRequests: React.FC = () => {
     const fetchRequests = async () => {
       try {
         const response = await axios.get(
-          "https://campus-needs-backend.vercel.app/api/reseller-request/all",
+          "https://mirexa-store-backend.vercel.app/api/seller-request/all",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -42,7 +40,7 @@ const AdminResellerRequests: React.FC = () => {
         setRequests(response.data.data);
         setFilteredRequests(response.data.data);
       } catch (error) {
-        console.error("Error fetching reseller requests:", error);
+        console.error("Error fetching seller requests:", error);
       } finally {
         setLoading(false);
       }
@@ -71,7 +69,7 @@ const AdminResellerRequests: React.FC = () => {
   const handleApprove = async (requestId: string) => {
     try {
       await axios.put(
-        `https://campus-needs-backend.vercel.app/api/reseller-request/approve/${requestId}`,
+        `https://mirexa-store-backend.vercel.app/api/seller-request/approve/${requestId}`,
         {},
         {
           headers: {
@@ -92,7 +90,7 @@ const AdminResellerRequests: React.FC = () => {
   const handleReject = async (requestId: string) => {
     try {
       await axios.put(
-        `https://campus-needs-backend.vercel.app/api/reseller-request/reject/${requestId}`,
+        `https://mirexa-store-backend.vercel.app/api/seller-request/reject/${requestId}`,
         {},
         {
           headers: {
@@ -119,7 +117,7 @@ const AdminResellerRequests: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Manage Reseller Requests</h1>
+      <h1 className="text-2xl font-bold mb-4">Manage seller Requests</h1>
 
       <input
         type="text"
@@ -130,7 +128,7 @@ const AdminResellerRequests: React.FC = () => {
       />
 
       {filteredRequests.length === 0 ? (
-        <p>No reseller requests found.</p>
+        <p>No seller requests found.</p>
       ) : (
         <div className="space-y-4">
           {filteredRequests.map((request) => (
@@ -181,4 +179,4 @@ const AdminResellerRequests: React.FC = () => {
   );
 };
 
-export default AdminResellerRequests;
+export default AdminsellerRequests;

@@ -43,7 +43,7 @@ const CategoryProductsPage = () => {
     if (categorySlug) {
       axios
         .get(
-          `https://campus-needs-backend.vercel.app/api/product/category/${categorySlug}`
+          `https://mirexa-store-backend.vercel.app/api/product/category/${categorySlug}`
         )
         .then((res) => {
           if (Array.isArray(res.data.data)) {

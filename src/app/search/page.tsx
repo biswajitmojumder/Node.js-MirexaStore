@@ -37,7 +37,7 @@ const SearchPage = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/product`
+          `https://mirexa-store-backend.vercel.app/api/product`
         );
         const filtered = res.data.data.filter((product: Product) =>
           product.name.toLowerCase().includes(query?.toLowerCase() || "")

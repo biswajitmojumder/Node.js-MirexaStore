@@ -25,7 +25,7 @@ import {
 import Loading from "@/app/loading";
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
-const ResellerAnalytics = () => {
+const SellerAnalytics = () => {
   const auth = useAppSelector((state: { auth: any }) => state.auth);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ const ResellerAnalytics = () => {
         }
 
         const response = await Axios.get(
-          "https://campus-needs-backend.vercel.app/api/checkout",
+          "https://mirexa-store-backend.vercel.app/api/checkout",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -70,12 +70,12 @@ const ResellerAnalytics = () => {
         const userEmail = auth?.user?.email; // Logged-in user's email
         const today = new Date().toDateString();
 
-        // Filter orders by reseller email matching the logged-in user
+        // Filter orders by seller email matching the logged-in user
         const relevantOrders = allOrders.filter((order: any) =>
           order.items.some((item: any) => item.sellerEmail === userEmail)
         );
 
-        const resellerItems = relevantOrders.flatMap((order: any) =>
+        const sellerItems = relevantOrders.flatMap((order: any) =>
           order.items
             .filter((item: any) => item.sellerEmail === userEmail) // Ensure the item belongs to the logged-in user
             .map((item: any) => ({
@@ -99,7 +99,7 @@ const ResellerAnalytics = () => {
         const weeklyMap: any = {};
         const monthlyMap: any = {};
 
-        resellerItems.forEach(
+        sellerItems.forEach(
           (item: {
             price: number;
             quantity: number;
@@ -205,7 +205,7 @@ const ResellerAnalytics = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-        Reseller Analytics Dashboard
+        Seller Analytics Dashboard
       </h1>
 
       {/* Summary Cards */}
@@ -366,8 +366,8 @@ const Card = ({
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["reseller"]}>
-      <ResellerAnalytics />
+    <WithAuth requiredRoles={["seller"]}>
+      <SellerAnalytics />
     </WithAuth>
   );
 }

@@ -30,7 +30,7 @@ const AdminProductPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://campus-needs-backend.vercel.app/api/product"
+          "https://mirexa-store-backend.vercel.app/api/product"
         );
 
         const allProducts = response.data.data;
@@ -104,7 +104,7 @@ const AdminProductPage = () => {
 
     try {
       await axios.patch(
-        `https://campus-needs-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
+        `https://mirexa-store-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
         {},
         {
           headers: {
@@ -243,7 +243,7 @@ const AdminProductPage = () => {
                   <div className="flex justify-start gap-2">
                     <button
                       onClick={() =>
-                        router.push(`/reseller/products/${product._id}`)
+                        router.push(`/seller/products/${product._id}`)
                       }
                       className="text-blue-500 hover:text-blue-700 py-1 px-3 rounded-md border border-blue-500 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                     >
@@ -269,7 +269,7 @@ const AdminProductPage = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["reseller"]}>
+    <WithAuth requiredRoles={["seller"]}>
       <AdminProductPage />
     </WithAuth>
   );

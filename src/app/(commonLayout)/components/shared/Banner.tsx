@@ -24,11 +24,14 @@ const Banner: React.FC = () => {
 
         {/* Text Content */}
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-2xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">
-            Welcome to MirexaStore
+          <h1 className="text-3xl sm:text-4xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 animate__animated animate__fadeIn">
+            Smart Shopping Starts at MirexaStore
           </h1>
+
           <p className="text-sm sm:text-lg lg:text-2xl font-light mb-6 sm:mb-8 animate__animated animate__fadeIn animate__delay-1s">
-            Everything your your life needs – one store, endless convenience.
+            Discover gadgets, gear, and everyday essentials — all in one trusted
+            destination. Enjoy fast delivery, fair prices, and a future-ready
+            shopping experience.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-6 sm:mb-8">

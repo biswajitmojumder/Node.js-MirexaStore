@@ -15,7 +15,7 @@ const ProfileDropdown = () => {
   const dispatch = useDispatch();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [resellerSlug, setResellerSlug] = useState("");
+  const [sellerSlug, setsellerSlug] = useState("");
 
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -63,23 +63,23 @@ const ProfileDropdown = () => {
     };
   }, []);
 
-  // Fetch reseller profile on load (if user is reseller)
+  // Fetch seller profile on load (if user is seller)
   useEffect(() => {
-    const fetchResellerProfile = async () => {
-      if (!user?.email || user.role !== "reseller") return;
+    const fetchsellerProfile = async () => {
+      if (!user?.email || user.role !== "seller") return;
 
       try {
         const res = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reseller/profile/${user.email}`
+          `https://mirexa-store-backend.vercel.app/api/seller/profile/${user.email}`
         );
-        setResellerSlug(res.data?.data?.brand?.slug || "");
+        setsellerSlug(res.data?.data?.brand?.slug || "");
         console.log(res);
       } catch (error) {
-        console.error("Failed to fetch reseller profile", error);
+        console.error("Failed to fetch seller profile", error);
       }
     };
 
-    fetchResellerProfile();
+    fetchsellerProfile();
   }, [user?.email, user?.role]);
 
   return (
@@ -133,11 +133,11 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
-                      href="/admin/resellerrequest"
+                      href="/admin/sellerrequest"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
-                      Reseller Request
+                      seller Request
                     </Link>
                     <Link
                       href="/admin/users"
@@ -184,11 +184,11 @@ const ProfileDropdown = () => {
                     </Link>
                   </li>
                 </>
-              ) : user?.role === "reseller" ? (
+              ) : user?.role === "seller" ? (
                 <>
                   <li>
                     <Link
-                      href="/reseller/addProduct"
+                      href="/seller/addProduct"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
@@ -197,7 +197,7 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href="/reseller/orders"
+                      href="/seller/orders"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
@@ -206,7 +206,7 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href="/reseller/products"
+                      href="/seller/products"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
@@ -215,7 +215,7 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href="/reseller/analytics"
+                      href="/seller/analytics"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
@@ -224,7 +224,7 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href="/reseller/profile"
+                      href="/seller/profile"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg"
                     >
@@ -233,7 +233,7 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href={`/store/${resellerSlug}`}
+                      href={`/store/${sellerSlug}`}
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
                     >
@@ -290,11 +290,11 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
-                      href="/reseller-request"
+                      href="/seller-request"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
                     >
-                      Become a Reseller
+                      Become a seller
                     </Link>
                   </li>
                 </>

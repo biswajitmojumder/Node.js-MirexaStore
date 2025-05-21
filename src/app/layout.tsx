@@ -15,33 +15,33 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "MirexaStore",
   description:
-    "Welcome to MirexaStore – your trusted platform for essential student products. From gadgets to gear, find everything you need to thrive in school, college, or university life.",
+    "Shop smart at MirexaStore – your all-in-one destination for tech gadgets, accessories, home essentials, and lifestyle products. Fast delivery, trusted service, and quality you can count on.",
+  // next.js 13+ automatically injects OG & Twitter tags from metadata on each page
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" data-theme="light">
       <head>
-        {/* Viewport and theme color meta */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#F85606" />
-
-        {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
-
-        {/* Preconnect GA domain to speed up loading */}
         <link
           rel="preconnect"
           href="https://www.googletagmanager.com"
           crossOrigin="anonymous"
         />
 
-        {/* Google Analytics 4 - load lazily after main content */}
+        {/* Google Analytics 4 - load lazily */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-RWY5TMX717"
           strategy="lazyOnload"
+          async
+          defer
         />
         <Script id="ga4-init" strategy="lazyOnload">
           {`

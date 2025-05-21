@@ -35,7 +35,7 @@ const TestimonialsClient: FC<Props> = ({
       setLoading(true);
       try {
         const res = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reviews/all?page=${currentPage}&limit=6`
+          `https://mirexa-store-backend.vercel.app/api/reviews/all?page=${currentPage}&limit=6`
         );
         const reviews = res.data.data.map((review: any) => ({
           userName: review.userName || "Anonymous",

@@ -88,7 +88,7 @@ const OrderDetails: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
+        `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -100,7 +100,7 @@ const OrderDetails: React.FC = () => {
         orderData.items.map(async (item) => {
           try {
             const productRes = await Axios.get(
-              `https://campus-needs-backend.vercel.app/api/product/${item.productId}`
+              `https://mirexa-store-backend.vercel.app/api/product/${item.productId}`
             );
             return { ...item, product: productRes.data.data };
           } catch {
@@ -177,7 +177,7 @@ const OrderDetails: React.FC = () => {
         >
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Campus Needs</h2>
+              <h2 className="text-xl font-semibold mb-2">MirexaStore</h2>
               <p className="text-sm">www.MirexaStore.com</p>
               <p className="text-sm">support@MirexaStore.com</p>
             </div>
@@ -286,7 +286,7 @@ const OrderDetails: React.FC = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["reseller"]}>
+    <WithAuth requiredRoles={["seller"]}>
       <OrderDetails />
     </WithAuth>
   );

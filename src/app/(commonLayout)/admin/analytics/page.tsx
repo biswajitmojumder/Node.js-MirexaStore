@@ -29,7 +29,7 @@ const AdminAnalytics = () => {
   const [totalProductsSold, setTotalProductsSold] = useState(0);
   const [uniqueSellers, setUniqueSellers] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0); // Track total users
-  const [totalResellers, setTotalResellers] = useState(0); // Track total resellers
+  const [totalsellers, setTotalsellers] = useState(0); // Track total sellers
   const [sellerSalesMap, setSellerSalesMap] = useState<any>({});
   const [sellerStatusMap, setSellerStatusMap] = useState<any>({});
 
@@ -52,10 +52,10 @@ const AdminAnalytics = () => {
         }
 
         const [ordersResponse, usersResponse] = await Promise.all([
-          Axios.get("https://campus-needs-backend.vercel.app/api/checkout", {
+          Axios.get("https://mirexa-store-backend.vercel.app/api/checkout", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          Axios.get("https://campus-needs-backend.vercel.app/api/users", {
+          Axios.get("https://mirexa-store-backend.vercel.app/api/users", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -69,14 +69,14 @@ const AdminAnalytics = () => {
         let totalItemCount = 0;
         let totalUniqueSellers = new Set<string>();
 
-        // Track resellers by their email
-        const resellerEmails = new Set<string>();
+        // Track sellers by their email
+        const sellerEmails = new Set<string>();
 
         allOrders.forEach((order: any) => {
           order.items.forEach((item: any) => {
             const sellerEmail = item.sellerEmail;
             if (sellerEmail) {
-              resellerEmails.add(sellerEmail); // Collect resellers
+              sellerEmails.add(sellerEmail); // Collect sellers
 
               totalAmount += item.price * item.quantity;
               totalItemCount += item.quantity;
@@ -106,14 +106,14 @@ const AdminAnalytics = () => {
           });
         });
 
-        // Count total users and resellers
+        // Count total users and sellers
         setTotalUsers(allUsers.length);
 
-        // Filter users with role "reseller" and set total resellers
-        const resellers = allUsers.filter(
-          (user: { role: string }) => user.role === "reseller"
+        // Filter users with role "seller" and set total sellers
+        const sellers = allUsers.filter(
+          (user: { role: string }) => user.role === "seller"
         );
-        setTotalResellers(resellers.length);
+        setTotalsellers(sellers.length);
 
         setOrders(allOrders);
         setUsers(allUsers);
@@ -202,8 +202,8 @@ const AdminAnalytics = () => {
         />
         <Card
           icon={<FaUsers />}
-          title="Total Resellers"
-          value={totalResellers.toString()}
+          title="Total sellers"
+          value={totalsellers.toString()}
           color="text-teal-600"
         />
       </div>
@@ -216,10 +216,10 @@ const AdminAnalytics = () => {
         <Bar data={chartData} />
       </div>
 
-      {/* Reseller Users Table */}
+      {/* seller Users Table */}
       <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-          👤 Reseller Information
+          👤 seller Information
         </h2>
         <div className="overflow-x-auto">
           <table className="table-auto w-full text-left">
@@ -233,7 +233,7 @@ const AdminAnalytics = () => {
             </thead>
             <tbody>
               {currentUsers
-                .filter((user) => user.role === "reseller") // Only show resellers
+                .filter((user) => user.role === "seller") // Only show sellers
                 .map((user, index) => (
                   <tr key={index} className="border-t">
                     <td className="px-4 py-2">{user.name}</td>
@@ -280,7 +280,7 @@ const AdminAnalytics = () => {
             </thead>
             <tbody>
               {currentUsers
-                .filter((user) => user.role === "user") // Only show resellers
+                .filter((user) => user.role === "user") // Only show sellers
                 .map((user, index) => (
                   <tr key={index} className="border-t">
                     <td className="px-4 py-2">{user.name}</td>

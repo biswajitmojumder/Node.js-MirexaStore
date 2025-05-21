@@ -18,7 +18,7 @@ export default function Newsletter() {
 
     try {
       const res = await fetch(
-        "https://campus-needs-backend.vercel.app/api/newsletter/subscribe",
+        "https://mirexa-store-backend.vercel.app/api/newsletter/subscribe",
         {
           method: "POST",
           headers: {

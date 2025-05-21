@@ -22,7 +22,7 @@ interface Brand {
   };
 }
 
-interface ResellerProfile {
+interface SellerProfile {
   _id: string;
   userEmail: string;
   brand: Brand;
@@ -43,11 +43,7 @@ interface Product {
   [key: string]: any;
 }
 
-export default function StorePageClient({
-  reseller,
-}: {
-  reseller: ResellerProfile;
-}) {
+export default function StorePageClient({ seller }: { seller: SellerProfile }) {
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -61,14 +57,14 @@ export default function StorePageClient({
       try {
         // Always get followers count
         const followersRes = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reseller/followers/${reseller._id}`
+          `https://mirexa-store-backend.vercel.app/api/seller/followers/${seller._id}`
         );
         setFollowersCount(followersRes.data.followers || 0);
 
         // Conditionally get isFollowing only if token exists
         if (token) {
           const isFollowingRes = await axios.get(
-            `https://campus-needs-backend.vercel.app/api/reseller/is-following?resellerId=${reseller._id}`,
+            `https://mirexa-store-backend.vercel.app/api/seller/is-following?sellerId=${seller._id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -87,7 +83,7 @@ export default function StorePageClient({
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "https://campus-needs-backend.vercel.app/api/product"
+          "https://mirexa-store-backend.vercel.app/api/product"
         );
 
         const allProducts = res.data.data || [];
@@ -95,7 +91,7 @@ export default function StorePageClient({
         const filtered = allProducts
           .filter(
             (product: any) =>
-              product.sellerEmail === reseller.userEmail &&
+              product.sellerEmail === seller.userEmail &&
               product.status === "active" // ✅ active only
           )
           .map((product: any) => ({
@@ -116,7 +112,7 @@ export default function StorePageClient({
 
     fetchFollowData();
     fetchProducts();
-  }, [reseller._id, reseller.userEmail]);
+  }, [seller._id, seller.userEmail]);
 
   const handleFollowToggle = async () => {
     const token = localStorage.getItem("accessToken");
@@ -130,8 +126,8 @@ export default function StorePageClient({
 
     try {
       await axios.post(
-        `https://campus-needs-backend.vercel.app/api/reseller/${url}`,
-        { resellerId: reseller._id },
+        `https://mirexa-store-backend.vercel.app/api/seller/${url}`,
+        { sellerId: seller._id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -146,7 +142,7 @@ export default function StorePageClient({
     }
   };
 
-  const brand = reseller.brand;
+  const brand = seller.brand;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
@@ -183,10 +179,10 @@ export default function StorePageClient({
             <p className="text-gray-600 mt-1">{brand.tagline}</p>
           )}
           {brand.verified && (
-           <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-            <MdVerified className="h-4 w-4" />
-            <span>Verified Reseller</span>
-          </div>
+            <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+              <MdVerified className="h-4 w-4" />
+              <span>Verified seller</span>
+            </div>
           )}
           <div className="flex items-center gap-4 mt-2 justify-center sm:justify-start">
             <span className="text-sm text-gray-500">
@@ -231,7 +227,7 @@ export default function StorePageClient({
         {products.length > 0 ? (
           <ProductCart products={products} />
         ) : (
-          <p className="text-gray-500">No products found for this reseller.</p>
+          <p className="text-gray-500">No products found for this seller.</p>
         )}
       </div>
     </div>

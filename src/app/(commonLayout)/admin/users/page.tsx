@@ -16,7 +16,7 @@ type UserType = {
   _id: string;
   name: string;
   email: string;
-  role: "user" | "admin" | "reseller";
+  role: "user" | "admin" | "seller";
   phone?: string;
   address?: string;
 };
@@ -43,7 +43,7 @@ const UserViewPage = () => {
 
       try {
         const response = await axios.get<{ data: UserType[] }>(
-          "https://campus-needs-backend.vercel.app/api/users",
+          "https://mirexa-store-backend.vercel.app/api/users",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -74,7 +74,7 @@ const UserViewPage = () => {
     }
   }, [searchQuery, users]);
 
-  const handleMakeReseller = async (userId: string) => {
+  const handleMakeseller = async (userId: string) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       console.error("No accessToken found");
@@ -84,7 +84,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.patch(
-          `https://campus-needs-backend.vercel.app/api/users/${userId}/role/reseller`,
+          `https://mirexa-store-backend.vercel.app/api/users/${userId}/role/seller`,
           {},
           {
             headers: {
@@ -93,15 +93,15 @@ const UserViewPage = () => {
           }
         ),
         {
-          pending: "Making user a reseller...",
-          success: "User role updated to reseller",
+          pending: "Making user a seller...",
+          success: "User role updated to seller",
           error: "Failed to update user role",
         }
       )
       .then(() => {
         setUsers((prevUsers: UserType[]) =>
           prevUsers.map((user) =>
-            user._id === userId ? { ...user, role: "reseller" } : user
+            user._id === userId ? { ...user, role: "seller" } : user
           )
         );
       });
@@ -128,7 +128,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.delete(
-          `https://campus-needs-backend.vercel.app/api/users/${deleteUserId}`,
+          `https://mirexa-store-backend.vercel.app/api/users/${deleteUserId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -207,12 +207,12 @@ const UserViewPage = () => {
                     {user.address || "N/A"}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-800">
-                    {user.role !== "admin" && user.role !== "reseller" && (
+                    {user.role !== "admin" && user.role !== "seller" && (
                       <button
                         className="px-3 py-1 bg-green-600 text-white mr-2 rounded hover:bg-green-700"
-                        onClick={() => handleMakeReseller(user._id)}
+                        onClick={() => handleMakeseller(user._id)}
                       >
-                        Make Reseller
+                        Make seller
                       </button>
                     )}
                     <button

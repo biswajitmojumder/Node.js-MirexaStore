@@ -54,7 +54,7 @@ const UserAnalytics = () => {
         }
 
         const response = await Axios.get(
-          "https://campus-needs-backend.vercel.app/api/checkout",
+          "https://mirexa-store-backend.vercel.app/api/checkout",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

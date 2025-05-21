@@ -28,7 +28,7 @@ const AdminProductPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://campus-needs-backend.vercel.app/api/product"
+          "https://mirexa-store-backend.vercel.app/api/product"
         );
         setProducts(response.data.data);
         setFilteredProducts(response.data.data);
@@ -94,7 +94,7 @@ const AdminProductPage = () => {
 
     try {
       await axios.patch(
-        `https://campus-needs-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
+        `https://mirexa-store-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
         {},
         {
           headers: {

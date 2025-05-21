@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import ResellerClientButton from "./FooterCsr";
+import SellerClientButton from "./FooterCsr";
 
 const FooterSSR = () => {
   return (
-    <footer className="bg-[#EA580C] text-white pt-10 pb-5">
+    <footer className="bg-[#F6550C] text-white pt-10 pb-5">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>
@@ -83,14 +83,14 @@ const FooterSSR = () => {
           </ul>
         </div>
 
-        {/* Contact + Client Reseller Button */}
+        {/* Contact + Client seller Button */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
           <p className="text-sm mb-2">📞 +8801405671742</p>
           <p className="text-sm mb-4">✉️ mdeasinsarkar01@gmail.com</p>
 
           {/* CLIENT-ONLY BUTTON LOADED SEPARATELY */}
-          <ResellerClientButton />
+          <SellerClientButton />
 
           {/* Social Icons */}
           <div className="flex gap-4 mt-4">

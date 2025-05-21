@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import axios from "axios";
 import Loading from "@/app/loading";
-import ResellerProfileForm from "./ResellerProfileForm";
+import SellerProfileForm from "./SellerProfileForm";
 
-interface ResellerRequest {
+interface SellerRequest {
   name: string;
   email: string;
   phone: string;
@@ -20,7 +20,7 @@ interface Props {
   email: string;
   token: string | null;
 }
-const ResellerRequestPage = () => {
+const SellerRequestPage = () => {
   const userInfo = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -32,8 +32,9 @@ const ResellerRequestPage = () => {
     productType: "general", // Default productType
   });
 
-  const [existingRequest, setExistingRequest] =
-    useState<ResellerRequest | null>(null);
+  const [existingRequest, setExistingRequest] = useState<SellerRequest | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
@@ -47,7 +48,7 @@ const ResellerRequestPage = () => {
 
       try {
         const response = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reseller-request/my-requests`,
+          `https://mirexa-store-backend.vercel.app/api/seller-request/my-requests`,
           {
             headers: {
               Authorization: `Bearer ${userInfo?.token}`,
@@ -59,7 +60,7 @@ const ResellerRequestPage = () => {
           setExistingRequest(response.data.data[0]); // Assuming the response contains an array
         }
       } catch (error) {
-        console.error("Error fetching reseller request:", error);
+        console.error("Error fetching seller request:", error);
       } finally {
         setFetching(false);
       }
@@ -93,11 +94,11 @@ const ResellerRequestPage = () => {
       productType: formData.productType,
     };
 
-    console.log("Submitting reseller request payload:", payload); // ✅ Log actual payload being sent
+    console.log("Submitting seller request payload:", payload); // ✅ Log actual payload being sent
 
     try {
       const response = await axios.post(
-        `https://campus-needs-backend.vercel.app/api/reseller-request/create`,
+        `https://mirexa-store-backend.vercel.app/api/seller-request/create`,
         payload,
         {
           headers: {
@@ -137,11 +138,11 @@ const ResellerRequestPage = () => {
                 🎉 Congratulations, {existingRequest.name}!
               </h2>
               <p>
-                You are now an approved <strong>Reseller</strong> 🛍️
+                You are now an approved <strong>seller</strong> 🛍️
               </p>
               <p>We’ll share resources, tools, and updates soon.</p>
             </div>
-            <ResellerProfileForm />
+            <SellerProfileForm />
           </>
         );
       case "rejected":
@@ -162,7 +163,7 @@ const ResellerRequestPage = () => {
     <div className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
         <h1 className="text-3xl font-bold text-[#EA580C] mb-6 text-center">
-          Become a Reseller
+          Become a seller
         </h1>
 
         {existingRequest ? (
@@ -272,4 +273,4 @@ const ResellerRequestPage = () => {
   );
 };
 
-export default ResellerRequestPage;
+export default SellerRequestPage;

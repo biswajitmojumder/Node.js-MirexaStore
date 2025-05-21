@@ -23,7 +23,7 @@ const EditProductPage = () => {
       const fetchProduct = async () => {
         try {
           const response = await axios.get(
-            `https://campus-needs-backend.vercel.app/api/product/details/${id}`
+            `https://mirexa-store-backend.vercel.app/api/product/details/${id}`
           );
           setProduct(response.data.data);
           setLoading(false);
@@ -73,7 +73,7 @@ const EditProductPage = () => {
 
     try {
       await axios.put(
-        `https://campus-needs-backend.vercel.app/api/product/${id}`,
+        `https://mirexa-store-backend.vercel.app/api/product/${id}`,
         product,
         {
           headers: {
@@ -82,7 +82,7 @@ const EditProductPage = () => {
         }
       );
       toast.success("Product updated successfully!");
-      router.push("/reseller/products");
+      router.push("/seller/products");
     } catch (err) {
       setError("Error updating product");
       toast.error("Error updating product!");
@@ -295,7 +295,7 @@ const EditProductPage = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["reseller"]}>
+    <WithAuth requiredRoles={["seller"]}>
       <EditProductPage />
     </WithAuth>
   );

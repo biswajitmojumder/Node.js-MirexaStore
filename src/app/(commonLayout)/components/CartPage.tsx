@@ -52,7 +52,7 @@
 //     setLoading(true);
 //     try {
 //       const response = await fetch(
-//         `https://campus-needs-backend.vercel.app/api/cart/${userId}`,
+//         `https://mirexa-store-backend.vercel.app/api/cart/${userId}`,
 //         {
 //           method: "GET",
 //           headers: {

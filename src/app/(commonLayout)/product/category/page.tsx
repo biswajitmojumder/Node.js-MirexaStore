@@ -9,7 +9,7 @@ interface Category {
 
 export default async function CategoryPage() {
   const res = await fetch(
-    "https://campus-needs-backend.vercel.app/api/category",
+    "https://mirexa-store-backend.vercel.app/api/category",
     {
       cache: "no-store", // always fetch fresh data (optional: use 'force-cache' for SSG)
     }

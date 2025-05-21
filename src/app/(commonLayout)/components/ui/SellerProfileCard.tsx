@@ -1,31 +1,31 @@
-// components/ResellerProfileCard.tsx
+// components/sellerProfileCard.tsx
 
 import Image from "next/image";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
 
-type ResellerProfileCardProps = {
-  resellerProfile: any;
-  resellerRating: { averageRating: number; totalReviews: number } | null;
+type SellerProfileCardProps = {
+  sellerProfile: any;
+  sellerRating: { averageRating: number; totalReviews: number } | null;
   isFollowing: boolean;
   followersCount: number;
   handleFollowToggle: () => void;
 };
 
-export default function ResellerProfileCard({
-  resellerProfile,
-  resellerRating,
+export default function SellerProfileCard({
+  sellerProfile,
+  sellerRating,
   isFollowing,
   followersCount,
   handleFollowToggle,
-}: ResellerProfileCardProps) {
-  if (!resellerProfile) return null;
+}: SellerProfileCardProps) {
+  if (!sellerProfile) return null;
 
-  // Handle the null case for resellerRating
-  const rating = resellerRating ? (
+  // Handle the null case for sellerRating
+  const rating = sellerRating ? (
     <>
-      <strong>⭐ Rating:</strong> {resellerRating.averageRating ?? "N/A"} (
-      {resellerRating.totalReviews ?? 0} reviews)
+      <strong>⭐ Rating:</strong> {sellerRating.averageRating ?? "N/A"} (
+      {sellerRating.totalReviews ?? 0} reviews)
     </>
   ) : (
     <p>
@@ -39,13 +39,13 @@ export default function ResellerProfileCard({
       <div className="flex items-start justify-between flex-wrap gap-4">
         {/* Left side: Logo + Brand Info */}
         <Link
-          href={`/store/${resellerProfile.brand.slug}`}
+          href={`/store/${sellerProfile.brand.slug}`}
           className="flex items-center gap-4 flex-1 min-w-0 group"
         >
-          {resellerProfile.brand.logo && (
+          {sellerProfile.brand.logo && (
             <Image
-              src={resellerProfile.brand.logo}
-              alt={resellerProfile.brand.name}
+              src={sellerProfile.brand.logo}
+              alt={sellerProfile.brand.name}
               width={64} // Set width
               height={64} // Set height
               className="rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0 transition-transform group-hover:scale-105"
@@ -53,15 +53,15 @@ export default function ResellerProfileCard({
           )}
           <div className="truncate">
             <h2 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate group-hover:underline">
-              {resellerProfile.brand.name}
+              {sellerProfile.brand.name}
             </h2>
             <p className="text-gray-500 text-sm truncate group-hover:text-blue-600 transition">
-              {resellerProfile.brand.tagline}
+              {sellerProfile.brand.tagline}
             </p>
-            {resellerProfile.brand.verified && (
+            {sellerProfile.brand.verified && (
               <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
                 <MdVerified className="h-4 w-4" />
-                <span>Verified Reseller</span>
+                <span>Verified Seller</span>
               </div>
             )}
           </div>
@@ -90,17 +90,16 @@ export default function ResellerProfileCard({
       </div>
 
       {/* Description */}
-      {resellerProfile.brand.description && (
+      {sellerProfile.brand.description && (
         <p className="mt-5 text-sm text-gray-700 leading-relaxed">
-          {resellerProfile.brand.description}
+          {sellerProfile.brand.description}
         </p>
       )}
 
       {/* Location & Rating */}
       <div className="mt-4 text-sm text-gray-500 space-y-1">
         <p>
-          <strong>📍 Location:</strong>{" "}
-          {resellerProfile.brand.location || "N/A"}
+          <strong>📍 Location:</strong> {sellerProfile.brand.location || "N/A"}
         </p>
         {rating}
       </div>

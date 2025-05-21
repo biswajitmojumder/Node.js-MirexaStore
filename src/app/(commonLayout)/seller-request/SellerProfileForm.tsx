@@ -6,7 +6,7 @@ import axios from "axios";
 import Image from "next/image";
 import { RootState } from "@/app/lib/redux/store";
 
-const ResellerProfileForm = () => {
+const SellerProfileForm = () => {
   const userInfo = useSelector((state: RootState) => state.auth);
 
   const [form, setForm] = useState({
@@ -36,7 +36,7 @@ const ResellerProfileForm = () => {
         if (!email) return;
 
         const res = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reseller/profile/${email}`
+          `https://mirexa-store-backend.vercel.app/api/seller/profile/${email}`
         );
 
         const brand = res.data?.data?.brand;
@@ -134,7 +134,7 @@ const ResellerProfileForm = () => {
       };
 
       const response = await axios.post(
-        "https://campus-needs-backend.vercel.app/api/reseller/create-profile",
+        "https://mirexa-store-backend.vercel.app/api/seller/create-profile",
         payload,
         {
           headers: {
@@ -150,11 +150,9 @@ const ResellerProfileForm = () => {
         setSuccessMsg(
           "❌ Slug already exists. Please choose a different brand name."
         );
-      } else if (
-        err.response?.data?.message?.includes("You are not reseller")
-      ) {
+      } else if (err.response?.data?.message?.includes("You are not seller")) {
         setSuccessMsg(
-          "❌ You are not a reseller. Please contact support to upgrade your account."
+          "❌ You are not a seller. Please contact support to upgrade your account."
         );
       } else {
         setSuccessMsg("❌ Failed to submit profile. Please try again.");
@@ -172,7 +170,7 @@ const ResellerProfileForm = () => {
     return (
       <div className="mt-10 p-6 border border-green-300 rounded-xl shadow bg-green-50">
         <h2 className="text-xl font-semibold mb-4 text-green-700">
-          🎉 Your Reseller Profile is Already Submitted!
+          🎉 Your seller Profile is Already Submitted!
         </h2>
 
         <div className="mb-4">
@@ -254,7 +252,7 @@ const ResellerProfileForm = () => {
   return (
     <div className="mt-10 p-6 border border-gray-200 rounded-xl shadow">
       <h2 className="text-xl font-semibold mb-4 text-orange-600">
-        🛍️ Complete Your Reseller Profile
+        🛍️ Complete Your seller Profile
       </h2>
 
       {successMsg && <p className="text-green-600 font-medium">{successMsg}</p>}
@@ -314,4 +312,4 @@ const ResellerProfileForm = () => {
   );
 };
 
-export default ResellerProfileForm;
+export default SellerProfileForm;

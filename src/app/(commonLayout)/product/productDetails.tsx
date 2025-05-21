@@ -14,7 +14,7 @@ import Loading from "@/app/loading";
 import { HiPlus, HiMinus } from "react-icons/hi";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
-import ResellerProfileCard from "../components/ui/ResellerProfileCard";
+import SellerProfileCard from "../components/ui/SellerProfileCard";
 
 interface ProductDetailsProps {
   product: {
@@ -98,8 +98,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   const [stockQuantity, setStockQuantity] = useState(
     product.data.stockQuantity
   );
-  const [resellerProfile, setResellerProfile] = useState<any | null>(null);
-  const [resellerRating, setResellerRating] = useState<{
+  const [sellerProfile, setsellerProfile] = useState<any | null>(null);
+  const [sellerRating, setsellerRating] = useState<{
     averageRating: number;
     totalReviews: number;
   } | null>(null);
@@ -125,29 +125,29 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     );
   };
   useEffect(() => {
-    const fetchResellerData = async () => {
+    const fetchsellerData = async () => {
       if (!product.data.sellerEmail) return;
 
       try {
         // Step 1: Get profile & rating
         const [profileRes, ratingRes] = await Promise.all([
           axios.get(
-            `https://campus-needs-backend.vercel.app/api/reseller/profile/${product.data.sellerEmail}`
+            `https://mirexa-store-backend.vercel.app/api/seller/profile/${product.data.sellerEmail}`
           ),
           axios.get(
-            `https://campus-needs-backend.vercel.app/api/reseller/rating/${product.data.sellerEmail}`
+            `https://mirexa-store-backend.vercel.app/api/seller/rating/${product.data.sellerEmail}`
           ),
         ]);
 
         const profile = profileRes.data.data;
-        setResellerProfile(profile);
-        setResellerRating(ratingRes.data.data);
+        setsellerProfile(profile);
+        setsellerRating(ratingRes.data.data);
 
-        const resellerId = profile._id;
+        const sellerId = profile._id;
 
         // Step 2: Get followers count
         const followersRes = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reseller/followers/${resellerId}`
+          `https://mirexa-store-backend.vercel.app/api/seller/followers/${sellerId}`
         );
         setFollowersCount(followersRes.data.followers); // always show this ✅
 
@@ -155,7 +155,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         const token = localStorage.getItem("accessToken");
         if (token) {
           const isFollowingRes = await axios.get(
-            `https://campus-needs-backend.vercel.app/api/reseller/is-following?resellerId=${resellerId}`,
+            `https://mirexa-store-backend.vercel.app/api/seller/is-following?sellerId=${sellerId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -167,13 +167,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           setIsFollowing(false); // fallback for unauthenticated user
         }
       } catch (error) {
-        console.error("Failed to fetch reseller data:", error);
+        console.error("Failed to fetch seller data:", error);
       }
     };
 
-    fetchResellerData();
+    fetchsellerData();
   }, [product.data.sellerEmail]);
-  console.log(resellerProfile?.data?.whatsapp);
+  console.log(sellerProfile?.data?.whatsapp);
   const handleFollowToggle = async () => {
     const token = localStorage.getItem("accessToken");
 
@@ -189,8 +189,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     try {
       const url = isFollowing ? "unfollow" : "follow";
       await axios.post(
-        `https://campus-needs-backend.vercel.app/api/reseller/${url}`,
-        { resellerId: resellerProfile._id },
+        `https://mirexa-store-backend.vercel.app/api/seller/${url}`,
+        { sellerId: sellerProfile._id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -209,7 +209,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://campus-needs-backend.vercel.app/api/reviews/${product.data._id}`
+          `https://mirexa-store-backend.vercel.app/api/reviews/${product.data._id}`
         );
         setReviews(response.data.data);
       } catch (error) {
@@ -398,7 +398,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://campus-needs-backend.vercel.app/api/reviews/like/${reviewId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/like/${reviewId}`,
         {},
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
@@ -425,7 +425,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://campus-needs-backend.vercel.app/api/reviews/reply/${reviewId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/reply/${reviewId}`,
         { reply: replyComment, userName: auth.user.name },
         {
           headers: {
@@ -468,7 +468,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       await axios.delete(
-        `https://campus-needs-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
+        `https://mirexa-store-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 
@@ -528,7 +528,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               reverseOrder={false}
             />
 
-            <h1 className="text-3xl font-semibold">{product.data.name}</h1>
+            <h1 className="text-3xl pt-2 font-semibold">{product.data.name}</h1>
             <div className="flex flex-col md:flex-row gap-8">
               {/* Product Images Gallery */}
               <div className="w-full md:w-1/2 flex justify-center items-center">
@@ -753,12 +753,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               </div>
             </div>
 
-            {/* reseller profile */}
+            {/* seller profile */}
 
-            {resellerProfile && (
-              <ResellerProfileCard
-                resellerProfile={resellerProfile}
-                resellerRating={resellerRating}
+            {sellerProfile && (
+              <SellerProfileCard
+                sellerProfile={sellerProfile}
+                sellerRating={sellerRating}
                 isFollowing={isFollowing}
                 followersCount={followersCount}
                 handleFollowToggle={handleFollowToggle}
@@ -843,8 +843,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       )}
 
       <FloatingIcons
-        sellerNumber={resellerProfile?.brand?.whatsapp}
-        phone={resellerProfile?.brand?.phone}
+        sellerNumber={sellerProfile?.brand?.whatsapp}
+        phone={sellerProfile?.brand?.phone}
       />
     </>
   );

@@ -26,7 +26,7 @@ const ProfilePage = () => {
 
       try {
         const userResponse = await Axios.get(
-          "https://campus-needs-backend.vercel.app/api/users/me",
+          "https://mirexa-store-backend.vercel.app/api/users/me",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -39,15 +39,15 @@ const ProfilePage = () => {
 
         if (user?.email) {
           try {
-            const resellerResponse = await Axios.get(
-              `https://campus-needs-backend.vercel.app/api/reseller/profile/${user.email}`
+            const sellerResponse = await Axios.get(
+              `https://mirexa-store-backend.vercel.app/api/seller/profile/${user.email}`
             );
 
-            if (resellerResponse?.data?.data?.brand) {
-              setBrandProfile(resellerResponse?.data?.data);
+            if (sellerResponse?.data?.data?.brand) {
+              setBrandProfile(sellerResponse?.data?.data);
             }
           } catch {
-            console.warn("No reseller brand data found.");
+            console.warn("No seller brand data found.");
           }
         }
       } catch (err) {

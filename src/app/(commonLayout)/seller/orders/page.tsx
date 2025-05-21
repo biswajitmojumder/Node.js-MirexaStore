@@ -27,7 +27,7 @@ interface Order {
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Canceled";
 }
 
-const ResellerOrders: React.FC = () => {
+const SellerOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,8 +41,8 @@ const ResellerOrders: React.FC = () => {
   useEffect(() => {
     const userRole = localStorage.getItem("role");
 
-    if (userRole !== "reseller") {
-      setError("Access denied. resellers only.");
+    if (userRole !== "seller") {
+      setError("Access denied. sellers only.");
       setLoading(false);
       return;
     }
@@ -59,7 +59,7 @@ const ResellerOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://campus-needs-backend.vercel.app/api/checkout",
+        "https://mirexa-store-backend.vercel.app/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -96,7 +96,7 @@ const ResellerOrders: React.FC = () => {
       }
 
       await Axios.patch(
-        `https://campus-needs-backend.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -133,7 +133,7 @@ const ResellerOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
+                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -167,46 +167,50 @@ const ResellerOrders: React.FC = () => {
   // ✅✅ NEW FUNCTION: Courier Request
   const courierRequest = async (orderId: string) => {
     let loadingToastId: string | number | undefined;
-  
+
     try {
       // Check if the user is logged in
       if (!token || !auth?.user?.email) {
         toast.error("❌ You must be logged in to request a courier.");
         return;
       }
-  
+
       loadingToastId = toast.loading("Requesting Courier...");
-  
+
       // 1. Fetch Order details
       const { data: orderRes } = await Axios.get(
-        `https://campus-needs-backend.vercel.app/api/checkout/${orderId}`,
+        `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-  
+
       const order = orderRes?.data;
       if (!order) {
-        throw new Error("Order details not found. Please check the order ID and try again.");
+        throw new Error(
+          "Order details not found. Please check the order ID and try again."
+        );
       }
-  
-      // 2. Fetch Reseller Profile
-      const { data: resellerRes } = await Axios.get(
-        `https://campus-needs-backend.vercel.app/api/reseller/profile/${auth.user.email}`,
+
+      // 2. Fetch seller Profile
+      const { data: sellerRes } = await Axios.get(
+        `https://mirexa-store-backend.vercel.app/api/seller/profile/${auth.user.email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-  
-      const reseller = resellerRes?.data;
-      if (!reseller || !reseller.brand) {
-        throw new Error("Reseller profile not found or incomplete. Please check the profile details.");
+
+      const seller = sellerRes?.data;
+      if (!seller || !seller.brand) {
+        throw new Error(
+          "seller profile not found or incomplete. Please check the profile details."
+        );
       }
-  
+
       // 3. Build Courier Payload
       const courierPayload = {
         orderId: order._id,
@@ -221,14 +225,14 @@ const ResellerOrders: React.FC = () => {
           deliveryNote: order.shippingDetails.deliveryNote || "",
         },
         seller: {
-          name: reseller.brand.name || "",
-          email: reseller.userEmail || "",
-          phone: reseller.brand.phone || "",
-          location: reseller.brand.location || "",
-          whatsapp: reseller.brand.whatsapp || "",
+          name: seller.brand.name || "",
+          email: seller.userEmail || "",
+          phone: seller.brand.phone || "",
+          location: seller.brand.location || "",
+          whatsapp: seller.brand.whatsapp || "",
           socialLinks: {
-            facebook: reseller.brand.socialLinks?.facebook || "",
-            instagram: reseller.brand.socialLinks?.instagram || "",
+            facebook: seller.brand.socialLinks?.facebook || "",
+            instagram: seller.brand.socialLinks?.instagram || "",
           },
         },
         codAmount: order.totalPrice,
@@ -243,12 +247,12 @@ const ResellerOrders: React.FC = () => {
             : [item.productImage || "No image available"], // always array
         })),
       };
-  
+
       console.log("Courier Payload:", JSON.stringify(courierPayload, null, 2));
-  
+
       // 4. Send Courier Request
       await Axios.post(
-        `https://campus-needs-backend.vercel.app/api/courier/request`,
+        `https://mirexa-store-backend.vercel.app/api/courier/request`,
         courierPayload,
         {
           headers: {
@@ -256,7 +260,7 @@ const ResellerOrders: React.FC = () => {
           },
         }
       );
-  
+
       if (loadingToastId) {
         toast.update(loadingToastId, {
           render: "✅ Courier Requested Successfully!",
@@ -265,19 +269,19 @@ const ResellerOrders: React.FC = () => {
           autoClose: 3000,
         });
       }
-  
     } catch (err: any) {
       console.error("API Error:", err?.response?.data || err);
-  
+
       // Handle MongoDB duplicate key error
       let errorMessage = "❌ Something went wrong. Please try again later.";
-  
+
       if (err?.response?.data?.code === 11000) {
-        errorMessage = "⚠️ This order has already been processed for a courier. Please check the status or contact support for more details.";
+        errorMessage =
+          "⚠️ This order has already been processed for a courier. Please check the status or contact support for more details.";
       } else if (err?.response?.data?.message) {
         errorMessage = err?.response?.data?.message;
       }
-  
+
       // Provide a more user-friendly error message in the toast
       if (loadingToastId) {
         toast.update(loadingToastId, {
@@ -291,12 +295,6 @@ const ResellerOrders: React.FC = () => {
       }
     }
   };
-  
-  
-  
-  
-  
-  
 
   const filteredOrders = orders.filter((order) => {
     const matchesQuery = order._id
@@ -324,7 +322,7 @@ const ResellerOrders: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto my-8 px-4">
       <h1 className="text-3xl font-semibold text-center mb-6">
-        Reseller Order Management
+        Seller Order Management
       </h1>
 
       {/* Search & Filter */}
@@ -478,8 +476,8 @@ const ResellerOrders: React.FC = () => {
 
 export default function ProtectedPage() {
   return (
-    <WithAuth requiredRoles={["reseller"]}>
-      <ResellerOrders />
+    <WithAuth requiredRoles={["seller"]}>
+      <SellerOrders />
     </WithAuth>
   );
 }

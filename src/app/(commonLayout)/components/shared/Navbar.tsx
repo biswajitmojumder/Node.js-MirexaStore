@@ -8,10 +8,8 @@ import ClickSparkWrapper from "../reactbit/ClickSparkWrapper/ClickSparkWrapper";
 const Navbar = () => {
   return (
     <ClickSparkWrapper>
-      {" "}
-      <header className="bg-[#F85606] shadow-lg sticky top-0 z-50">
+      <header className="bg-[#F6550C] shadow-lg">
         <div className="container mx-auto flex items-center justify-between px-2 py-2 lg:py-3">
-          {/* Left Section: Logo */}
           <Link href="/" className="flex items-center min-w-[160px]">
             <Image
               src="/favicon.ico"
@@ -23,8 +21,7 @@ const Navbar = () => {
             />
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex gap-10 text-lg  items-center">
+          <nav className="hidden md:flex gap-10 text-lg items-center">
             {[
               { href: "/", label: "Home" },
               { href: "/product", label: "Product" },
@@ -41,7 +38,6 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* Right Section: Search, Cart, Profile */}
           <div className="flex items-center gap-2">
             <SearchBar />
             <CartButton />
