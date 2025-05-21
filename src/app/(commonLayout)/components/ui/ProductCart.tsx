@@ -18,6 +18,8 @@ export type Product = {
   brand?: string;
   productImages: string[];
   slug: string;
+  averageRating?: number;
+  totalReviews?: number;
 };
 
 type ProductCartProps = {
@@ -99,9 +101,9 @@ const ProductCart = ({ products }: ProductCartProps) => {
                     transition={{ duration: 0.3 }}
                   >
                     <div>
-                      <figure className="flex items-center justify-center overflow-hidden bg-white">
+                      <figure className="flex items-center justify-center overflow-hidden bg-white relative">
                         {product.productImages?.length > 0 ? (
-                          <span>
+                          <>
                             {discountPercentage > 0 && (
                               <span className="absolute top-2 left-2 bg-red-500 z-10 text-white px-3 py-1 text-xs font-semibold rounded-md">
                                 {discountPercentage}% Off
@@ -119,13 +121,14 @@ const ProductCart = ({ products }: ProductCartProps) => {
                                 />
                               </div>
                             </div>
-                          </span>
+                          </>
                         ) : (
                           <span className="text-3xl font-bold text-gray-500">
                             {product.name[0]}
                           </span>
                         )}
                       </figure>
+
                       <div className="card-body p-1 lg:p-4 flex flex-col items-start gap-1">
                         <h2 className="card-title text-base lg:text-lg font-medium text-left">
                           {product.name}
@@ -158,18 +161,30 @@ const ProductCart = ({ products }: ProductCartProps) => {
                           )}
                         </div>
 
-                        {/* Stock status */}
-                        <p
-                          className={`text-sm font-bold ${
-                            product.stockQuantity > 0
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {product.stockQuantity > 0
-                            ? "In Stock"
-                            : "Out of Stock"}
-                        </p>
+                        {/* Stock status + Rating in same line */}
+                        <div className="flex items-start text-left justify-between w-full text-sm">
+                          <p
+                            className={`font-bold m-0 p-0 ${
+                              product.stockQuantity > 0
+                                ? "text-green-500"
+                                : "text-red-500"
+                            }`}
+                            style={{ minWidth: "fit-content" }}
+                          >
+                            {product.stockQuantity > 0
+                              ? "In Stock"
+                              : "Out of Stock"}
+                          </p>
+
+                          {typeof product.averageRating === "number" && (
+                            <div className="flex items-center gap-1 text-yellow-500 font-semibold">
+                              <span>⭐ {product.averageRating.toFixed(1)}</span>
+                              <span className="text-gray-500 font-normal">
+                                ({product.totalReviews ?? 0})
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -182,8 +197,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
             )}
           </div>
 
-          {/* ✅ Pagination Controls */}
-
+          {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="mt-6 flex justify-center">
               <Pagination
