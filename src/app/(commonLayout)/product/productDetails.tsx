@@ -772,53 +772,60 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               product.data.weight ? (
                 <>
                   {product.data.longDescription && (
-                    <div className="mb-6">
+                    <section className="mb-6">
                       <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Product Details
+                        📄 Product Details
                       </h4>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-gray-600 leading-relaxed">
                         {product.data.longDescription}
                       </p>
-                    </div>
+                    </section>
                   )}
 
                   {product.data.warranty && (
-                    <div className="mb-6">
+                    <section className="mb-6">
                       <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Warranty
+                        🛠 Warranty
                       </h4>
                       <p className="text-base text-gray-600">
                         {product.data.warranty}
                       </p>
-                    </div>
+                    </section>
                   )}
 
                   {product.data.weight && (
-                    <div className="mb-6">
+                    <section className="mb-6">
                       <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        Weight
+                        ⚖️ Weight
                       </h4>
                       <p className="text-base text-gray-600">
                         {product.data.weight} kg
                       </p>
-                    </div>
+                    </section>
                   )}
 
-                  {/* Features List (only if exists) */}
                   {Array.isArray(product.data.features) &&
                     product.data.features.length > 0 && (
-                      <div className="mb-6">
+                      <section className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                          Features
+                          🔍 Key Features
                         </h4>
-                        <ul className="list-disc list-inside text-base text-gray-600">
+                        <ul className="list-none space-y-2">
                           {product.data.features.map(
                             (feature: string, index: number) => (
-                              <li key={index}>{feature}</li>
+                              <li
+                                key={index}
+                                className="flex items-start text-base text-gray-600"
+                              >
+                                <span className="mr-2 mt-1 text-green-500">
+                                  ✅
+                                </span>
+                                <span>{feature}</span>
+                              </li>
                             )
                           )}
                         </ul>
-                      </div>
+                      </section>
                     )}
                 </>
               ) : (

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SellerClientButton from "./FooterCsr";
+import FooterClientLinks from "./FooterClientLinks";
 
 const FooterSSR = () => {
   return (
@@ -18,85 +19,16 @@ const FooterSSR = () => {
               priority
             />
           </Link>
-          <p className="text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed mt-2">
             Your one-stop solution for quality products at the best prices.
             Enjoy seamless shopping experience.
           </p>
         </div>
 
-        {/* Customer Service */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link href="/contact" className="hover:underline">
-                Contact Us
-              </Link>
-            </li>
-            <li>
-              <Link href="/faq" className="hover:underline">
-                FAQs
-              </Link>
-            </li>
-            <li>
-              <Link href="/shipping-policy" className="hover:underline">
-                Shipping Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/return-policy" className="hover:underline">
-                Return & Refund Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/blog" className="hover:underline">
-                Blog
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {/* Customer Service + Quick Links + Socials (from client) */}
+        <FooterClientLinks />
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link href="/" className="hover:underline">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/product" className="hover:underline">
-                Products
-              </Link>
-            </li>
-            <li>
-              <Link href="/cart" className="hover:underline">
-                Cart
-              </Link>
-            </li>
-            <li>
-              <Link href="/add-product" className="hover:underline">
-                Add Product
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact + Client seller Button */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
-          <p className="text-sm mb-2">📞 +8801405671742</p>
-          <p className="text-sm mb-4">✉️ mdeasinsarkar01@gmail.com</p>
-
-          {/* CLIENT-ONLY BUTTON LOADED SEPARATELY */}
-          <SellerClientButton />
-
-          {/* Social Icons */}
-          <div className="flex gap-4 mt-4">
-            {/* Social icons SVG same as before */}
-          </div>
-        </div>
+        {/* Contact Info + Seller Button */}
       </div>
 
       <div className="mt-10 border-t border-white pt-4 text-center text-xs">

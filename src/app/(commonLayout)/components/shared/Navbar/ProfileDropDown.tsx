@@ -9,13 +9,29 @@ import { logoutUser } from "@/app/lib/redux/features/authSlice";
 import { RootState } from "@/app/lib/redux/store";
 import axios from "axios";
 import { Avatar, AvatarIcon } from "@heroui/react";
+import {
+  LogIn,
+  UserPlus,
+  LogOut,
+  ShoppingCart,
+  PackageCheck,
+  LayoutDashboard,
+  Store,
+  BarChart2,
+  Settings,
+  Plus,
+  Users,
+  ClipboardList,
+  Home,
+  ShoppingBasket,
+} from "lucide-react";
 
 const ProfileDropdown = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [sellerSlug, setsellerSlug] = useState("");
+  const [sellerSlug, setSellerSlug] = useState("");
 
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -65,21 +81,21 @@ const ProfileDropdown = () => {
 
   // Fetch seller profile on load (if user is seller)
   useEffect(() => {
-    const fetchsellerProfile = async () => {
+    const fetchSellerProfile = async () => {
       if (!user?.email || user.role !== "seller") return;
 
       try {
         const res = await axios.get(
           `https://mirexa-store-backend.vercel.app/api/seller/profile/${user.email}`
         );
-        setsellerSlug(res.data?.data?.brand?.slug || "");
+        setSellerSlug(res.data?.data?.brand?.slug || "");
         console.log(res);
       } catch (error) {
         console.error("Failed to fetch seller profile", error);
       }
     };
 
-    fetchsellerProfile();
+    fetchSellerProfile();
   }, [user?.email, user?.role]);
 
   return (
@@ -90,7 +106,7 @@ const ProfileDropdown = () => {
         className="btn btn-ghost btn-circle"
       >
         {/* Desktop avatar */}
-        <div className="hidden sm:block w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-white overflow-hidden">
+        <div className="hidden lg:block w-9 h-9 lg:w-10 lg:h-10 rounded-full border-2 border-white overflow-hidden">
           <div className="flex items-center">
             <Avatar
               classNames={{
@@ -103,7 +119,7 @@ const ProfileDropdown = () => {
         </div>
 
         {/* Mobile menu icon */}
-        <div className="block sm:hidden">
+        <div className="block lg:hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-6 h-6 text-white"
@@ -129,21 +145,23 @@ const ProfileDropdown = () => {
         >
           {user ? (
             <>
-              {user?.role === "admin" ? (
+              {user?.role === "admin" && (
                 <>
                   <li>
                     <Link
                       href="/admin/sellerrequest"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
-                      seller Request
+                      <ClipboardList className="w-5 h-5 text-[#EA580C]" />
+                      Seller Request
                     </Link>
                     <Link
                       href="/admin/users"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <Users className="w-5 h-5 text-[#EA580C]" />
                       User Management
                     </Link>
                   </li>
@@ -151,8 +169,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/admin/addProduct"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <Plus className="w-5 h-5 text-[#EA580C]" />
                       Add Product
                     </Link>
                   </li>
@@ -160,8 +179,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/admin/products"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
                       Product Management
                     </Link>
                   </li>
@@ -169,8 +189,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/admin/orders"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <PackageCheck className="w-5 h-5 text-[#EA580C]" />
                       Order Management
                     </Link>
                   </li>
@@ -178,20 +199,24 @@ const ProfileDropdown = () => {
                     <Link
                       href="/admin/analytics"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <BarChart2 className="w-5 h-5 text-[#EA580C]" />
                       Analytics
                     </Link>
                   </li>
                 </>
-              ) : user?.role === "seller" ? (
+              )}
+
+              {user?.role === "seller" && (
                 <>
                   <li>
                     <Link
                       href="/seller/addProduct"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <Plus className="w-5 h-5 text-[#EA580C]" />
                       Add Product
                     </Link>
                   </li>
@@ -199,8 +224,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/seller/orders"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <PackageCheck className="w-5 h-5 text-[#EA580C]" />
                       Order Management
                     </Link>
                   </li>
@@ -208,8 +234,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/seller/products"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
                       Product Management
                     </Link>
                   </li>
@@ -217,8 +244,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/seller/analytics"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <BarChart2 className="w-5 h-5 text-[#EA580C]" />
                       Analytics
                     </Link>
                   </li>
@@ -226,29 +254,48 @@ const ProfileDropdown = () => {
                     <Link
                       href="/seller/profile"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <Settings className="w-5 h-5 text-[#EA580C]" />
                       Profile Settings
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      href={`/store/${sellerSlug}`}
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
-                    >
-                      My Store
-                    </Link>
-                  </li>
+
+                  {sellerSlug ? (
+                    <li>
+                      <Link
+                        href={`/store/${sellerSlug}`}
+                        onClick={handleLinkClick}
+                        className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg flex items-center gap-2"
+                      >
+                        <Store className="w-5 h-5 text-[#EA580C]" />
+                        My Store
+                      </Link>
+                    </li>
+                  ) : (
+                    <li>
+                      <Link
+                        href="/seller-request"
+                        onClick={handleLinkClick}
+                        className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg flex items-center gap-2"
+                      >
+                        <ClipboardList className="w-5 h-5 text-[#EA580C]" />
+                        My Request
+                      </Link>
+                    </li>
+                  )}
                 </>
-              ) : (
+              )}
+
+              {user?.role === "user" && (
                 <>
                   <li>
                     <Link
                       href="/product"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
                       Product
                     </Link>
                   </li>
@@ -256,8 +303,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/cart"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <ShoppingCart className="w-5 h-5 text-[#EA580C]" />
                       Shopping Cart
                     </Link>
                   </li>
@@ -265,8 +313,9 @@ const ProfileDropdown = () => {
                     <Link
                       href="/cart/checkout"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <PackageCheck className="w-5 h-5 text-[#EA580C]" />
                       Checkout
                     </Link>
                   </li>
@@ -274,36 +323,31 @@ const ProfileDropdown = () => {
                     <Link
                       href="/order-history"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
+                      <ClipboardList className="w-5 h-5 text-[#EA580C]" />
                       Order History
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/analytics"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg"
-                    >
-                      Analytics
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/seller-request"
                       onClick={handleLinkClick}
-                      className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg"
+                      className="hover:bg-gray-100 font-bold text-[#EA580C] p-2 rounded-lg flex items-center gap-2"
                     >
-                      Become a seller
+                      <Store className="w-5 h-5 text-[#EA580C]" />
+                      Become a Seller
                     </Link>
                   </li>
                 </>
               )}
+
               <li>
                 <button
                   onClick={handleLogout}
-                  className="hover:bg-gray-100 p-2 rounded-lg"
+                  className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                 >
+                  <LogOut className="w-5 h-5 text-[#EA580C]" />
                   Logout
                 </button>
               </li>
@@ -314,8 +358,9 @@ const ProfileDropdown = () => {
                 <Link
                   href="/login"
                   onClick={handleLinkClick}
-                  className="hover:bg-gray-100 p-2 rounded-lg"
+                  className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                 >
+                  <LogIn className="w-5 h-5 text-[#EA580C]" />
                   Login
                 </Link>
               </li>
@@ -323,8 +368,9 @@ const ProfileDropdown = () => {
                 <Link
                   href="/register"
                   onClick={handleLinkClick}
-                  className="hover:bg-gray-100 p-2 rounded-lg"
+                  className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                 >
+                  <UserPlus className="w-5 h-5 text-[#EA580C]" />
                   Register
                 </Link>
               </li>

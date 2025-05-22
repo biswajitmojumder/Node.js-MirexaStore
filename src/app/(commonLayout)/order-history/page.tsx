@@ -131,40 +131,36 @@ const OrderHistory: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Check the file type to differentiate between image or video
-      const isImage = file.type.startsWith("image/");
-      const isVideo = file.type.startsWith("video/");
+    if (!file) return;
 
-      if (!isImage && !isVideo) {
-        toast.error("Only images and videos are allowed.");
-        return;
-      }
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
 
-      // Prepare the form data to upload the file
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "campus-needs-upload"); // Replace with your actual Cloudinary upload preset
-
-      try {
-        // Make a POST request to upload the media (both images and videos)
-        const { data } = await Axios.post(
-          "https://api.cloudinary.com/v1_1/dwg8d0bfp/upload", // Replace with your actual Cloudinary cloud name
-          formData
-        );
-
-        // Add the uploaded media URL to the state
-        const mediaType = file.type.startsWith("image/") ? "image" : "video";
-        setMedia((prev) => [
-          ...prev,
-          { url: data.secure_url, type: mediaType }, // Store both the URL and type
-        ]);
-        toast.success("Media uploaded successfully!");
-      } catch (error) {
-        console.error("Error uploading media:", error);
-        toast.error("Failed to upload media.");
-      }
+    if (!isImage && !isVideo) {
+      toast.error("Only images and videos are allowed.");
+      return;
     }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "campus-needs-upload");
+
+    try {
+      const { data } = await Axios.post(
+        "https://api.cloudinary.com/v1_1/dwg8d0bfp/upload",
+        formData
+      );
+
+      const mediaType = isImage ? "image" : "video";
+      setMedia((prev) => [...prev, { url: data.secure_url, type: mediaType }]);
+      toast.success("Media uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      toast.error("Failed to upload media.");
+    }
+  };
+  const handleRemoveMedia = (index: number) => {
+    setMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleReviewSubmit = async (
@@ -399,12 +395,45 @@ const OrderHistory: React.FC = () => {
                           onChange={(e) => (item.review = e.target.value)}
                         />
                         {/* Media upload */}
+                        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {media.map((item, index) => (
+                            <div
+                              key={index}
+                              className="relative border rounded-md shadow overflow-hidden group"
+                            >
+                              {item.type === "image" ? (
+                                <Image
+                                  src={item.url}
+                                  alt="Preview"
+                                  width={500}
+                                  height={500}
+                                  className="w-full h-auto object-cover"
+                                />
+                              ) : (
+                                <video
+                                  src={item.url}
+                                  controls
+                                  className="w-full h-auto"
+                                />
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMedia(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                              >
+                                ✖
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                         <input
                           type="file"
                           onChange={handleMediaUpload}
                           accept="image/*,video/*"
                           className="mt-2"
                         />
+
                         <button
                           onClick={() =>
                             handleReviewSubmit(

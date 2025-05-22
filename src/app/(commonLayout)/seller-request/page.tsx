@@ -16,10 +16,7 @@ interface SellerRequest {
   status: "pending" | "approved" | "rejected";
   productType: string;
 }
-interface Props {
-  email: string;
-  token: string | null;
-}
+
 const SellerRequestPage = () => {
   const userInfo = useSelector((state: RootState) => state.auth);
 
@@ -29,7 +26,7 @@ const SellerRequestPage = () => {
     phone: userInfo?.user?.phone || "",
     company: "",
     message: "",
-    productType: "general", // Default productType
+    productType: "general",
   });
 
   const [existingRequest, setExistingRequest] = useState<SellerRequest | null>(
@@ -57,7 +54,7 @@ const SellerRequestPage = () => {
         );
 
         if (response.data?.data) {
-          setExistingRequest(response.data.data[0]); // Assuming the response contains an array
+          setExistingRequest(response.data.data[0]);
         }
       } catch (error) {
         console.error("Error fetching seller request:", error);
@@ -94,8 +91,6 @@ const SellerRequestPage = () => {
       productType: formData.productType,
     };
 
-    console.log("Submitting seller request payload:", payload); // ✅ Log actual payload being sent
-
     try {
       const response = await axios.post(
         `https://mirexa-store-backend.vercel.app/api/seller-request/create`,
@@ -107,7 +102,7 @@ const SellerRequestPage = () => {
         }
       );
 
-      setExistingRequest(response.data.data); // Assuming the response contains the created request
+      setExistingRequest(response.data.data);
     } catch (err: any) {
       console.error("Submission Error:", err);
       setErrorMsg(
@@ -133,15 +128,31 @@ const SellerRequestPage = () => {
       case "approved":
         return (
           <>
-            <div className="text-center text-green-700 font-semibold space-y-2">
-              <h2 className="text-2xl font-bold">
+            <div className="text-center text-green-700 font-semibold space-y-4">
+              <h2 className="text-2xl md:text-3xl font-bold">
                 🎉 Congratulations, {existingRequest.name}!
               </h2>
               <p>
                 You are now an approved <strong>seller</strong> 🛍️
               </p>
               <p>We’ll share resources, tools, and updates soon.</p>
+
+              <p className="text-orange-600 font-semibold">
+                ⚠ Please <strong>log out and log back in</strong> to apply your
+                new seller permissions securely.
+              </p>
+              <p className="text-orange-600 font-semibold">
+                ⚠ আপনার নতুন বিক্রেতা অনুমতিগুলো সঠিকভাবে ও নিরাপদভাবে প্রয়োগ
+                করতে, <br />
+                <strong>লগআউট করে পুনরায় লগইন করুন</strong> এবং তারপর প্রোফাইল
+                পূরণ করুন।
+              </p>
+
+              <p className="text-sm text-red-500 italic">
+                This helps us keep your account secure and up to date.
+              </p>
             </div>
+
             <SellerProfileForm />
           </>
         );
@@ -155,14 +166,12 @@ const SellerRequestPage = () => {
     }
   };
 
-  if (fetching) {
-    return <Loading></Loading>;
-  }
+  if (fetching) return <Loading />;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-12">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-        <h1 className="text-3xl font-bold text-[#EA580C] mb-6 text-center">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-10 sm:py-16">
+      <div className="max-w-2xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-xl">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#EA580C] mb-6 text-center">
           Become a seller
         </h1>
 
@@ -212,7 +221,7 @@ const SellerRequestPage = () => {
                 required
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
 
@@ -225,7 +234,7 @@ const SellerRequestPage = () => {
                 name="company"
                 value={formData.company}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
 
@@ -237,11 +246,10 @@ const SellerRequestPage = () => {
                 required
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
 
-            {/* Added Product Type Dropdown */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Product Type
@@ -250,7 +258,7 @@ const SellerRequestPage = () => {
                 name="productType"
                 value={formData.productType}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
               >
                 <option value="general">General</option>
                 <option value="electronics">Electronics</option>

@@ -3,12 +3,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+
 import FloatingIcons from "../../components/ui/FloatingIcons";
 import Loading from "@/app/loading";
 import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
-
+import {
+  X,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Landmark,
+  StickyNote,
+  ShoppingCart,
+} from "lucide-react";
 type CartItem = {
   productId: string;
   name: string;
@@ -277,16 +286,34 @@ const CheckoutPage = () => {
               {/* Shipping Info Form */}
               <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-                  Shipping Information
+                  <User className="inline-block w-6 h-6 mr-2 text-blue-500" />
+                  Shipping Information / শিপিং তথ্য
                 </h2>
                 <div className="space-y-5">
                   {/* Input Fields except District */}
                   {[
-                    { id: "fullName", label: "Full Name" },
-                    { id: "phone", label: "Phone" },
-                    { id: "email", label: "Email", type: "email" },
-                    { id: "address", label: "Address" },
-                  ].map(({ id, label, type = "text" }) => (
+                    {
+                      id: "fullName",
+                      label: "Full Name / পুরো নাম",
+                      icon: <User className="w-5 h-5 text-gray-500" />,
+                    },
+                    {
+                      id: "phone",
+                      label: "Phone / ফোন",
+                      icon: <Phone className="w-5 h-5 text-gray-500" />,
+                    },
+                    {
+                      id: "email",
+                      label: "Email / ইমেইল",
+                      type: "email",
+                      icon: <Mail className="w-5 h-5 text-gray-500" />,
+                    },
+                    {
+                      id: "address",
+                      label: "Address / ঠিকানা",
+                      icon: <MapPin className="w-5 h-5 text-gray-500" />,
+                    },
+                  ].map(({ id, label, type = "text", icon }) => (
                     <div key={id}>
                       <label
                         htmlFor={id}
@@ -294,15 +321,18 @@ const CheckoutPage = () => {
                       >
                         {label}
                       </label>
-                      <input
-                        id={id}
-                        type={type}
-                        value={formData[id]}
-                        onChange={(e) =>
-                          setFormData({ ...formData, [id]: e.target.value })
-                        }
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                      />
+                      <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
+                        {icon}
+                        <input
+                          id={id}
+                          type={type}
+                          value={formData[id]}
+                          onChange={(e) =>
+                            setFormData({ ...formData, [id]: e.target.value })
+                          }
+                          className="w-full px-3 py-3 focus:outline-none"
+                        />
+                      </div>
                       {!formData[id] && (
                         <p className="text-xs text-red-500 mt-1">
                           {label} is required.
@@ -317,20 +347,24 @@ const CheckoutPage = () => {
                       htmlFor="city"
                       className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      City
+                      City / শহর
                     </label>
-                    <select
-                      id="city"
-                      value={formData.city}
-                      onChange={handleCityChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                    >
-                      {cities.map((city, index) => (
-                        <option key={index} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
+                      <Landmark className="w-5 h-5 text-gray-500" />
+                      <select
+                        id="city"
+                        value={formData.city}
+                        onChange={handleCityChange}
+                        className="w-full px-3 py-3 focus:outline-none bg-transparent"
+                      >
+                        <option value="">Select a city</option>
+                        {cities.map((city, index) => (
+                          <option key={index} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     {!formData.city && (
                       <p className="text-xs text-red-500 mt-1">
                         City is required.
@@ -338,23 +372,26 @@ const CheckoutPage = () => {
                     )}
                   </div>
 
-                  {/* District Field (after City) */}
+                  {/* District Field */}
                   <div>
                     <label
                       htmlFor="district"
                       className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      District
+                      District / জেলা
                     </label>
-                    <input
-                      id="district"
-                      type="text"
-                      value={formData.district}
-                      onChange={(e) =>
-                        setFormData({ ...formData, district: e.target.value })
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                    />
+                    <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
+                      <MapPin className="w-5 h-5 text-gray-500" />
+                      <input
+                        id="district"
+                        type="text"
+                        value={formData.district}
+                        onChange={(e) =>
+                          setFormData({ ...formData, district: e.target.value })
+                        }
+                        className="w-full px-3 py-3 focus:outline-none"
+                      />
+                    </div>
                     {!formData.district && (
                       <p className="text-xs text-red-500 mt-1">
                         District is required.
@@ -368,21 +405,24 @@ const CheckoutPage = () => {
                       htmlFor="deliveryNote"
                       className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      Delivery Note
+                      Delivery Note / ডেলিভারি নির্দেশনা
                     </label>
-                    <textarea
-                      id="deliveryNote"
-                      rows={4}
-                      value={formData.deliveryNote}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          deliveryNote: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                      placeholder="Any specific instructions about delivery..."
-                    />
+                    <div className="flex items-start border border-gray-300 rounded-md shadow-sm px-3">
+                      <StickyNote className="w-5 h-5 text-gray-500 mt-3" />
+                      <textarea
+                        id="deliveryNote"
+                        rows={4}
+                        value={formData.deliveryNote}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            deliveryNote: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-3 focus:outline-none"
+                        placeholder="Any specific instructions about delivery..."
+                      />
+                    </div>
                     {!formData.deliveryNote && (
                       <p className="text-xs text-red-500 mt-1">
                         Delivery note is required.
@@ -395,7 +435,8 @@ const CheckoutPage = () => {
               {/* Order Summary */}
               <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-                  Order Summary
+                  <ShoppingCart className="inline-block w-6 h-6 mr-2 text-green-600" />
+                  Order Summary / অর্ডার সারাংশ
                 </h2>
 
                 <div className="space-y-5">
@@ -442,17 +483,19 @@ const CheckoutPage = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500">No items in the cart.</p>
+                    <p className="text-gray-500">
+                      No items in the cart. / কার্টে কোনো পণ্য নেই।
+                    </p>
                   )}
                 </div>
 
                 <div className="mt-6 border-t pt-4 space-y-2 text-sm text-gray-700">
                   <div className="flex justify-between">
-                    <span>Shipping</span>
+                    <span>Shipping / শিপিং</span>
                     <span>{shippingCost}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
+                    <span>Total / মোট</span>
                     <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
                   </div>
                 </div>
@@ -476,7 +519,7 @@ const CheckoutPage = () => {
                   className="mt-6 w-full py-3 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
                   disabled={loading}
                 >
-                  {loading ? "Placing Order..." : "Place Order"}
+                  {loading ? "Placing Order..." : "Place Order / অর্ডার করুন"}
                 </button>
               </div>
             </div>

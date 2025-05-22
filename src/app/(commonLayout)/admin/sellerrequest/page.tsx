@@ -18,7 +18,7 @@ interface sellerRequest {
   };
 }
 
-const AdminsellerRequests: React.FC = () => {
+const AdminSellerRequests: React.FC = () => {
   const [requests, setRequests] = useState<sellerRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<sellerRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,7 +29,7 @@ const AdminsellerRequests: React.FC = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<{ data: sellerRequest[] }>(
           "https://mirexa-store-backend.vercel.app/api/seller-request/all",
           {
             headers: {
@@ -37,8 +37,18 @@ const AdminsellerRequests: React.FC = () => {
             },
           }
         );
-        setRequests(response.data.data);
-        setFilteredRequests(response.data.data);
+
+        const sortedRequests = response.data.data.sort((a, b) => {
+          const statusOrder: Record<sellerRequest["status"], number> = {
+            pending: 0,
+            approved: 1,
+            rejected: 2,
+          };
+          return statusOrder[a.status] - statusOrder[b.status];
+        });
+
+        setRequests(sortedRequests);
+        setFilteredRequests(sortedRequests);
       } catch (error) {
         console.error("Error fetching seller requests:", error);
       } finally {
@@ -179,4 +189,4 @@ const AdminsellerRequests: React.FC = () => {
   );
 };
 
-export default AdminsellerRequests;
+export default AdminSellerRequests;

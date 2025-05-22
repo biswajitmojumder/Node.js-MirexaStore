@@ -21,7 +21,7 @@ const Navbar = () => {
             />
           </Link>
 
-          <nav className="hidden md:flex gap-10 text-lg items-center">
+          <nav className="hidden lg:flex gap-10 text-lg items-center">
             {[
               { href: "/", label: "Home" },
               { href: "/product", label: "Product" },

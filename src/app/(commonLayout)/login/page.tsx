@@ -9,6 +9,8 @@ import { useAppDispatch } from "@/app/lib/redux/hook";
 import { loginUser } from "@/app/lib/redux/features/authSlice";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import clsx from "clsx";
+import { Mail, Lock } from "lucide-react";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -134,30 +136,34 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-gray-700 font-medium mb-2">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 transition duration-200"
-            placeholder="Enter your email"
-          />
+          <div className="relative">
+            <Mail className="absolute top-1/2 left-3 transform -translate-y-1/2 text-orange-500 w-5 h-5" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 transition duration-200"
+              placeholder="Enter your email"
+            />
+          </div>
         </div>
-
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             Password
           </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 transition duration-200"
-            placeholder="Enter your password"
-          />
+          <div className="relative">
+            <Lock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-orange-500 w-5 h-5" />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 transition duration-200"
+              placeholder="Enter your password"
+            />
+          </div>
         </div>
-
         <button
           type="submit"
           disabled={isSubmitting}
