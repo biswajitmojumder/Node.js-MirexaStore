@@ -130,7 +130,7 @@ const SellerRequestPage = () => {
           <>
             <div className="text-center text-green-700 font-semibold space-y-4">
               <h2 className="text-2xl md:text-3xl font-bold">
-                🎉 Congratulations, {existingRequest.name}!
+                🎉 Congratulations, {userInfo?.user?.name}!
               </h2>
               <p>
                 You are now an approved <strong>seller</strong> 🛍️

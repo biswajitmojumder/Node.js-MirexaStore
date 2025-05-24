@@ -23,6 +23,7 @@ import {
   Tooltip,
 } from "chart.js";
 import Loading from "@/app/loading";
+import CountUp from "../../components/reactbit/CountUp/CountUp";
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 const SellerAnalytics = () => {
@@ -213,31 +214,66 @@ const SellerAnalytics = () => {
         <Card
           icon={<FaDollarSign />}
           title="Total Sales"
-          value={`৳ ${totalSales}`}
+          value={
+            <span className="text-blue-600">
+              ৳{" "}
+              <CountUp from={0} to={totalSales} duration={1.5} separator="," />
+            </span>
+          }
           color="text-blue-600"
         />
         <Card
           icon={<FaBox />}
           title="Total Orders"
-          value={totalOrders.toString()}
+          value={
+            <CountUp from={0} to={totalOrders} duration={1.5} separator="," />
+          }
           color="text-green-600"
         />
         <Card
           icon={<FaTrophy />}
           title="Products Sold"
-          value={totalProductsSold.toString()}
+          value={
+            <CountUp
+              from={0}
+              to={totalProductsSold}
+              duration={1.5}
+              separator=","
+            />
+          }
           color="text-yellow-600"
         />
         <Card
           icon={<FaChartLine />}
           title="Avg Order Value"
-          value={`৳ ${averageOrderValue.toFixed(2)}`}
+          value={
+            <span className="text-red-600">
+              ৳{" "}
+              <CountUp
+                from={0}
+                to={parseFloat(averageOrderValue.toFixed(2))} // round to 2 decimals
+                duration={1.5}
+                separator=","
+              />
+            </span>
+          }
           color="text-red-600"
         />
+
         <Card
           icon={<FaCalendarDay />}
           title="Today's Sales"
-          value={`${todayProductSold} pcs`}
+          value={
+            <>
+              <CountUp
+                from={0}
+                to={todayProductSold}
+                duration={1.5}
+                separator=","
+              />{" "}
+              pcs
+            </>
+          }
           color="text-emerald-600"
         />
       </div>
@@ -247,19 +283,46 @@ const SellerAnalytics = () => {
         <Card
           icon={<FaHourglassHalf />}
           title="Processing"
-          value={statusCount.Processing.toString()}
+          value={
+            <span className="text-orange-500">
+              <CountUp
+                from={0}
+                to={statusCount.Processing}
+                duration={1.5}
+                separator=","
+              />
+            </span>
+          }
           color="text-orange-500"
         />
         <Card
           icon={<FaShippingFast />}
           title="Shipped"
-          value={statusCount.Shipped.toString()}
+          value={
+            <span className="text-purple-500">
+              <CountUp
+                from={0}
+                to={statusCount.Shipped}
+                duration={1.5}
+                separator=","
+              />
+            </span>
+          }
           color="text-purple-500"
         />
         <Card
           icon={<FaTruck />}
           title="Delivered"
-          value={statusCount.Delivered.toString()}
+          value={
+            <span className="text-green-500">
+              <CountUp
+                from={0}
+                to={statusCount.Delivered}
+                duration={1.5}
+                separator=","
+              />
+            </span>
+          }
           color="text-green-500"
         />
       </div>
@@ -352,7 +415,7 @@ const Card = ({
 }: {
   icon: JSX.Element;
   title: string;
-  value: string;
+  value: React.ReactNode; // <-- updated from string to React.ReactNode
   color: string;
 }) => (
   <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition duration-300">

@@ -8,6 +8,25 @@ import Loading from "@/app/loading";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import WithAuth from "@/app/lib/utils/withAuth";
+import {
+  Package,
+  Tag,
+  Image,
+  Layers,
+  Link2,
+  DollarSign,
+  LucideIcon,
+  Weight,
+  Shield,
+  Info,
+  Archive,
+  Video,
+  Link,
+  FileText,
+  Box,
+  Sliders,
+  Percent,
+} from "lucide-react";
 
 // SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>
@@ -106,18 +125,37 @@ const AddProduct = () => {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
-
+  const [brandSlug, setBrandSlug] = useState("");
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
+
+  useEffect(() => {
+    const fetchBrandSlug = async () => {
+      try {
+        const { data } = await axios.get(
+          `https://mirexa-store-backend.vercel.app/api/seller/profile/${user?.email}`
+        );
+        console.log("data", data);
+        setBrandSlug(data?.data?.brand?.slug); // set the brand slug
+        console.log("Brand Slug:", data?.data?.brand?.slug);
+      } catch (error) {
+        console.error("Failed to fetch brand slug:", error);
+      }
+    };
+
+    if (user?.email) {
+      fetchBrandSlug();
+    }
+  }, [user?.email]);
 
   useEffect(() => {
     if (!slugEdited) {
       setProductData((prev) => ({
         ...prev,
-        slug: generateSlug(prev.name),
+        slug: `${brandSlug}-${generateSlug(prev.name)}`,
       }));
     }
-  }, [productData.name, slugEdited]);
+  }, [brandSlug, productData.name, slugEdited]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -274,17 +312,32 @@ const AddProduct = () => {
   const renderInputField = (
     label: string,
     name: keyof ProductData,
-    type = "text"
+    type = "text",
+    Icon?: LucideIcon,
+    iconColor = "#F6550C"
   ) => (
     <div className="flex flex-col gap-2">
       <label className="font-medium text-gray-700">{label}</label>
-      <input
-        type={type}
-        name={name}
-        value={productData[name] === 0 ? "" : productData[name]}
-        onChange={handleInputChange}
-        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+      <div className="relative">
+        {Icon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+            {Icon && (
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Icon className="w-5 h-5" color={iconColor} />
+              </div>
+            )}
+          </div>
+        )}
+        <input
+          type={type}
+          name={name}
+          value={productData[name] === 0 ? "" : productData[name]}
+          onChange={handleInputChange}
+          className={`w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            Icon ? "pl-10" : ""
+          }`}
+        />
+      </div>
     </div>
   );
 
@@ -419,28 +472,84 @@ const AddProduct = () => {
         <div className="text-center text-2xl font-semibold text-gray-800">
           Add Product
         </div>
-        {renderInputField("Product Name", "name")}
-        {renderInputField("Slug (Editable)", "slug")}
-        {renderInputField("Description", "description")}
-        {renderInputField("Long Description", "longDescription")}
-        {renderInputField("Materials", "materials")}
-        {renderInputField("Care Instructions", "careInstructions")}
-        {renderInputField("Specifications", "specifications")}
-        {renderInputField("Additional Info", "additionalInfo")}
-        {renderInputField("Weight", "weight", "number")}
-        {renderInputField("Warranty", "warranty")}
-        {renderInputField("Price", "price")}
-        {renderInputField("Discount Price", "discountPrice", "number")}
-        {renderInputField("Stock Quantity", "stockQuantity", "number")}
-        {renderInputField("Category", "category")}
-        {renderInputField("Brand", "brand")}
-        {renderInputField("Video URL", "videoUrl")}
+        {renderInputField("Product Name", "name", "text", Tag, "#F6550C")}
+        {renderInputField(
+          "Slug (Editable)",
+          "slug",
+          "text",
+          Sliders,
+          "#F6550C"
+        )}
+        {renderInputField(
+          "Description",
+          "description",
+          "text",
+          FileText,
+          "#F6550C"
+        )}
+        {renderInputField(
+          "Long Description",
+          "longDescription",
+          "text",
+          FileText,
+          "#F6550C"
+        )}
+        {renderInputField("Materials", "materials", "text", Box, "#F6550C")}
+        {renderInputField(
+          "Care Instructions",
+          "careInstructions",
+          "text",
+          Info,
+          "#F6550C"
+        )}
+        {renderInputField(
+          "Specifications",
+          "specifications",
+          "text",
+          Layers,
+          "#F6550C"
+        )}
+        {renderInputField(
+          "Additional Info",
+          "additionalInfo",
+          "text",
+          Info,
+          "#F6550C"
+        )}
+        {renderInputField("Weight", "weight", "number", Weight, "#F6550C")}
+        {renderInputField("Warranty", "warranty", "text", Shield, "#F6550C")}
+        {renderInputField("Price", "price", "number", DollarSign, "#F6550C")}
+        {renderInputField(
+          "After Discount Price",
+          "discountPrice",
+          "number",
+          DollarSign,
+          "#F6550C"
+        )}
+        {renderInputField(
+          "Stock Quantity",
+          "stockQuantity",
+          "number",
+          Layers,
+          "#F6550C"
+        )}
+        {renderInputField("Category", "category", "text", Archive, "#F6550C")}
+        {renderInputField("Brand", "brand", "text", Tag, "#F6550C")}
+        {renderInputField("Video URL", "videoUrl", "text", Video, "#F6550C")}
         {renderArrayField("Product Images", productImages, setProductImages)}
         {renderArrayField("Tags", tags, setTags)}
         {renderArrayField("Colors", colors, setColors)}
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
-        {renderInputField("Affiliate Link", "affiliateLink")}
+        {renderInputField(
+          "Affiliate Link",
+          "affiliateLink",
+          "text",
+          Link,
+          "#F6550C"
+        )}
+
+        {/* checkboxes and variants remain the same */}
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-gray-700">
             <input

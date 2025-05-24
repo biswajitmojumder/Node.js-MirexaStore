@@ -24,7 +24,10 @@ import {
   ClipboardList,
   Home,
   ShoppingBasket,
+  FileWarning,
+  PlusCircle,
 } from "lucide-react";
+import { FaHandshake } from "react-icons/fa";
 
 const ProfileDropdown = () => {
   const router = useRouter();
@@ -167,6 +170,27 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
+                      href="/admin/product-request"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <PlusCircle className="w-5 h-5 text-[#EA580C]" />
+                      Product add request
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin/affiliate-product"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <FaHandshake className="w-5 h-5 text-[#EA580C]" />
+                      Affiliate Product
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
                       href="/admin/addProduct"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
@@ -238,6 +262,16 @@ const ProfileDropdown = () => {
                     >
                       <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
                       Product Management
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/seller/inactive-draft"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <FileWarning className="w-5 h-5 text-yellow-600" />
+                      Inactive & Under-review
                     </Link>
                   </li>
                   <li>

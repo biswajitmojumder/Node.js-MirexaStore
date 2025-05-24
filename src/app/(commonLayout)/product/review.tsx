@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { Dialog } from "@headlessui/react";
 import Image from "next/image";
 import { Pagination } from "@heroui/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface MediaItem {
   url: string;
@@ -277,6 +278,31 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
                 </span>
               ))}
             </div>
+
+            {/* <div className="flex items-center">
+              {review.rating === 5 ? (
+                <div className="w-24 h-8">
+                  <DotLottieReact
+                    src="https://lottie.host/82df4844-2e40-4b13-825e-9bc4ad5c8f23/Fpgi7xYGW3.lottie"
+                    loop
+                    autoplay
+                  />
+                </div>
+              ) : (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <span
+                    key={index}
+                    className={
+                      index < review.rating
+                        ? "text-yellow-500"
+                        : "text-gray-300"
+                    }
+                  >
+                    ★
+                  </span>
+                ))
+              )}
+            </div> */}
           </div>
 
           <p className="mt-3">{review.comment}</p>

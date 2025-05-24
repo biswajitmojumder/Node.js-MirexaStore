@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
 import ShinyText from "../reactbit/ShinyText/ShinyText";
-import { Link } from "lucide-react";
 
 const Banner: React.FC = () => {
   return (

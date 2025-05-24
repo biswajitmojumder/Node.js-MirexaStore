@@ -10,6 +10,7 @@ import Loading from "@/app/loading";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
+import Link from "next/link";
 
 const AdminProductPage = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -220,6 +221,9 @@ const AdminProductPage = () => {
                 Stock Quantity
               </th>
               <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                Status
+              </th>
+              <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
                 Actions
               </th>
             </tr>
@@ -228,7 +232,22 @@ const AdminProductPage = () => {
             {filteredProducts.map((product) => (
               <tr key={product._id} className="border-b hover:bg-gray-50">
                 <td className="py-3 px-4 text-sm text-gray-800">
-                  {product.name}
+                  <Link
+                    href={`/product/${product.slug}`}
+                    className="block hover:underline text-gray-800"
+                  >
+                    <div className="text-sm py-3 px-4">
+                      {product.name}
+                      {typeof product.averageRating === "number" && (
+                        <div className="flex items-center gap-1 text-yellow-500 font-semibold">
+                          <span>⭐ {product.averageRating.toFixed(1)}</span>
+                          <span className="text-gray-500 font-normal">
+                            ({product.totalReviews ?? 0})
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
                   ৳{product.price}
@@ -239,6 +258,16 @@ const AdminProductPage = () => {
                 <td className="py-3 px-4 text-sm text-gray-800">
                   {product.stockQuantity}
                 </td>
+                <td
+                  className={`py-3 px-4 text-sm 
+                    ${product.status === "active" ? "text-green-600" : ""}
+                    ${product.status === "inactive" ? "text-red-600" : ""}
+                    ${product.status === "draft" ? "text-yellow-600" : ""}
+                  `}
+                >
+                  {product.status}
+                </td>
+
                 <td className="py-3 px-4 text-sm">
                   <div className="flex justify-start gap-2">
                     <button
