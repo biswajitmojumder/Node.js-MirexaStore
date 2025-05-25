@@ -26,6 +26,9 @@ import {
   ShoppingBasket,
   FileWarning,
   PlusCircle,
+  CalendarCheck,
+  BadgeCheck,
+  UserCheck,
 } from "lucide-react";
 import { FaHandshake } from "react-icons/fa";
 
@@ -180,6 +183,26 @@ const ProfileDropdown = () => {
                   </li>
                   <li>
                     <Link
+                      href="/admin/subscription-requests"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <UserCheck className="w-5 h-5 text-[#EA580C]" />
+                      Subscription Requests
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin/seller-validtill"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <CalendarCheck className="w-5 h-5 text-[#EA580C]" />
+                      Seller ValidTill
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
                       href="/admin/affiliate-product"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
@@ -284,6 +307,17 @@ const ProfileDropdown = () => {
                       Analytics
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      href="/seller/subscription"
+                      onClick={handleLinkClick}
+                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2 transition"
+                    >
+                      <BadgeCheck className="w-5 h-5 text-[#EA580C]" />
+                      Subscription
+                    </Link>
+                  </li>
+
                   <li>
                     <Link
                       href="/seller/profile"

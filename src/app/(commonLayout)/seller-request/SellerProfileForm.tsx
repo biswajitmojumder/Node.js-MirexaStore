@@ -192,7 +192,11 @@ const SellerProfileForm = () => {
         },
       };
 
-      await axios.post(
+      // 🔍 Log the payload before submitting
+      console.log("📤 Submitting Seller Profile Payload:");
+      console.log(JSON.stringify(payload, null, 2));
+
+      const response = await axios.post(
         "https://mirexa-store-backend.vercel.app/api/seller/create-profile",
         payload,
         {
@@ -202,9 +206,13 @@ const SellerProfileForm = () => {
         }
       );
 
+      console.log("✅ Response:", response.data);
+
       setSuccessMsg("✅ Profile created successfully!");
       setProfileExists(true);
     } catch (err: any) {
+      console.error("❌ Submission Error:", err?.response?.data || err.message);
+
       if (err.response?.data?.message?.includes("slug")) {
         setSuccessMsg(
           "❌ Slug already exists. Please choose a different name."

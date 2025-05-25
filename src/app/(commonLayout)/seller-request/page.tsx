@@ -1,11 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import axios from "axios";
 import Loading from "@/app/loading";
 import SellerProfileForm from "./SellerProfileForm";
+
+// Icons with consistent color
+import {
+  FaStore,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSpinner,
+  FaUserShield,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaBuilding,
+  FaClipboardList,
+} from "react-icons/fa";
+
+const iconClass = "text-[#F6550C] inline-block mr-2";
 
 interface SellerRequest {
   name: string;
@@ -19,6 +35,7 @@ interface SellerRequest {
 
 const SellerRequestPage = () => {
   const userInfo = useSelector((state: RootState) => state.auth);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: userInfo?.user?.name || "",
@@ -37,44 +54,33 @@ const SellerRequestPage = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
+    if (!userInfo?.token) router.push("/login");
+  }, [userInfo?.token, router]);
+
+  useEffect(() => {
     const fetchRequest = async () => {
-      if (!userInfo?.user?._id) {
-        setFetching(false);
-        return;
-      }
-
+      if (!userInfo?.user?._id) return setFetching(false);
       try {
-        const response = await axios.get(
+        const res = await axios.get(
           `https://mirexa-store-backend.vercel.app/api/seller-request/my-requests`,
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo?.token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${userInfo?.token}` } }
         );
-
-        if (response.data?.data) {
-          setExistingRequest(response.data.data[0]);
-        }
+        if (res.data?.data) setExistingRequest(res.data.data[0]);
       } catch (error) {
         console.error("Error fetching seller request:", error);
       } finally {
         setFetching(false);
       }
     };
-
     fetchRequest();
-  }, [userInfo?.user?._id]);
+  }, [userInfo?.token, userInfo?.user?._id]);
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,29 +88,23 @@ const SellerRequestPage = () => {
     setLoading(true);
     setErrorMsg("");
 
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      company: formData.company,
-      additionalInfo: formData.message,
-      productType: formData.productType,
-    };
-
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         `https://mirexa-store-backend.vercel.app/api/seller-request/create`,
-        payload,
         {
-          headers: {
-            Authorization: `Bearer ${userInfo?.token}`,
-          },
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          additionalInfo: formData.message,
+          productType: formData.productType,
+        },
+        {
+          headers: { Authorization: `Bearer ${userInfo?.token}` },
         }
       );
-
-      setExistingRequest(response.data.data);
+      setExistingRequest(res.data.data);
     } catch (err: any) {
-      console.error("Submission Error:", err);
       setErrorMsg(
         err?.response?.data?.message ||
           "Something went wrong. Please try again."
@@ -120,8 +120,9 @@ const SellerRequestPage = () => {
     switch (existingRequest.status) {
       case "pending":
         return (
-          <div className="text-center text-yellow-600 font-medium">
-            🕐 Your request is currently <strong>pending</strong>. We’ll contact
+          <div className="text-center text-yellow-600 font-medium flex items-center justify-center gap-2">
+            <FaSpinner className="animate-spin text-[#F6550C]" />
+            Your request is currently <strong>pending</strong>. We’ll contact
             you shortly.
           </div>
         );
@@ -129,14 +130,14 @@ const SellerRequestPage = () => {
         return (
           <>
             <div className="text-center text-green-700 font-semibold space-y-4">
-              <h2 className="text-2xl md:text-3xl font-bold">
+              <h2 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
+                <FaCheckCircle className="text-[#F6550C]" />
                 🎉 Congratulations, {userInfo?.user?.name}!
               </h2>
               <p>
                 You are now an approved <strong>seller</strong> 🛍️
               </p>
               <p>We’ll share resources, tools, and updates soon.</p>
-
               <p className="text-orange-600 font-semibold">
                 ⚠ Please <strong>log out and log back in</strong> to apply your
                 new seller permissions securely.
@@ -147,19 +148,18 @@ const SellerRequestPage = () => {
                 <strong>লগআউট করে পুনরায় লগইন করুন</strong> এবং তারপর প্রোফাইল
                 পূরণ করুন।
               </p>
-
               <p className="text-sm text-red-500 italic">
                 This helps us keep your account secure and up to date.
               </p>
             </div>
-
             <SellerProfileForm />
           </>
         );
       case "rejected":
         return (
-          <div className="text-center text-red-600 font-medium">
-            ❌ Sorry, your request was <strong>rejected</strong>. Please contact
+          <div className="text-center text-red-600 font-medium flex items-center justify-center gap-2">
+            <FaTimesCircle className="text-[#F6550C]" />
+            Sorry, your request was <strong>rejected</strong>. Please contact
             support if you have any concerns.
           </div>
         );
@@ -171,8 +171,9 @@ const SellerRequestPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-10 sm:py-16">
       <div className="max-w-2xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-xl">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#EA580C] mb-6 text-center">
-          Become a seller
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#F6550C] mb-6 text-center flex items-center justify-center gap-2">
+          <FaStore className="text-[#F6550C]" />
+          Become a Seller
         </h1>
 
         {existingRequest ? (
@@ -185,12 +186,12 @@ const SellerRequestPage = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">
+                <FaUserShield className={iconClass} />
                 Full Name
               </label>
               <input
                 type="text"
                 name="name"
-                required
                 value={formData.name}
                 readOnly
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
@@ -199,12 +200,12 @@ const SellerRequestPage = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">
+                <FaEnvelope className={iconClass} />
                 Email Address
               </label>
               <input
                 type="email"
                 name="email"
-                required
                 value={formData.email}
                 readOnly
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
@@ -213,20 +214,22 @@ const SellerRequestPage = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">
+                <FaPhoneAlt className={iconClass} />
                 Phone Number
               </label>
               <input
                 type="tel"
                 name="phone"
-                required
                 value={formData.phone}
+                required
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F6550C]"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">
+                <FaBuilding className={iconClass} />
                 Company Name (Optional)
               </label>
               <input
@@ -234,31 +237,35 @@ const SellerRequestPage = () => {
                 name="company"
                 value={formData.company}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Message</label>
-              <textarea
-                name="message"
-                rows={4}
-                required
-                value={formData.message}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F6550C]"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">
+                <FaClipboardList className={iconClass} />
+                Message
+              </label>
+              <textarea
+                name="message"
+                rows={4}
+                value={formData.message}
+                required
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F6550C]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                <FaClipboardList className={iconClass} />
                 Product Type
               </label>
               <select
                 name="productType"
                 value={formData.productType}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F6550C]"
               >
                 <option value="general">General</option>
                 <option value="electronics">Electronics</option>
@@ -270,9 +277,17 @@ const SellerRequestPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#EA580C] text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50"
+              className="w-full bg-[#F6550C] text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? "Submitting..." : "Submit Request"}
+              {loading ? (
+                <>
+                  <FaSpinner className="animate-spin" /> Submitting...
+                </>
+              ) : (
+                <>
+                  <FaCheckCircle /> Submit Request
+                </>
+              )}
             </button>
           </form>
         )}
