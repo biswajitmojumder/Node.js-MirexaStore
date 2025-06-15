@@ -8,6 +8,7 @@ import Loading from "@/app/loading";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import WithAuth from "@/app/lib/utils/withAuth";
+import { HexColorPicker } from "react-colorful";
 import {
   Package,
   Tag,
@@ -126,9 +127,23 @@ const AddProduct = () => {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
   const [brandSlug, setBrandSlug] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
+  const [currentColor, setCurrentColor] = useState("#ff0000");
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
 
+  //colour select
+
+  const addColor = () => {
+    if (currentColor && !colors.includes(currentColor)) {
+      setColors([...colors, currentColor]);
+    }
+  };
+
+  const removeColor = (color: string) => {
+    setColors(colors.filter((c) => c !== color));
+  };
   useEffect(() => {
     const fetchBrandSlug = async () => {
       try {
@@ -240,12 +255,22 @@ const AddProduct = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate Category
+    const finalCategory =
+      selectedCategory === "Others" ? customCategory.trim() : selectedCategory;
+
+    if (!finalCategory) {
+      toast.error("❌ Please select or enter a category.");
+      return;
+    }
+
     const sellerEmail = user?.email || "";
     const sellerName = user?.name || "";
     const sellerNumber = user?.phone || 0;
 
     const finalData = {
       ...productData,
+      category: finalCategory, // Add the final category here
       type: productData.affiliateLink ? "affiliate" : "own",
       productImages,
       tags,
@@ -276,6 +301,9 @@ const AddProduct = () => {
       if (response.status === 200) {
         toast.success("✅ Product added successfully!");
         resetForm();
+        // Reset Category States
+        setSelectedCategory("");
+        setCustomCategory("");
       } else {
         throw new Error("Failed to add product.");
       }
@@ -533,12 +561,98 @@ const AddProduct = () => {
           Layers,
           "#F6550C"
         )}
-        {renderInputField("Category", "category", "text", Archive, "#F6550C")}
+        <label
+          className="block text-sm font-medium mb-1"
+          style={{ color: "#F6550C" }}
+        >
+          Category
+        </label>
+        <select
+          className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="">Select a category</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Books">Books</option>
+          <option value="Others">Others</option>
+        </select>
+
+        {selectedCategory === "Others" && (
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            placeholder="Enter custom category"
+            value={customCategory}
+            onChange={(e) => setCustomCategory(e.target.value)}
+          />
+        )}
+
         {renderInputField("Brand", "brand", "text", Tag, "#F6550C")}
         {renderInputField("Video URL", "videoUrl", "text", Video, "#F6550C")}
         {renderArrayField("Product Images", productImages, setProductImages)}
         {renderArrayField("Tags", tags, setTags)}
-        {renderArrayField("Colors", colors, setColors)}
+        {/* colour picker */}
+        <div className="mb-6">
+          <label className="block text-base font-semibold text-gray-800 mb-2">
+            Pick Product Colors
+          </label>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+            {/* Color Picker */}
+            <div>
+              <HexColorPicker
+                color={currentColor}
+                onChange={setCurrentColor}
+                className="w-full rounded-lg shadow"
+              />
+            </div>
+
+            {/* Manual Input + Preview + Add */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={currentColor}
+                  onChange={(e) => setCurrentColor(e.target.value)}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm w-32"
+                  placeholder="#ffffff"
+                />
+                <div
+                  className="w-8 h-8 rounded-full border shadow"
+                  style={{ backgroundColor: currentColor }}
+                ></div>
+                <button
+                  type="button"
+                  onClick={addColor}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+                >
+                  + Add
+                </button>
+              </div>
+
+              {/* Selected Color List */}
+              {colors.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Selected Colors:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <div
+                        key={color}
+                        onClick={() => removeColor(color)}
+                        className="w-7 h-7 rounded-full border shadow cursor-pointer"
+                        style={{ backgroundColor: color }}
+                        title={`Click to remove ${color}`}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
         {renderInputField(
