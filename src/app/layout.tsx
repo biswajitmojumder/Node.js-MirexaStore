@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import Footer from "@/app/(commonLayout)/components/shared/Footer";
 import Providers from "./lib/Providers";
 import Script from "next/script";
 import ClickSparkWrapper from "./(commonLayout)/components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
 
-const roboto = Roboto({
-  weight: "400",
-  subsets: ["latin"],
+// const roboto = Roboto({
+//   weight: "400",
+//   subsets: ["latin"],
+//   display: "swap",
+// });
+
+// const poppins = Poppins({
+//   weight: ["400", "500", "600", "700"],
+//   subsets: ["latin"],
+//   display: "swap",
+// });
+
+const hindSiliguri = Hind_Siliguri({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["bengali"],
   display: "swap",
 });
 
@@ -52,7 +64,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           `}
         </Script>
       </head>
-      <body className={roboto.className}>
+      <body className={hindSiliguri.className}>
         <ClickSparkWrapper>
           <Providers>
             {children}

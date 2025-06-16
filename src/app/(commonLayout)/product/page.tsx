@@ -3,8 +3,11 @@
 import ProductCart from "../components/ui/ProductCart";
 
 const Product = async () => {
-  const apiUrl = "https://mirexa-store-backend.vercel.app/api/product"; // ✅ API to get all products
-  const response = await fetch(apiUrl);
+  const apiUrl = "https://mirexa-store-backend.vercel.app/api/product";
+
+  const response = await fetch(apiUrl, {
+    next: { revalidate: 60 }, // ✅ Revalidate every 60 seconds
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch products");
