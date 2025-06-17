@@ -18,7 +18,11 @@ import {
   Link2,
   FileImage,
   AlignLeft,
+  Banknote,
 } from "lucide-react";
+import Loading from "@/app/loading";
+import toast, { Toaster } from "react-hot-toast";
+import { ToastContainer } from "react-toastify";
 
 const SellerProfileForm = () => {
   const userInfo = useSelector((state: RootState) => state.auth);
@@ -33,6 +37,7 @@ const SellerProfileForm = () => {
     location: "",
     phone: "",
     whatsapp: "",
+    bkash: "",
     socialLinks: {
       facebook: "",
       instagram: "",
@@ -58,11 +63,12 @@ const SellerProfileForm = () => {
           setForm({
             ...brand,
             socialLinks: {
-              facebook: brand.socialLinks?.facebook || "",
-              instagram: brand.socialLinks?.instagram || "",
+              facebook: brand?.socialLinks?.facebook || "",
+              instagram: brand?.socialLinks?.instagram || "",
             },
-            whatsapp: brand.whatsapp || "",
-            phone: brand.phone || "",
+            whatsapp: brand?.whatsapp || "",
+            phone: brand?.phone || "",
+            bkash: brand?.bkash || "",
           });
           setProfileExists(true);
         }
@@ -167,7 +173,15 @@ const SellerProfileForm = () => {
     setSuccessMsg("");
 
     if (!form.logo || !form.banner) {
-      setSuccessMsg("❌ Please upload both logo and banner.");
+      setSuccessMsg(" Please upload both logo and banner.");
+      setLoading(false);
+      return;
+    }
+    // 🔐 Role check before submit
+    if (userInfo?.user?.role !== "seller") {
+      toast.error(
+        "🔒 For security reasons, please log out and log in again to activate your seller access."
+      );
       setLoading(false);
       return;
     }
@@ -185,6 +199,7 @@ const SellerProfileForm = () => {
           location: form.location,
           phone: form.phone,
           whatsapp: form.whatsapp,
+          bkash: form.bkash,
           socialLinks: {
             facebook: form.socialLinks.facebook,
             instagram: form.socialLinks.instagram,
@@ -193,8 +208,6 @@ const SellerProfileForm = () => {
       };
 
       // 🔍 Log the payload before submitting
-      console.log("📤 Submitting Seller Profile Payload:");
-      console.log(JSON.stringify(payload, null, 2));
 
       const response = await axios.post(
         "https://mirexa-store-backend.vercel.app/api/seller/create-profile",
@@ -209,6 +222,9 @@ const SellerProfileForm = () => {
       console.log("✅ Response:", response.data);
 
       setSuccessMsg("✅ Profile created successfully!");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       setProfileExists(true);
     } catch (err: any) {
       console.error("❌ Submission Error:", err?.response?.data || err.message);
@@ -230,9 +246,7 @@ const SellerProfileForm = () => {
   };
 
   if (!userInfo?.user?.email) {
-    return (
-      <p className="text-center py-10 text-gray-500">Loading user info...</p>
-    );
+    return <Loading></Loading>;
   }
 
   if (profileExists) {
@@ -290,6 +304,15 @@ const SellerProfileForm = () => {
             <strong>Phone:</strong> {form.phone}
           </p>
           <p>
+            <strong>Bkash:</strong>{" "}
+            {form?.bkash ? (
+              form.bkash
+            ) : (
+              <span className="text-red-500 italic">N/A</span>
+            )}
+          </p>
+
+          <p>
             <strong>WhatsApp:</strong> {form.whatsapp}
           </p>
         </div>
@@ -323,7 +346,15 @@ const SellerProfileForm = () => {
       <h2 className="text-lg sm:text-xl font-semibold mb-4 text-orange-600">
         🛍️ Complete Your Seller Profile
       </h2>
-
+      <Toaster
+        position="top-center"
+        gutter={10}
+        containerStyle={{
+          top: "75px",
+          zIndex: 9999,
+        }}
+        reverseOrder={false}
+      />
       {successMsg && (
         <p className="text-green-600 font-medium mb-4">{successMsg}</p>
       )}
@@ -359,6 +390,11 @@ const SellerProfileForm = () => {
             label: "WhatsApp Number",
             name: "whatsapp",
             icon: <MessageCircle className="w-4 h-4 mr-1 text-orange-500" />,
+          },
+          {
+            label: "Bkash Number",
+            name: "bkash",
+            icon: <Banknote className="w-4 h-4 mr-1 text-pink-500" />, // pink for Bkash theme
           },
           {
             label: "Facebook",
