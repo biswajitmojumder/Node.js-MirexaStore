@@ -55,6 +55,7 @@ const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [shippingCost, setShippingCost] = useState(60); // Default shipping for Dhaka
+  const [singleShipping, setSingleShipping] = useState(60);
   const [user, setUser] = useState<UserType | null>(null);
   const [formData, setFormData] = useState<FormDataType>({
     fullName: "",
@@ -66,7 +67,12 @@ const CheckoutPage = () => {
     deliveryNote: "",
     country: "Bangladesh",
   });
+  const [paymentMethod, setPaymentMethod] = useState("cod"); // default is COD
+  const [transactionId, setTransactionId] = useState("");
+  const [sellerBkashNumber, setSellerBkashNumber] = useState(""); // You can fetch this from seller data
+  const [finalBkashNumber, setFinalBkashNumber] = useState("017XXXXXXXX");
   const [isFirstOrder, setIsFirstOrder] = useState(false);
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
   type FormDataType = {
     [key: string]: any;
@@ -167,6 +173,11 @@ const CheckoutPage = () => {
       return;
     }
 
+    if (paymentMethod === "bkash" && !transactionId) {
+      toast.error("Please enter your Bkash transaction ID.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -201,7 +212,7 @@ const CheckoutPage = () => {
             name: item.name || "",
             productImage: item.productImages || [],
           })),
-          totalPrice: grandTotal,
+          totalPrice: totalAmount + singleShipping,
           shippingCost: shipping,
           totalAmount: totalAmount,
           grandTotal: grandTotal,
@@ -209,8 +220,10 @@ const CheckoutPage = () => {
           orderDate: new Date().toISOString(),
           shippingDetails: formData,
           deliveryNote: formData.deliveryNote,
+          paymentMethod: paymentMethod,
+          transactionId: paymentMethod === "bkash" ? transactionId : null,
         };
-
+        console.log(orderData);
         const response = await axios.post(
           "https://mirexa-store-backend.vercel.app/api/checkout",
           orderData,
@@ -238,16 +251,42 @@ const CheckoutPage = () => {
       setLoading(false);
     }
   };
-
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCity = e.target.value;
     setFormData({ ...formData, city: selectedCity });
+  };
+  useEffect(() => {
+    // শুধু তখনই শিপিং খরচ আপডেট হবে যখন কার্ট বা সিটি চেঞ্জ হবে
+    if (!formData.city) return; // city empty থাকলে কিছু করো না
 
-    if (selectedCity === "Dhaka") {
-      setShippingCost(60);
-    } else {
-      setShippingCost(120);
-    }
+    const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
+    const sellerCount = uniqueSellers.size;
+
+    const costPerSeller = formData.city === "Dhaka" ? 60 : 120;
+    setSingleShipping(costPerSeller);
+    const totalShipping = sellerCount * costPerSeller;
+    setShippingCost(totalShipping);
+  }, [cartItems, formData.city]);
+
+  useEffect(() => {
+    const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
+    const isMultipleSellers = uniqueSellers.size > 1;
+
+    const number = isMultipleSellers
+      ? "01405671742"
+      : sellerBkashNumber || "017XXXXXXXX";
+
+    setFinalBkashNumber(number);
+  }, [cartItems, sellerBkashNumber]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(finalBkashNumber);
+    setCopied(true);
+
+    // Hide the tooltip after 1.5 seconds
+    setTimeout(() => {
+      setCopied(false);
+    }, 1500);
   };
 
   return (
@@ -486,6 +525,92 @@ const CheckoutPage = () => {
                     <p className="text-gray-500">
                       No items in the cart. / কার্টে কোনো পণ্য নেই।
                     </p>
+                  )}
+                </div>
+                {/* Payment Method Selection */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    Payment Method / পেমেন্ট পদ্ধতি
+                  </h3>
+
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cod"
+                        checked={paymentMethod === "cod"}
+                        onChange={() => setPaymentMethod("cod")}
+                        className="accent-blue-600"
+                      />
+                      Cash on Delivery / ক্যাশ অন ডেলিভারি
+                    </label>
+
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="bkash"
+                        checked={paymentMethod === "bkash"}
+                        onChange={() => setPaymentMethod("bkash")}
+                        className="accent-blue-600"
+                      />
+                      Bkash Payment / বিকাশ পেমেন্ট
+                    </label>
+                  </div>
+
+                  {/* Show Bkash Payment Instructions */}
+                  {paymentMethod === "bkash" && (
+                    <div className="mt-4 bg-pink-50 border border-pink-200 p-4 rounded-md shadow-sm">
+                      <p className="text-sm text-gray-800 mb-2 leading-6">
+                        📲 অনুগ্রহ করে মোট{" "}
+                        <span className="font-semibold text-pink-600">
+                          ৳{(totalAmount + shippingCost).toFixed(2)}
+                        </span>{" "}
+                        নিচের বিকাশ নম্বরে{" "}
+                        <span className="font-medium">Send Money</span> করুন।
+                      </p>
+
+                      {/* Bkash Number + Copy Button */}
+                      <div className="flex items-center gap-4 mt-2 relative w-full max-w-md flex-nowrap overflow-x-auto">
+                        <p className="text-base font-semibold text-pink-700 whitespace-nowrap">
+                          বিকাশ নম্বর:{" "}
+                          <span className="tracking-wide">
+                            {finalBkashNumber}
+                          </span>
+                        </p>
+
+                        <button
+                          onClick={handleCopy}
+                          className={`text-[10px] bg-pink-600 text-white px-3 py-1.5 rounded-md hover:bg-pink-700 transition whitespace-nowrap flex-shrink-0`}
+                          title={copied ? "কপি হয়েছে!" : "ক্লিক করে কপি করুন"}
+                        >
+                          {copied ? "✓ কপি হয়েছে" : "কপি করুন"}
+                        </button>
+                      </div>
+
+                      {/* Instruction Text */}
+                      <p className="text-sm text-gray-600 mt-3 leading-5">
+                        📝 পেমেন্ট সম্পন্ন হলে নিচের ঘরে আপনার{" "}
+                        <span className="font-medium">Transaction ID</span> দিন।
+                        <br />✅ অর্ডার কনফার্ম হওয়ার আগ পর্যন্ত চাইলে একটি
+                        স্ক্রিনশট রেখে দিতে পারেন।
+                      </p>
+
+                      {/* Transaction ID Input */}
+                      <div className="mt-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          আপনার বিকাশ Transaction ID:
+                        </label>
+                        <input
+                          type="text"
+                          value={transactionId}
+                          onChange={(e) => setTransactionId(e.target.value)}
+                          placeholder="Transaction ID লিখুন"
+                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-pink-300"
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
 
