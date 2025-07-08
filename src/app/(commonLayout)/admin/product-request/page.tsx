@@ -50,8 +50,8 @@ const ProductRequest = () => {
     try {
       const endpoint =
         tab === "all"
-          ? "https://mirexa-store-backend.vercel.app/api/product"
-          : "https://mirexa-store-backend.vercel.app/api/product/inactive-draft";
+          ? "https://api.mirexastore.com/api/product"
+          : "https://api.mirexastore.com/api/product/inactive-draft";
 
       const res = await fetch(endpoint, {
         headers: {
@@ -82,7 +82,7 @@ const ProductRequest = () => {
 
     try {
       const res = await fetch(
-        `https://mirexa-store-backend.vercel.app/api/product/status/${id}`,
+        `https://api.mirexastore.com/api/product/status/${id}`,
         {
           method: "PATCH",
           headers: {

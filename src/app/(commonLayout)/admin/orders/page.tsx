@@ -9,6 +9,9 @@ import "react-toastify/dist/ReactToastify.css";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
+import { Copy } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import PaymentCell from "../../components/shared/pay-seller";
 
 interface ShippingDetails {
   fullName: string;
@@ -24,6 +27,9 @@ interface OrderItem {
 }
 
 interface Order {
+  totalPrice: any;
+  paymentMethod: string;
+  transactionId: string;
   _id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
@@ -40,7 +46,7 @@ const AdminOrders: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [sellerFilter, setSellerFilter] = useState<string>("");
   const [userEmailFilter, setUserEmailFilter] = useState<string>("");
-
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
   const router = useRouter();
   const token = useSelector((state: RootState) => state.auth.token);
 
@@ -65,7 +71,7 @@ const AdminOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://mirexa-store-backend.vercel.app/api/checkout",
+        "https://api.mirexastore.com/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -90,7 +96,7 @@ const AdminOrders: React.FC = () => {
       else if (currentStatus === "Shipped") newStatus = "Delivered";
 
       await Axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://api.mirexastore.com/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -127,7 +133,7 @@ const AdminOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+                  `https://api.mirexastore.com/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -247,71 +253,147 @@ const AdminOrders: React.FC = () => {
         </select>
       </div>
 
-      {filteredGroupedOrders.map(
-        ({ sellerEmail, orders }) =>
-          orders.length > 0 && (
-            <div key={sellerEmail} className="mb-8">
-              <h2 className="text-xl font-semibold mb-2">
-                Seller: {sellerEmail}
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white shadow-md rounded-lg">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                      <th className="py-3 px-6 text-left">Order ID</th>
-                      <th className="py-3 px-6 text-left">Customer</th>
-                      <th className="py-3 px-6 text-left">User Email</th>
-                      <th className="py-3 px-6 text-center">Date</th>
-                      <th className="py-3 px-6 text-center">Total</th>
-                      <th className="py-3 px-6 text-center">Status</th>
-                      <th className="py-3 px-6 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-700 text-sm">
-                    {orders.map((order) => (
-                      <tr
-                        key={order._id}
-                        className="border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="py-3 px-6">{order._id.slice(-6)}</td>
-                        <td className="py-3 px-6">
-                          {order.shippingDetails.fullName}
-                        </td>
-                        <td className="py-3 px-6">
-                          {order.shippingDetails.email || "N/A"}
-                        </td>
-                        <td className="py-3 px-6 text-center">
-                          {new Date(order.orderDate).toLocaleDateString()}
-                        </td>
-                        <td className="py-3 px-6 text-center">
-                          ৳{order.grandTotal.toFixed(2)}
-                        </td>
-                        <td className="py-3 px-6 text-center">
-                          <span
-                            className={`py-1 px-3 rounded-full text-xs font-semibold ${
-                              order.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-600"
-                                : order.status === "Processing"
-                                ? "bg-blue-100 text-blue-600"
-                                : order.status === "Shipped"
-                                ? "bg-purple-100 text-purple-600"
-                                : order.status === "Delivered"
-                                ? "bg-green-100 text-green-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                          >
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-6 text-center space-x-2">
+      {filteredGroupedOrders.map(({ sellerEmail, orders }) =>
+        orders.length > 0 ? (
+          <div key={sellerEmail} className="mb-10">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              🛍️ Seller: <span className="text-blue-700">{sellerEmail}</span>
+            </h2>
+
+            <div className="w-full overflow-x-auto rounded-lg shadow">
+              <table className="min-w-full bg-white text-sm text-left">
+                <thead className="bg-gray-50 text-gray-600 uppercase text-xs font-medium">
+                  <tr>
+                    <th className="py-3 px-4">Order ID</th>
+                    <th className="py-3 px-4">Customer</th>
+                    <th className="py-3 px-4">Email</th>
+                    <th className="py-3 px-4 text-center">Date</th>
+                    <th className="py-3 px-4 text-center">Total</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="py-3 px-4 text-center">Payment</th>
+                    <th className="py-3 px-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-700">
+                  {orders.map((order) => (
+                    <tr
+                      key={order._id}
+                      className="border-b border-gray-200 hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4 font-mono text-gray-800">
+                        #{order._id.slice(-6)}
+                      </td>
+                      <td className="py-3 px-4">
+                        {order.shippingDetails.fullName}
+                      </td>
+                      <td className="py-3 px-4">
+                        {order.shippingDetails.email || "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {new Date(order.orderDate).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 px-4 text-center font-semibold">
+                        ৳{order.totalPrice.toFixed(2)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                            order.status === "Pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : order.status === "Processing"
+                              ? "bg-blue-100 text-blue-700"
+                              : order.status === "Shipped"
+                              ? "bg-purple-100 text-purple-700"
+                              : order.status === "Delivered"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                      {/* <td className="py-3 px-4 text-center">
+                        {["bkash", "adminBkash"].includes(
+                          order.paymentMethod
+                        ) ? (
+                          <div className="flex flex-col items-center space-y-1">
+                            <span
+                              className={`font-semibold ${
+                                order.paymentMethod === "adminBkash"
+                                  ? "text-purple-600"
+                                  : "text-pink-600"
+                              }`}
+                            >
+                              {order.paymentMethod === "adminBkash"
+                                ? "Bkash (Admin)"
+                                : "Bkash"}
+                            </span>
+
+                            {order.paymentMethod === "adminBkash" && (
+                              <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold">
+                                Paid to Admin
+                              </span>
+                            )}
+
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded">
+                                {order.transactionId || "N/A"}
+                              </span>
+
+                              {order.transactionId && (
+                                <div className="relative">
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(
+                                        order.transactionId!
+                                      );
+                                      setCopiedOrderId(order._id);
+                                      setTimeout(
+                                        () => setCopiedOrderId(null),
+                                        2000
+                                      );
+                                    }}
+                                    className="text-pink-600 hover:text-pink-800 transition"
+                                    aria-label="Copy Transaction ID"
+                                  >
+                                    <Copy className="w-4 h-4" strokeWidth={2} />
+                                  </button>
+
+                                  <AnimatePresence>
+                                    {copiedOrderId === order._id && (
+                                      <motion.div
+                                        key="tooltip"
+                                        initial={{ opacity: 0, y: -8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -8 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded shadow z-10 whitespace-nowrap"
+                                      >
+                                        কপি হয়েছে!
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-800 font-medium">COD</span>
+                        )}
+                      </td> */}
+
+                      <PaymentCell order={order} refetch={fetchOrders} />
+
+                      <td className="py-3 px-4">
+                        <div className="flex flex-wrap justify-center gap-2">
                           {order.status !== "Delivered" &&
                             order.status !== "Canceled" && (
                               <>
                                 {order.status === "Pending" && (
                                   <button
-                                    className="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                                    className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-md"
                                     onClick={() =>
-                                      updateOrderStatus(order._id, "Pending")
+                                      updateOrderStatus(order._id, "Processing")
                                     }
                                   >
                                     Processing
@@ -319,9 +401,9 @@ const AdminOrders: React.FC = () => {
                                 )}
                                 {order.status === "Processing" && (
                                   <button
-                                    className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
+                                    className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1 rounded-md"
                                     onClick={() =>
-                                      updateOrderStatus(order._id, "Processing")
+                                      updateOrderStatus(order._id, "Shipped")
                                     }
                                   >
                                     Shipped
@@ -329,9 +411,9 @@ const AdminOrders: React.FC = () => {
                                 )}
                                 {order.status === "Shipped" && (
                                   <button
-                                    className="text-xs bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                                    className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-md"
                                     onClick={() =>
-                                      updateOrderStatus(order._id, "Shipped")
+                                      updateOrderStatus(order._id, "Delivered")
                                     }
                                   >
                                     Delivered
@@ -341,26 +423,27 @@ const AdminOrders: React.FC = () => {
                             )}
                           {order.status !== "Delivered" && (
                             <button
-                              className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                              className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md"
                               onClick={() => deleteOrder(order._id)}
                             >
                               Cancel
                             </button>
                           )}
                           <button
-                            className="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600"
+                            className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-md"
                             onClick={() => router.push(`orders/${order._id}`)}
                           >
-                            View Details
+                            View
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )
+          </div>
+        ) : null
       )}
 
       <ToastContainer />

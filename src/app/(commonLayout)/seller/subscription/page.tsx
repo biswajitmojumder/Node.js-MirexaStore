@@ -73,9 +73,7 @@ const SubscriptionSeller = () => {
 
   useEffect(() => {
     toast.promise(
-      axios.get(
-        "https://mirexa-store-backend.vercel.app/api/subscription/plans"
-      ),
+      axios.get("https://api.mirexastore.com/api/subscription/plans"),
       {
         loading: <Loading></Loading>,
         success: (res) => {
@@ -90,12 +88,9 @@ const SubscriptionSeller = () => {
   useEffect(() => {
     if (!token) return;
     toast.promise(
-      axios.get(
-        "https://mirexa-store-backend.vercel.app/api/subscription/my-requests",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      ),
+      axios.get("https://api.mirexastore.com/api/subscription/my-requests", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
       {
         loading: "Loading your subscriptions...",
         success: (res) => {
@@ -113,7 +108,7 @@ const SubscriptionSeller = () => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/profile/${email}`
+          `https://api.mirexastore.com/api/seller/profile/${email}`
         );
         const validTill = new Date(res.data.data.validTill);
         const now = new Date();
@@ -165,7 +160,7 @@ const SubscriptionSeller = () => {
     try {
       await toast.promise(
         axios.post(
-          "https://mirexa-store-backend.vercel.app/api/subscription/request",
+          "https://api.mirexastore.com/api/subscription/request",
           {
             planId: selectedPlan._id,
             planTitle: selectedPlan.title,
@@ -191,7 +186,7 @@ const SubscriptionSeller = () => {
       setTransactionId("");
 
       const res = await axios.get(
-        "https://mirexa-store-backend.vercel.app/api/subscription/my-requests",
+        "https://api.mirexastore.com/api/subscription/my-requests",
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -35,6 +35,8 @@ interface ShippingDetails {
 }
 
 interface Order {
+  transactionId: string;
+  paymentMethod: string;
   totalPrice: any;
   shippingCost: any;
   _id: string;
@@ -65,7 +67,7 @@ const OrderHistory: React.FC = () => {
   const fetchProductDetails = async (productId: string) => {
     try {
       const response = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/product/history/${productId}`
+        `https://api.mirexastore.com/api/product/history/${productId}`
       );
       return response.data.data;
     } catch (err) {
@@ -85,7 +87,7 @@ const OrderHistory: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/checkout/order/${userId}`,
+        `https://api.mirexastore.com/api/checkout/order/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -207,7 +209,7 @@ const OrderHistory: React.FC = () => {
 
       // Send the review to the backend with the necessary data
       const response = await Axios.post(
-        "https://mirexa-store-backend.vercel.app/api/reviews/create",
+        "https://api.mirexastore.com/api/reviews/create",
         reviewData,
         {
           headers: {
@@ -290,6 +292,7 @@ const OrderHistory: React.FC = () => {
                 >
                   {order.status}
                 </p>
+
                 <p className="text-xl font-medium text-gray-700">
                   Total:{" "}
                   <span className="text-xl font-semibold">
@@ -297,7 +300,24 @@ const OrderHistory: React.FC = () => {
                   </span>
                 </p>
               </div>
+              <p className="text-sm text-gray-600">
+                Payment Method:{" "}
+                <span className="font-medium text-gray-800">
+                  {order.paymentMethod === "adminBkash" ||
+                  order.paymentMethod === "admin"
+                    ? "bKash"
+                    : order.paymentMethod === "cod"
+                    ? "Cash on Delivery"
+                    : order.paymentMethod || "N/A"}
+                </span>
+              </p>
 
+              <p className="text-sm text-gray-600">
+                Transaction ID:{" "}
+                <span className="font-medium text-gray-800">
+                  {order.transactionId || "N/A"}
+                </span>
+              </p>
               <div className="mt-6 space-y-6">
                 <h4 className="text-xl font-semibold">Items</h4>
                 {order.items.map((item: OrderItem) => (

@@ -92,7 +92,7 @@ const ProfileDropdown = () => {
 
       try {
         const res = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/profile/${user.email}`
+          `https://api.mirexastore.com/api/seller/profile/${user.email}`
         );
         setSellerSlug(res.data?.data?.brand?.slug || "");
         console.log(res);

@@ -18,6 +18,13 @@ import {
   StickyNote,
   ShoppingCart,
 } from "lucide-react";
+
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+  }
+}
+
 type CartItem = {
   productId: string;
   name: string;
@@ -73,6 +80,7 @@ const CheckoutPage = () => {
   const [finalBkashNumber, setFinalBkashNumber] = useState("017XXXXXXXX");
   const [isFirstOrder, setIsFirstOrder] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isMultipleSellers, setIsMultipleSellers] = useState(false);
   const router = useRouter();
   type FormDataType = {
     [key: string]: any;
@@ -129,7 +137,7 @@ const CheckoutPage = () => {
   const checkFirstOrder = async (userId: string) => {
     try {
       const response = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/checkout/check-first-order/${userId}`
+        `https://api.mirexastore.com/api/checkout/check-first-order/${userId}`
       );
       setIsFirstOrder(response.data.isFirstOrder);
     } catch (error: any) {
@@ -173,8 +181,8 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (paymentMethod === "bkash" && !transactionId) {
-      toast.error("Please enter your Bkash transaction ID.");
+    if (["bkash", "adminBkash"].includes(paymentMethod) && !transactionId) {
+      toast.error("অনুগ্রহ করে আপনার বিকাশ Transaction ID লিখুন।");
       return;
     }
 
@@ -221,11 +229,14 @@ const CheckoutPage = () => {
           shippingDetails: formData,
           deliveryNote: formData.deliveryNote,
           paymentMethod: paymentMethod,
-          transactionId: paymentMethod === "bkash" ? transactionId : null,
+          transactionId: ["bkash", "adminBkash"].includes(paymentMethod)
+            ? transactionId
+            : null,
         };
+
         console.log(orderData);
         const response = await axios.post(
-          "https://mirexa-store-backend.vercel.app/api/checkout",
+          "https://api.mirexastore.com/api/checkout",
           orderData,
           {
             headers: {
@@ -240,6 +251,27 @@ const CheckoutPage = () => {
 
       await Promise.all(orderPromises);
 
+      // ✅ GA4 purchase event fire korchi ekhane
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "purchase", {
+          transaction_id: Date.now().toString(), // unique id
+          value:
+            cartItems.reduce(
+              (acc, item) => acc + item.price * item.quantity,
+              0
+            ) + shippingCost,
+          currency: "BDT",
+          shipping: shippingCost,
+          items: cartItems.map((item) => ({
+            item_id: item.productId,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            item_brand: item.sellerName,
+          })),
+        });
+      }
+
       toast.success("✅ All orders placed successfully!");
       localStorage.removeItem("cart");
       window.dispatchEvent(new Event("cartUpdated"));
@@ -251,6 +283,7 @@ const CheckoutPage = () => {
       setLoading(false);
     }
   };
+
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCity = e.target.value;
     setFormData({ ...formData, city: selectedCity });
@@ -277,6 +310,12 @@ const CheckoutPage = () => {
       : sellerBkashNumber || "017XXXXXXXX";
 
     setFinalBkashNumber(number);
+
+    // ✅ Admin Bkash হলে আলাদা ভাবে চিহ্নিত করা
+    // if (isMultipleSellers) {
+    //   setPaymentMethod("adminBkash");
+    // }
+    setIsMultipleSellers(isMultipleSellers);
   }, [cartItems, sellerBkashNumber]);
 
   const handleCopy = () => {
@@ -551,8 +590,15 @@ const CheckoutPage = () => {
                         type="radio"
                         name="paymentMethod"
                         value="bkash"
-                        checked={paymentMethod === "bkash"}
-                        onChange={() => setPaymentMethod("bkash")}
+                        checked={
+                          paymentMethod === "bkash" ||
+                          paymentMethod === "adminBkash"
+                        }
+                        onChange={() =>
+                          setPaymentMethod(
+                            isMultipleSellers ? "adminBkash" : "bkash"
+                          )
+                        }
                         className="accent-blue-600"
                       />
                       Bkash Payment / বিকাশ পেমেন্ট
@@ -560,7 +606,8 @@ const CheckoutPage = () => {
                   </div>
 
                   {/* Show Bkash Payment Instructions */}
-                  {paymentMethod === "bkash" && (
+                  {(paymentMethod === "bkash" ||
+                    paymentMethod === "adminBkash") && (
                     <div className="mt-4 bg-pink-50 border border-pink-200 p-4 rounded-md shadow-sm">
                       <p className="text-sm text-gray-800 mb-2 leading-6">
                         📲 অনুগ্রহ করে মোট{" "}

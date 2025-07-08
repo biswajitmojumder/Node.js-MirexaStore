@@ -9,9 +9,7 @@ export async function generateMetadata({ params }: { params: tParams }) {
   const { id } = await params;
 
   try {
-    const res = await fetch(
-      `https://mirexa-store-backend.vercel.app/api/product/${id}`
-    );
+    const res = await fetch(`https://api.mirexastore.com/api/product/${id}`);
     if (!res.ok) {
       return {
         title: "Product Not Found - MirexaStore",
@@ -54,7 +52,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
   const { id } = await params;
 
   try {
-    const apiUrl = `https://mirexa-store-backend.vercel.app/api/product/${id}`;
+    const apiUrl = `https://api.mirexastore.com/api/product/${id}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
@@ -69,7 +67,7 @@ const ProductPage = async ({ params }: { params: tParams }) => {
       return; // Ensure the function exits here
     }
 
-    const relatedProductsUrl = `https://mirexa-store-backend.vercel.app/api/product/category/${productData.data.category}`;
+    const relatedProductsUrl = `https://api.mirexastore.com/api/product/category/${productData.data.category}`;
     const relatedProductsResponse = await fetch(relatedProductsUrl);
 
     const relatedProducts = relatedProductsResponse.ok

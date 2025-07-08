@@ -26,7 +26,7 @@ const ProfilePage = () => {
 
       try {
         const userResponse = await Axios.get(
-          "https://mirexa-store-backend.vercel.app/api/users/me",
+          "https://api.mirexastore.com/api/users/me",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -40,7 +40,7 @@ const ProfilePage = () => {
         if (user?.email) {
           try {
             const sellerResponse = await Axios.get(
-              `https://mirexa-store-backend.vercel.app/api/seller/profile/${user.email}`
+              `https://api.mirexastore.com/api/seller/profile/${user.email}`
             );
 
             if (sellerResponse?.data?.data?.brand) {

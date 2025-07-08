@@ -43,7 +43,7 @@ const UserViewPage = () => {
 
       try {
         const response = await axios.get<{ data: UserType[] }>(
-          "https://mirexa-store-backend.vercel.app/api/users",
+          "https://api.mirexastore.com/api/users",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -84,7 +84,7 @@ const UserViewPage = () => {
     toast
       .promise(
         axios.patch(
-          `https://mirexa-store-backend.vercel.app/api/users/${userId}/role/seller`,
+          `https://api.mirexastore.com/api/users/${userId}/role/seller`,
           {},
           {
             headers: {
@@ -127,14 +127,11 @@ const UserViewPage = () => {
 
     toast
       .promise(
-        axios.delete(
-          `https://mirexa-store-backend.vercel.app/api/users/${deleteUserId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        ),
+        axios.delete(`https://api.mirexastore.com/api/users/${deleteUserId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
         {
           pending: "Deleting user...",
           success: "User deleted successfully",

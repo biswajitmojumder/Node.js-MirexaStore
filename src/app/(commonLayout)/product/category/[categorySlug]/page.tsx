@@ -42,9 +42,7 @@ const CategoryProductsPage = () => {
   useEffect(() => {
     if (categorySlug) {
       axios
-        .get(
-          `https://mirexa-store-backend.vercel.app/api/product/category/${categorySlug}`
-        )
+        .get(`https://api.mirexastore.com/api/product/category/${categorySlug}`)
         .then((res) => {
           if (Array.isArray(res.data.data)) {
             setProducts(res.data.data);

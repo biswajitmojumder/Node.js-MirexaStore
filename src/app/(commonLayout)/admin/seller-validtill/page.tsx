@@ -47,7 +47,7 @@ function SellerValidTill() {
       setError(null);
       try {
         const res = await fetch(
-          "https://mirexa-store-backend.vercel.app/api/seller/all-sellers",
+          "https://api.mirexastore.com/api/seller/all-sellers",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -95,7 +95,7 @@ function SellerValidTill() {
     setError(null);
     try {
       const res = await fetch(
-        `https://mirexa-store-backend.vercel.app/api/seller/extend-validity/${email}`,
+        `https://api.mirexastore.com/api/seller/extend-validity/${email}`,
         {
           method: "PATCH",
           headers: {

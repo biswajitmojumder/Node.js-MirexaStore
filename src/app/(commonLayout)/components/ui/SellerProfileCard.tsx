@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
+import { SellerDescription } from "./sellerProfileDescription";
 
 type SellerProfileCardProps = {
   sellerProfile: any;
@@ -90,11 +91,7 @@ export default function SellerProfileCard({
       </div>
 
       {/* Description */}
-      {sellerProfile.brand.description && (
-        <p className="mt-5 text-sm text-gray-700 leading-relaxed">
-          {sellerProfile.brand.description}
-        </p>
-      )}
+      <SellerDescription description={sellerProfile.brand.description} />
 
       {/* Location & Rating */}
       <div className="mt-4 text-sm text-gray-500 space-y-1">

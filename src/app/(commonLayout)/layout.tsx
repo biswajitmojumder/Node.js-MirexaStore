@@ -5,32 +5,48 @@ import ClickSparkWrapper from "./components/reactbit/ClickSparkWrapper/ClickSpar
 
 export const metadata: Metadata = {
   title:
-    "MirexaStore | Online Shopping for Everyone – Electronics, Fashion, Home & More",
+    "MirexaStore | Best Online Shopping in Bangladesh – Fashion, Electronics & More",
   description:
-    "Shop online at MirexaStore – your all-in-one destination for electronics, fashion, home essentials, gadgets, beauty products, and more. Discover top deals and quality items for men, women, kids, and every age group. Fast delivery, secure checkout, and great prices – everything you need, all in one place.",
+    "Buy top-quality electronics, fashion, home decor, and more online from MirexaStore. Trusted online shopping in Bangladesh with fast delivery, secure payment & great prices.",
+
+  keywords: [
+    "online shopping Bangladesh",
+    "MirexaStore",
+    "buy electronics online",
+    "fashion store BD",
+    "home essentials BD",
+    "best online store Bangladesh",
+    "gadget store Bangladesh",
+    "online fashion shop BD",
+  ],
+
   openGraph: {
-    title:
-      "MirexaStore | Online Shopping for Everyone – Electronics, Fashion, Home & More",
+    title: "MirexaStore | Best Online Shopping in Bangladesh",
     description:
-      "Shop online at MirexaStore – your all-in-one destination for electronics, fashion, home essentials, gadgets, beauty products, and more. Discover top deals and quality items for men, women, kids, and every age group. Fast delivery, secure checkout, and great prices – everything you need, all in one place.",
-    url: "https://mirexa-store.vercel.app/",
+      "Shop at MirexaStore – Bangladesh’s most trusted destination for electronics, fashion, and daily essentials. Quality guaranteed. Fast shipping nationwide.",
+    url: "https://mirexastore.com/",
     siteName: "MirexaStore",
     images: [
       {
-        url: "../favicon.ico", // Must be absolute URL
-        width: 1200,
-        height: 630,
-        alt: "MirexaStore – Online Shopping for Everyone",
+        url: "https://res.cloudinary.com/dwg8d0bfp/image/upload/v1751225263/mirexastore_dksqoq.png", // ✅ Your provided logo
+        width: 800,
+        height: 800,
+        alt: "MirexaStore Logo – Online Shopping Bangladesh",
       },
     ],
     type: "website",
+    locale: "en_US",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "MirexaStore | Online Shopping for Everyone",
+    title: "MirexaStore | Trusted Online Store in Bangladesh",
     description:
-      "Shop online at MirexaStore – your all-in-one destination for electronics, fashion, home essentials, gadgets, beauty products, and more.",
-    images: ["../favicon.ico"],
+      "Electronics, fashion, home & lifestyle – discover everything at MirexaStore. Fast shipping, easy checkout, and amazing deals await.",
+    images: [
+      "https://res.cloudinary.com/dwg8d0bfp/image/upload/v1751225263/mirexastore_dksqoq.png",
+    ],
+    creator: "@mirexastore", // optional
   },
 };
 

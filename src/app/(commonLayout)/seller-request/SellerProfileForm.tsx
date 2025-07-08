@@ -55,7 +55,7 @@ const SellerProfileForm = () => {
         if (!email) return;
 
         const res = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/profile/${email}`
+          `https://api.mirexastore.com/api/seller/profile/${email}`
         );
 
         const brand = res.data?.data?.brand;
@@ -210,7 +210,7 @@ const SellerProfileForm = () => {
       // 🔍 Log the payload before submitting
 
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/seller/create-profile",
+        "https://api.mirexastore.com/api/seller/create-profile",
         payload,
         {
           headers: {

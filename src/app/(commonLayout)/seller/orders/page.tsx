@@ -20,6 +20,9 @@ interface ShippingDetails {
 }
 
 interface Order {
+  adminBkashStatus: string;
+  transactionId: string;
+  paymentMethod: string;
   _id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
@@ -33,6 +36,8 @@ const SellerOrders: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
+
   const router = useRouter();
 
   const auth = useAppSelector((state) => state.auth);
@@ -59,7 +64,7 @@ const SellerOrders: React.FC = () => {
       }
 
       const response = await Axios.get(
-        "https://mirexa-store-backend.vercel.app/api/checkout",
+        "https://api.mirexastore.com/api/checkout",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -96,7 +101,7 @@ const SellerOrders: React.FC = () => {
       }
 
       await Axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/checkout/update-status/${orderId}`,
+        `https://api.mirexastore.com/api/checkout/update-status/${orderId}`,
         { status: newStatus },
         {
           headers: {
@@ -133,7 +138,7 @@ const SellerOrders: React.FC = () => {
                 if (!token) return;
 
                 await Axios.delete(
-                  `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+                  `https://api.mirexastore.com/api/checkout/${orderId}`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -179,7 +184,7 @@ const SellerOrders: React.FC = () => {
 
       // 1. Fetch Order details
       const { data: orderRes } = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+        `https://api.mirexastore.com/api/checkout/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -196,7 +201,7 @@ const SellerOrders: React.FC = () => {
 
       // 2. Fetch seller Profile
       const { data: sellerRes } = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/seller/profile/${auth.user.email}`,
+        `https://api.mirexastore.com/api/seller/profile/${auth.user.email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -252,7 +257,7 @@ const SellerOrders: React.FC = () => {
 
       // 4. Send Courier Request
       await Axios.post(
-        `https://mirexa-store-backend.vercel.app/api/courier/request`,
+        `https://api.mirexastore.com/api/courier/request`,
         courierPayload,
         {
           headers: {
@@ -320,24 +325,26 @@ const SellerOrders: React.FC = () => {
     );
 
   return (
-    <div className="max-w-6xl mx-auto my-8 px-4">
-      <h1 className="text-3xl font-semibold text-center mb-6">
+    <div className="max-w-7xl mx-auto my-8 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-semibold text-center mb-8 text-gray-900">
         Seller Order Management
       </h1>
 
       {/* Search & Filter */}
-      <div className="mb-4 flex justify-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
         <input
           type="text"
           placeholder="Search by Order ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
+          className="w-full sm:w-60 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          aria-label="Search by Order ID"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
+          className="w-full sm:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          aria-label="Filter by Status"
         >
           <option value="">All Status</option>
           <option value="Pending">Pending</option>
@@ -348,58 +355,190 @@ const SellerOrders: React.FC = () => {
         </select>
       </div>
 
-      <div className="overflow-x-auto sm:overflow-x-visible">
-        <table className="min-w-full bg-white shadow-md rounded-lg">
-          <thead>
-            <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">Order ID</th>
-              <th className="py-3 px-6 text-left">Customer</th>
-              <th className="py-3 px-6 text-center">Date</th>
-              <th className="py-3 px-6 text-center">Total</th>
-              <th className="py-3 px-6 text-center">Status</th>
-              <th className="py-3 px-6 text-center">Actions</th>
+      <div className="overflow-x-auto shadow rounded-lg">
+        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+          <thead className="bg-gray-50">
+            <tr>
+              {[
+                "Order ID",
+                "Customer",
+                "Date",
+                "Total",
+                "Status",
+                "Payment Method",
+                "Actions",
+              ].map((heading) => (
+                <th
+                  key={heading}
+                  className="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                >
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="text-gray-700 text-sm">
+
+          <tbody className="text-gray-700 text-sm divide-y divide-gray-100">
             {filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No orders found.
+                <td
+                  colSpan={7}
+                  className="py-10 text-center text-gray-500 italic"
+                >
+                  কোনো অর্ডার পাওয়া যায়নি।
                 </td>
               </tr>
             ) : (
               filteredOrders.map((order) => (
                 <tr
                   key={order._id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
+                  className="hover:bg-gray-50 transition-colors"
                 >
-                  <td className="py-3 px-6">{order._id.slice(-6)}</td>
-                  <td className="py-3 px-6">
+                  {/* Order ID */}
+                  <td className="py-3 px-4 whitespace-nowrap font-mono text-indigo-600">
+                    #{order._id.slice(-6)}
+                  </td>
+
+                  {/* Customer */}
+                  <td className="py-3 px-4">
                     {order.shippingDetails.fullName}
                   </td>
-                  <td className="py-3 px-6 text-center">
+
+                  {/* Date */}
+                  <td className="py-3 px-4 text-center">
                     {new Date(order.orderDate).toLocaleDateString()}
                   </td>
-                  <td className="py-3 px-6 text-center">
+
+                  {/* Total */}
+                  <td className="py-3 px-4 text-center font-semibold">
                     ৳{order.totalPrice.toFixed(2)}
                   </td>
-                  <td className="py-3 px-6 text-center">
+
+                  {/* Status */}
+                  <td className="py-3 px-4 text-center">
                     <span
-                      className={`py-1 px-3 rounded-full text-xs font-semibold ${
+                      className={`inline-block py-1 px-3 rounded-full text-xs font-semibold ${
                         order.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-600"
+                          ? "bg-yellow-100 text-yellow-700"
                           : order.status === "Processing"
-                          ? "bg-blue-100 text-blue-600"
+                          ? "bg-blue-100 text-blue-700"
                           : order.status === "Shipped"
-                          ? "bg-purple-100 text-purple-600"
+                          ? "bg-purple-100 text-purple-700"
                           : order.status === "Delivered"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
                       }`}
                     >
                       {order.status}
                     </span>
                   </td>
+
+                  {/* Payment Method */}
+                  <td className="py-3 px-4 text-center">
+                    {["bkash", "adminBkash"].includes(order.paymentMethod) ? (
+                      <div className="flex flex-col items-center space-y-1">
+                        <span
+                          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                            order.paymentMethod === "adminBkash"
+                              ? "bg-purple-200 text-purple-900"
+                              : "bg-pink-200 text-pink-900"
+                          }`}
+                        >
+                          {order.paymentMethod === "adminBkash"
+                            ? "Bkash (Admin)"
+                            : "Bkash"}
+                        </span>
+
+                        {order.paymentMethod === "adminBkash" && (
+                          <div className="flex space-x-1 text-[10px] text-purple-800">
+                            <span className="bg-purple-300 px-2 py-0.5 rounded-full font-medium">
+                              Paid to Admin
+                            </span>
+                            {order.adminBkashStatus === "paidToSeller" && (
+                              <span className="flex items-center gap-1 bg-green-300 px-2 py-0.5 rounded-full font-medium text-green-900">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={3}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                Paid to Seller
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Only show transactionId & copy button if paymentMethod is "bkash" */}
+                        {order.paymentMethod === "bkash" && (
+                          <div className="flex items-center space-x-2 mt-1">
+                            <code className="bg-gray-100 text-gray-800 font-mono text-sm px-3 py-1 rounded select-all break-words max-w-[150px]">
+                              {order.transactionId || "N/A"}
+                            </code>
+
+                            {order.transactionId && (
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    order.transactionId
+                                  );
+                                  setCopiedOrderId(order._id);
+                                  setTimeout(
+                                    () => setCopiedOrderId(null),
+                                    2000
+                                  );
+                                }}
+                                title="কপি করুন"
+                                className="text-xs bg-pink-600 hover:bg-pink-700 text-white rounded px-3 py-1 transition"
+                              >
+                                কপি
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {copiedOrderId === order._id && (
+                          <div className="relative">
+                            <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded shadow whitespace-nowrap pointer-events-none">
+                              কপি হয়েছে!
+                            </div>
+                          </div>
+                        )}
+
+                        {order.paymentMethod === "bkash" &&
+                          order.adminBkashStatus === "paidToSeller" && (
+                            <span className="flex items-center gap-1 text-[10px] font-medium bg-green-200 text-green-900 rounded-full px-3 py-1 mt-2">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={3}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              Paid to Seller
+                            </span>
+                          )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-700 font-medium">COD</span>
+                    )}
+                  </td>
+
+                  {/* Actions */}
                   <td className="py-3 px-6 text-center space-x-2">
                     {order.status !== "Delivered" &&
                       order.status !== "Canceled" && (
@@ -430,7 +569,7 @@ const SellerOrders: React.FC = () => {
                                 className="text-xs bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600"
                                 onClick={() => courierRequest(order._id)}
                               >
-                                Courier Request
+                                Courier Req
                               </button>
                             </>
                           )}

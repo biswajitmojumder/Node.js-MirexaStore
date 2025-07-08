@@ -201,7 +201,7 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/product",
+        "https://api.mirexastore.com/api/product",
         finalData,
         {
           headers: {

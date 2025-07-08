@@ -23,7 +23,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/auth/register",
+        "https://api.mirexastore.com/api/auth/register",
         {
           name,
           email,

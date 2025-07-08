@@ -31,7 +31,7 @@ const AdminProductPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://mirexa-store-backend.vercel.app/api/product"
+          "https://api.mirexastore.com/api/product"
         );
 
         const allProducts = response.data.data;
@@ -105,7 +105,7 @@ const AdminProductPage = () => {
 
     try {
       await axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
+        `https://api.mirexastore.com/api/product/status/${deleteProductId}`, // Use PATCH instead of DELETE
         {},
         {
           headers: {

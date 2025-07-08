@@ -24,7 +24,7 @@ const InactiveDraftProductPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "https://mirexa-store-backend.vercel.app/api/product/inactive-draft",
+          "https://api.mirexastore.com/api/product/inactive-draft",
           {
             headers: {
               Authorization: `Bearer ${token}`,

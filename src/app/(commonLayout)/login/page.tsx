@@ -40,7 +40,7 @@ const Login = () => {
 
       try {
         const response = await axios.get(
-          "https://mirexa-store-backend.vercel.app/api/users/me",
+          "https://api.mirexastore.com/api/users/me",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -84,7 +84,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/auth/login",
+        "https://api.mirexastore.com/api/auth/login",
         { email, password }
       );
 
@@ -120,7 +120,7 @@ const Login = () => {
     const currentPath = window.location.pathname + window.location.search;
 
     window.open(
-      `https://mirexa-store-backend.vercel.app/api/auth/google?redirect=${encodeURIComponent(
+      `https://api.mirexastore.com/api/auth/google?redirect=${encodeURIComponent(
         currentPath
       )}`,
       "_self"

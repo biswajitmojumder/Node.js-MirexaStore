@@ -52,10 +52,10 @@ const AdminAnalytics = () => {
         }
 
         const [ordersResponse, usersResponse] = await Promise.all([
-          Axios.get("https://mirexa-store-backend.vercel.app/api/checkout", {
+          Axios.get("https://api.mirexastore.com/api/checkout", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          Axios.get("https://mirexa-store-backend.vercel.app/api/users", {
+          Axios.get("https://api.mirexastore.com/api/users", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

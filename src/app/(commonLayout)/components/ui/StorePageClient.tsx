@@ -57,14 +57,14 @@ export default function StorePageClient({ seller }: { seller: SellerProfile }) {
       try {
         // Always get followers count
         const followersRes = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/followers/${seller._id}`
+          `https://api.mirexastore.com/api/seller/followers/${seller._id}`
         );
         setFollowersCount(followersRes.data.followers || 0);
 
         // Conditionally get isFollowing only if token exists
         if (token) {
           const isFollowingRes = await axios.get(
-            `https://mirexa-store-backend.vercel.app/api/seller/is-following?sellerId=${seller._id}`,
+            `https://api.mirexastore.com/api/seller/is-following?sellerId=${seller._id}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -82,9 +82,7 @@ export default function StorePageClient({ seller }: { seller: SellerProfile }) {
 
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(
-          "https://mirexa-store-backend.vercel.app/api/product"
-        );
+        const res = await axios.get("https://api.mirexastore.com/api/product");
 
         const allProducts = res.data.data || [];
 
@@ -126,7 +124,7 @@ export default function StorePageClient({ seller }: { seller: SellerProfile }) {
 
     try {
       await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/seller/${url}`,
+        `https://api.mirexastore.com/api/seller/${url}`,
         { sellerId: seller._id },
         {
           headers: {
@@ -204,7 +202,7 @@ export default function StorePageClient({ seller }: { seller: SellerProfile }) {
       </div>
 
       {brand.description && (
-        <p className="text-gray-700 leading-relaxed text-base mb-8 max-w-2xl">
+        <p className="text-gray-700 leading-relaxed text-base mb-8 max-w-2xl whitespace-pre-wrap">
           {brand.description}
         </p>
       )}

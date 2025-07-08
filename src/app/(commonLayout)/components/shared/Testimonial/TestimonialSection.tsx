@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 const fetchInitialReviews = async (page: number = 1, limit: number = 6) => {
   const res = await fetch(
-    `https://mirexa-store-backend.vercel.app/api/reviews/all?page=${page}&limit=${limit}`,
+    `https://api.mirexastore.com/api/reviews/all?page=${page}&limit=${limit}`,
     { cache: "no-store" }
   );
   const data = await res.json();

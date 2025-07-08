@@ -88,7 +88,7 @@ const OrderDetails: React.FC = () => {
       }
 
       const response = await Axios.get(
-        `https://mirexa-store-backend.vercel.app/api/checkout/${orderId}`,
+        `https://api.mirexastore.com/api/checkout/${orderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -100,7 +100,7 @@ const OrderDetails: React.FC = () => {
         orderData.items.map(async (item) => {
           try {
             const productRes = await Axios.get(
-              `https://mirexa-store-backend.vercel.app/api/product/${item.productId}`
+              `https://api.mirexastore.com/api/product/${item.productId}`
             );
             return { ...item, product: productRes.data.data };
           } catch {

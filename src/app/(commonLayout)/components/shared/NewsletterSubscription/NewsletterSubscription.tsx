@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { MailIcon, CheckCircleIcon } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -18,7 +17,7 @@ export default function Newsletter() {
 
     try {
       const res = await fetch(
-        "https://mirexa-store-backend.vercel.app/api/newsletter/subscribe",
+        "https://api.mirexastore.com/api/newsletter/subscribe",
         {
           method: "POST",
           headers: {
@@ -48,19 +47,8 @@ export default function Newsletter() {
       {/* ✅ Toast Container */}
       <Toaster position="top-right" reverseOrder={false} />
 
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true }}
-        className="relative bg-white py-16 px-6 sm:px-10 rounded-3xl shadow-xl my-12 overflow-hidden"
-      >
-        <motion.div
-          initial={{ scale: 0.9 }}
-          whileInView={{ scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-          className="max-w-3xl mx-auto text-center"
-        >
+      <section className="relative bg-white py-16 px-6 sm:px-10 rounded-3xl shadow-xl my-12 overflow-hidden">
+        <div className="max-w-3xl mx-auto text-center">
           <MailIcon className="w-12 h-12 mx-auto mb-4 text-[#F85606]" />
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 text-gray-900">
             Join Our Newsletter
@@ -91,39 +79,12 @@ export default function Newsletter() {
           </form>
 
           {success && (
-            <motion.p
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="mt-6 text-green-600 text-lg flex justify-center items-center gap-2"
-            >
+            <p className="mt-6 text-green-600 text-lg flex justify-center items-center gap-2">
               <CheckCircleIcon className="w-5 h-5" /> Thanks for subscribing!
-            </motion.p>
+            </p>
           )}
-        </motion.div>
-
-        {/* Optional Decoration */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 0.15, scale: 1 }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          className="absolute top-0 left-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
-        ></motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 0.15, scale: 1 }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          className="absolute bottom-0 right-0 w-32 h-32 bg-pink-100 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"
-        ></motion.div>
-      </motion.section>
+        </div>
+      </section>
     </>
   );
 }

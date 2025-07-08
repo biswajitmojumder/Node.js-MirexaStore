@@ -62,7 +62,7 @@ const SellerRequestPage = () => {
       if (!userInfo?.user?._id) return setFetching(false);
       try {
         const res = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller-request/my-requests`,
+          `https://api.mirexastore.com/api/seller-request/my-requests`,
           { headers: { Authorization: `Bearer ${userInfo?.token}` } }
         );
         if (res.data?.data) setExistingRequest(res.data.data[0]);
@@ -90,7 +90,7 @@ const SellerRequestPage = () => {
 
     try {
       const res = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/seller-request/create`,
+        `https://api.mirexastore.com/api/seller-request/create`,
         {
           name: formData.name,
           email: formData.email,

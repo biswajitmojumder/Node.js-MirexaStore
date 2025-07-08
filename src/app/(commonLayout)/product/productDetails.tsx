@@ -37,7 +37,7 @@ interface ProductDetailsProps {
       stockQuantity: number;
       category: string;
       productImages: string[];
-      discountPrice?: number;
+      discountPrice?: number | undefined;
       brand: string;
       tags: string[];
       variants: Variant[];
@@ -53,13 +53,13 @@ interface ProductDetailsProps {
   };
 }
 
-interface Variant {
-  color: string;
-  size: string;
-  price: number;
-  stock: number;
-  images: string[];
-}
+type Variant = {
+  color?: string;
+  size?: string;
+  price?: number;
+  stock?: number;
+  images?: string[];
+};
 
 export interface ReviewReply {
   _id: string;
@@ -111,19 +111,51 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     product.data.productImages[0]
   );
 
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const rawDesc = product?.data?.longDescription;
+  const longDesc = typeof rawDesc === "string" ? rawDesc : "";
+  const isLong = longDesc.length > 300;
+  const displayDesc =
+    isLong && !showFullDescription ? longDesc.slice(0, 300) + "..." : longDesc;
+
   const [reviews, setReviews] = useState<Review[]>([]);
 
+  // variant part
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [variantPrice, setVariantPrice] = useState<number | null>(null);
+  const [variantStock, setVariantStock] = useState<number | null>(null);
 
   const handleVariantChange = (type: string, value: string) => {
-    setSelectedVariant(
-      (prev: any) =>
-        ({
-          ...prev,
-          [type]: value,
-        } as Variant)
-    );
+    const updatedVariant = {
+      ...selectedVariant,
+      [type]: value,
+    };
+
+    setSelectedVariant(updatedVariant);
+
+    // Find matched variant (color-only, size-only, or both)
+    const matchedVariant = product.data.variants.find((variant) => {
+      const matchColor = updatedVariant.color
+        ? variant.color === updatedVariant.color
+        : true;
+
+      const matchSize = updatedVariant.size
+        ? variant.size === updatedVariant.size
+        : true;
+
+      return matchColor && matchSize;
+    });
+
+    if (matchedVariant) {
+      setVariantPrice(matchedVariant.price ?? null);
+      setVariantStock(matchedVariant.stock ?? null);
+    } else {
+      setVariantPrice(null);
+      setVariantStock(null);
+    }
   };
+
   useEffect(() => {
     const fetchsellerData = async () => {
       if (!product.data.sellerEmail) return;
@@ -132,10 +164,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         // Step 1: Get profile & rating
         const [profileRes, ratingRes] = await Promise.all([
           axios.get(
-            `https://mirexa-store-backend.vercel.app/api/seller/profile/${product.data.sellerEmail}`
+            `https://api.mirexastore.com/api/seller/profile/${product.data.sellerEmail}`
           ),
           axios.get(
-            `https://mirexa-store-backend.vercel.app/api/seller/rating/${product.data.sellerEmail}`
+            `https://api.mirexastore.com/api/seller/rating/${product.data.sellerEmail}`
           ),
         ]);
 
@@ -147,7 +179,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
         // Step 2: Get followers count
         const followersRes = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/followers/${sellerId}`
+          `https://api.mirexastore.com/api/seller/followers/${sellerId}`
         );
         setFollowersCount(followersRes.data.followers); // always show this ✅
 
@@ -155,7 +187,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
         const token = localStorage.getItem("accessToken");
         if (token) {
           const isFollowingRes = await axios.get(
-            `https://mirexa-store-backend.vercel.app/api/seller/is-following?sellerId=${sellerId}`,
+            `https://api.mirexastore.com/api/seller/is-following?sellerId=${sellerId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -173,7 +205,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     fetchsellerData();
   }, [product.data.sellerEmail]);
-  console.log(sellerProfile?.data?.whatsapp);
+
   const handleFollowToggle = async () => {
     const token = localStorage.getItem("accessToken");
 
@@ -189,7 +221,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     try {
       const url = isFollowing ? "unfollow" : "follow";
       await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/seller/${url}`,
+        `https://api.mirexastore.com/api/seller/${url}`,
         { sellerId: sellerProfile._id },
         {
           headers: {
@@ -209,7 +241,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/reviews/${product.data._id}`
+          `https://api.mirexastore.com/api/reviews/${product.data._id}`
         );
         setReviews(response.data.data);
       } catch (error) {
@@ -269,13 +301,20 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     }
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // চেক করো একই product+user+variant আগেই আছে কিনা
     const existingCartItem = cart.find(
       (item: any) =>
         item.productId === product.data._id &&
         item.userId === userId &&
-        item.color === selectedVariant?.color &&
-        item.size === selectedVariant?.size
+        item.color === (selectedVariant?.color ?? "") &&
+        item.size === (selectedVariant?.size ?? "")
     );
+
+    // price & stock: variant থেকে নাও যদি না থাকে তাহলে product এর ডিফল্ট
+    const totalPrice =
+      variantPrice ?? product.data.discountPrice ?? product.data.price;
+    const stockQuantityToUse = variantStock ?? product.data.stockQuantity;
 
     if (existingCartItem) {
       toast.error(
@@ -290,13 +329,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       productId: product.data._id,
       quantity: cartQuantity,
       name: product.data.name,
-      price: product.data.price,
+      price: totalPrice,
       sellerEmail: product?.data?.sellerEmail,
       sellerName: product?.data?.sellerName,
-      stockQuantity: selectedVariant?.stock,
+      stockQuantity: stockQuantityToUse,
       productImages: product.data.productImages,
-      color: selectedVariant?.color,
-      size: selectedVariant?.size,
+      color: selectedVariant?.color ?? "",
+      size: selectedVariant?.size ?? "",
     };
 
     cart.push(cartItem);
@@ -322,11 +361,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     const user = JSON.parse(storedUser);
     const userId = user._id;
 
-    // ✅ Check if color and size are selected if they exist
+    // Variant validation
     if (product.data.variants) {
       if (
         product.data.variants.some((variant) => variant.color) &&
-        !selectedVariant?.color
+        (!selectedVariant?.color || selectedVariant.color.trim() === "")
       ) {
         toast.error("Please select color.");
         return;
@@ -334,25 +373,30 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
       if (
         product.data.variants.some((variant) => variant.size) &&
-        !selectedVariant?.size
+        (!selectedVariant?.size || selectedVariant.size.trim() === "")
       ) {
         toast.error("Please select size.");
         return;
       }
     }
 
+    // Price & stock: selectedVariant থেকে নাও, না থাকলে product data থেকে
+    const priceToUse =
+      variantPrice ?? product.data.discountPrice ?? product.data.price;
+    const stockToUse = variantStock ?? product.data.stockQuantity;
+
     const cartItem = {
       userId,
       productId: product.data._id,
       quantity: cartQuantity,
       name: product.data.name,
-      price: product.data.price,
+      price: priceToUse,
       sellerEmail: product?.data?.sellerEmail,
       sellerName: product?.data?.sellerName,
-      stockQuantity: selectedVariant?.stock,
+      stockQuantity: stockToUse,
       productImages: product.data.productImages,
-      color: selectedVariant?.color,
-      size: selectedVariant?.size,
+      color: selectedVariant?.color ?? "",
+      size: selectedVariant?.size ?? "",
     };
 
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -361,8 +405,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
       (item: any) =>
         item.productId === product.data._id &&
         item.userId === userId &&
-        item.color === selectedVariant?.color &&
-        item.size === selectedVariant?.size
+        item.color === (selectedVariant?.color ?? "") &&
+        item.size === (selectedVariant?.size ?? "")
     );
 
     if (!existingCartItem) {
@@ -398,7 +442,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/reviews/like/${reviewId}`,
+        `https://api.mirexastore.com/api/reviews/like/${reviewId}`,
         {},
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
@@ -425,7 +469,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       const { data } = await axios.post(
-        `https://mirexa-store-backend.vercel.app/api/reviews/reply/${reviewId}`,
+        `https://api.mirexastore.com/api/reviews/reply/${reviewId}`,
         { reply: replyComment, userName: auth.user.name },
         {
           headers: {
@@ -468,7 +512,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
 
     try {
       await axios.delete(
-        `https://mirexa-store-backend.vercel.app/api/reviews/delete-reply/${reviewId}/${replyId}`,
+        `https://api.mirexastore.com/api/reviews/delete-reply/${reviewId}/${replyId}`,
         { headers: { Authorization: `Bearer ${auth.token}` } }
       );
 
@@ -569,40 +613,50 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               <div className="w-full md:w-1/2">
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center gap-6">
-                    {product.data.discountPrice ? (
-                      <>
-                        <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
-                          ৳ {product.data.discountPrice}
-                        </span>
-                        <span className="text-lg text-gray-500 line-through transition-all duration-300 ease-in-out">
-                          ৳ {product.data.price}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
+                    <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
+                      ৳{" "}
+                      {variantPrice !== null
+                        ? variantPrice
+                        : product.data.discountPrice ?? product.data.price}
+                    </span>
+
+                    {/* মূল দাম দেখাও যদি discount price থাকে */}
+                    {variantPrice === null && product.data.discountPrice && (
+                      <span className="text-lg text-gray-500 line-through transition-all duration-300 ease-in-out">
                         ৳ {product.data.price}
                       </span>
                     )}
+
                     <span className="text-sm text-gray-500 font-medium">
-                      {product.data.stockQuantity > 0
+                      {variantStock !== null
+                        ? variantStock > 0
+                          ? `${variantStock} in stock`
+                          : "Out of stock"
+                        : product.data.stockQuantity > 0
                         ? `${product.data.stockQuantity} in stock`
                         : "Out of stock"}
                     </span>
                   </div>
 
-                  <p className="text-base text-gray-700">
+                  <div className="text-base text-gray-700 whitespace-pre-line">
                     {product.data.description}
-                  </p>
+                  </div>
 
                   {/* Brand and Tags */}
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    {product.data.brand && (
+                    {product.data.brand && product.data.brand.trim() !== "" && (
                       <span>Brand: {product.data.brand}</span>
                     )}
 
-                    {product.data.tags && product.data.tags.length > 0 && (
-                      <span>Tags: {product.data.tags.join(", ")}</span>
-                    )}
+                    {product.data.tags &&
+                      product.data.tags.some((tag) => tag.trim() !== "") && (
+                        <span>
+                          Tags:{" "}
+                          {product.data.tags
+                            .filter((tag) => tag.trim() !== "")
+                            .join(", ")}
+                        </span>
+                      )}
                   </div>
 
                   {/* Variants */}
@@ -643,12 +697,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                                         style={{
                                           backgroundColor: variant.color,
                                         }}
-                                        onClick={() =>
-                                          handleVariantChange(
-                                            "color",
-                                            variant.color
-                                          )
-                                        }
+                                        onClick={() => {
+                                          if (
+                                            typeof variant.color === "string" &&
+                                            variant.color.trim() !== ""
+                                          ) {
+                                            handleVariantChange(
+                                              "color",
+                                              variant.color
+                                            );
+                                          }
+                                        }}
                                       />
                                     )
                                 )}
@@ -681,12 +740,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                                             ? "bg-orange-600 text-white border-orange-600 scale-110"
                                             : "border-gray-300 hover:bg-orange-100"
                                         }`}
-                                        onClick={() =>
-                                          handleVariantChange(
-                                            "size",
-                                            variant.size
-                                          )
-                                        }
+                                        onClick={() => {
+                                          if (
+                                            typeof variant.size === "string" &&
+                                            variant.size.trim() !== ""
+                                          ) {
+                                            handleVariantChange(
+                                              "size",
+                                              variant.size
+                                            );
+                                          }
+                                        }}
                                       >
                                         {variant.size}
                                       </label>
@@ -766,74 +830,80 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
             )}
 
             {/* Additional Information */}
-            <div className="mt-8 text-gray-700 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
-              {product.data.longDescription ||
-              product.data.warranty ||
-              product.data.weight ? (
-                <>
-                  {product.data.longDescription && (
-                    <section className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        📄 Product Details
-                      </h4>
-                      <p className="text-base text-gray-600 leading-relaxed">
-                        {product.data.longDescription}
-                      </p>
-                    </section>
-                  )}
-
-                  {product.data.warranty && (
-                    <section className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        🛠 Warranty
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        {product.data.warranty}
-                      </p>
-                    </section>
-                  )}
-
-                  {product.data.weight && (
-                    <section className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                        ⚖️ Weight
-                      </h4>
-                      <p className="text-base text-gray-600">
-                        {product.data.weight} kg
-                      </p>
-                    </section>
-                  )}
-
-                  {Array.isArray(product.data.features) &&
-                    product.data.features.length > 0 && (
-                      <section className="mb-6">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                          🔍 Key Features
-                        </h4>
-                        <ul className="list-none space-y-2">
-                          {product.data.features.map(
-                            (feature: string, index: number) => (
-                              <li
-                                key={index}
-                                className="flex items-start text-base text-gray-600"
-                              >
-                                <span className="mr-2 mt-1 text-green-500">
-                                  ✅
-                                </span>
-                                <span>{feature}</span>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </section>
+            {(longDesc ||
+              product?.data?.warranty ||
+              product?.data?.weight ||
+              (Array.isArray(product.data.features) &&
+                product.data.features.length > 0)) && (
+              <div className="mt-8 text-gray-700 bg-white p-4 border border-gray-200 rounded-lg shadow-md">
+                {longDesc && (
+                  <section className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      📄 Product Details
+                    </h4>
+                    <p className="text-base text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {displayDesc}
+                    </p>
+                    {isLong && (
+                      <button
+                        onClick={() =>
+                          setShowFullDescription(!showFullDescription)
+                        }
+                        className="mt-2 text-sm text-blue-600 hover:underline focus:outline-none"
+                      >
+                        {showFullDescription ? "See less ▲" : "See more ▼"}
+                      </button>
                     )}
-                </>
-              ) : (
-                <p className="text-base text-gray-600">
-                  No product details available at the moment.
-                </p>
-              )}
-            </div>
+                  </section>
+                )}
+
+                {product?.data?.warranty && (
+                  <section className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      🛠 Warranty
+                    </h4>
+                    <p className="text-base text-gray-600">
+                      {product.data.warranty}
+                    </p>
+                  </section>
+                )}
+
+                {product?.data?.weight && (
+                  <section className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                      ⚖️ Weight
+                    </h4>
+                    <p className="text-base text-gray-600">
+                      {product.data.weight} kg
+                    </p>
+                  </section>
+                )}
+
+                {Array.isArray(product.data.features) &&
+                  product.data.features.length > 0 && (
+                    <section className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                        🔍 Key Features
+                      </h4>
+                      <ul className="list-none space-y-2">
+                        {product.data.features.map(
+                          (feature: string, index: number) => (
+                            <li
+                              key={index}
+                              className="flex items-start text-base text-gray-600"
+                            >
+                              <span className="mr-2 mt-1 text-green-500">
+                                ✅
+                              </span>
+                              <span>{feature}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </section>
+                  )}
+              </div>
+            )}
           </div>
 
           <div className="pt-10">

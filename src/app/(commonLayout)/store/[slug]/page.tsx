@@ -36,7 +36,7 @@ interface PageProps {
 async function getsellerBySlug(slug: string): Promise<SellerProfile | null> {
   try {
     const res = await fetch(
-      `https://mirexa-store-backend.vercel.app/api/seller/slug/${slug}`,
+      `https://api.mirexastore.com/api/seller/slug/${slug}`,
       { cache: "no-store" }
     );
 

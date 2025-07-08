@@ -61,7 +61,7 @@ const SellerAnalytics = () => {
         }
 
         const response = await Axios.get(
-          "https://mirexa-store-backend.vercel.app/api/checkout",
+          "https://api.mirexastore.com/api/checkout",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

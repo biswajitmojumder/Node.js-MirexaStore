@@ -33,7 +33,7 @@ function SubscriptionRequestsPage() {
     try {
       setLoading(true);
       const res = await axios.get(
-        "https://mirexa-store-backend.vercel.app/api/subscription/pending",
+        "https://api.mirexastore.com/api/subscription/pending",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ function SubscriptionRequestsPage() {
     setActionLoading(id);
     try {
       await axios.patch(
-        `https://mirexa-store-backend.vercel.app/api/subscription/${action}/${id}`,
+        `https://api.mirexastore.com/api/subscription/${action}/${id}`,
         {},
         {
           headers: {

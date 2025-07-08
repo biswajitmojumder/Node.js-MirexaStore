@@ -30,7 +30,7 @@ const AdminSellerRequests: React.FC = () => {
     const fetchRequests = async () => {
       try {
         const response = await axios.get<{ data: sellerRequest[] }>(
-          "https://mirexa-store-backend.vercel.app/api/seller-request/all",
+          "https://api.mirexastore.com/api/seller-request/all",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -79,7 +79,7 @@ const AdminSellerRequests: React.FC = () => {
   const handleApprove = async (requestId: string) => {
     try {
       await axios.put(
-        `https://mirexa-store-backend.vercel.app/api/seller-request/approve/${requestId}`,
+        `https://api.mirexastore.com/api/seller-request/approve/${requestId}`,
         {},
         {
           headers: {
@@ -100,7 +100,7 @@ const AdminSellerRequests: React.FC = () => {
   const handleReject = async (requestId: string) => {
     try {
       await axios.put(
-        `https://mirexa-store-backend.vercel.app/api/seller-request/reject/${requestId}`,
+        `https://api.mirexastore.com/api/seller-request/reject/${requestId}`,
         {},
         {
           headers: {

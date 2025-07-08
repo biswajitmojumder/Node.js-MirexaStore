@@ -3,7 +3,7 @@
 import ProductCart from "../components/ui/ProductCart";
 
 const Product = async () => {
-  const apiUrl = "https://mirexa-store-backend.vercel.app/api/product";
+  const apiUrl = "https://api.mirexastore.com/api/product";
 
   const response = await fetch(apiUrl, {
     next: { revalidate: 60 }, // ✅ Revalidate every 60 seconds

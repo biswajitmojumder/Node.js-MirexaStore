@@ -42,7 +42,7 @@ const AffiliateProductsPage = () => {
     const fetchAffiliateProducts = async () => {
       try {
         const response = await axios.get(
-          "https://mirexa-store-backend.vercel.app/api/product/affiliate-products",
+          "https://api.mirexastore.com/api/product/affiliate-products",
           {
             headers: {
               Authorization: `Bearer ${token}`,

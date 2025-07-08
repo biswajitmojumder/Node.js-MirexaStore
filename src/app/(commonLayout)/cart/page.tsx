@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
-
+// Declare dataLayer type globally
+declare global {
+  interface Window {
+    dataLayer: Record<string, any>[];
+  }
+}
 type CartItem = {
   userId: string;
   productId: string;
@@ -41,6 +46,24 @@ const CartPage = () => {
     : totalPriceBeforeDiscount;
 
   const handleCheckoutRedirect = () => {
+    if (typeof window !== "undefined") {
+      window.dataLayer = window.dataLayer || [];
+
+      window.dataLayer.push({
+        event: "begin_checkout",
+        ecommerce: {
+          currency: "BDT",
+          value: totalPrice,
+          items: cartItems.map((item) => ({
+            item_id: item.productId,
+            item_name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+        },
+      });
+    }
+
     router.push("/cart/checkout");
   };
 
@@ -112,13 +135,16 @@ const CartPage = () => {
     });
   }, []);
 
-  const handleRemoveItem = useCallback((id: string) => {
-    const updatedCart = cartItems.filter((item) => item.productId !== id);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCartItems(updatedCart);
-    toast.success("Item removed from cart!");
-    window.dispatchEvent(new Event("cartUpdated"));
-  }, [cartItems]);
+  const handleRemoveItem = useCallback(
+    (id: string) => {
+      const updatedCart = cartItems.filter((item) => item.productId !== id);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      setCartItems(updatedCart);
+      toast.success("Item removed from cart!");
+      window.dispatchEvent(new Event("cartUpdated"));
+    },
+    [cartItems]
+  );
 
   const showConfirmationModal = (id: string) => {
     setShowConfirmation(id);
@@ -138,9 +164,34 @@ const CartPage = () => {
     }
   }, [quantityUpdated]);
 
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      if (typeof window !== "undefined") {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "view_cart",
+          ecommerce: {
+            currency: "BDT",
+            value: totalPrice,
+            items: cartItems.map((item) => ({
+              item_id: item.productId,
+              item_name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+            })),
+          },
+        });
+      }
+    }
+  }, [cartItems, totalPrice]);
+
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <Toaster position="top-center" gutter={10} containerStyle={{ top: "70px", zIndex: 9999 }} />
+      <Toaster
+        position="top-center"
+        gutter={10}
+        containerStyle={{ top: "70px", zIndex: 9999 }}
+      />
 
       <div className="container mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">

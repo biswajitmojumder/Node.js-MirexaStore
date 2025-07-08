@@ -148,7 +148,7 @@ const AddProduct = () => {
     const fetchBrandSlug = async () => {
       try {
         const { data } = await axios.get(
-          `https://mirexa-store-backend.vercel.app/api/seller/profile/${user?.email}`
+          `https://api.mirexastore.com/api/seller/profile/${user?.email}`
         );
         console.log("data", data);
         setBrandSlug(data?.data?.brand?.slug); // set the brand slug
@@ -288,7 +288,7 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://mirexa-store-backend.vercel.app/api/product",
+        "https://api.mirexastore.com/api/product",
         finalData,
         {
           headers: {
@@ -342,36 +342,66 @@ const AddProduct = () => {
     name: keyof ProductData,
     type = "text",
     Icon?: LucideIcon,
-    iconColor = "#F6550C"
+    iconColor = "#F6550C",
+    required = false
+  ) => {
+    const isMultiline = name === "description" || name === "longDescription";
+
+    return (
+      <div className="flex flex-col gap-1">
+        {/* Label with asterisk if required */}
+        <label className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
+          {label}
+          {required && <span className="text-red-500">*</span>}
+        </label>
+
+        <div className="relative">
+          {Icon && (
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Icon className="w-5 h-5" color={iconColor} />
+            </div>
+          )}
+
+          {isMultiline ? (
+            <textarea
+              name={name}
+              required={required}
+              value={productData[name] as string}
+              onChange={handleInputChange}
+              rows={5}
+              className={`w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 ${
+                Icon ? "pl-11" : ""
+              }`}
+            />
+          ) : (
+            <input
+              type={type}
+              name={name}
+              required={required}
+              value={productData[name] === 0 ? "" : productData[name]}
+              onChange={handleInputChange}
+              className={`w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200 ${
+                Icon ? "pl-11" : ""
+              }`}
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderArrayField = (
+    label: string,
+    state: string[],
+    setter: any,
+    required = false
   ) => (
     <div className="flex flex-col gap-2">
-      <label className="font-medium text-gray-700">{label}</label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-            {Icon && (
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon className="w-5 h-5" color={iconColor} />
-              </div>
-            )}
-          </div>
-        )}
-        <input
-          type={type}
-          name={name}
-          value={productData[name] === 0 ? "" : productData[name]}
-          onChange={handleInputChange}
-          className={`w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            Icon ? "pl-10" : ""
-          }`}
-        />
-      </div>
-    </div>
-  );
+      <label className="font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
 
-  const renderArrayField = (label: string, state: string[], setter: any) => (
-    <div className="flex flex-col gap-2">
-      <label className="font-medium text-gray-700">{label}</label>
       {label === "Product Images" ? (
         <>
           <input
@@ -379,6 +409,7 @@ const AddProduct = () => {
             multiple
             onChange={handleImageUpload}
             className="w-full p-3 border border-gray-300 rounded-md"
+            required={required}
           />
           <div className="flex flex-wrap gap-4 mt-4">
             {state.map((img, idx) => (
@@ -399,6 +430,7 @@ const AddProduct = () => {
                 value={val}
                 onChange={(e) => handleArrayChange(setter, idx, e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={required}
               />
               <button
                 type="button"
@@ -500,20 +532,22 @@ const AddProduct = () => {
         <div className="text-center text-2xl font-semibold text-gray-800">
           Add Product
         </div>
-        {renderInputField("Product Name", "name", "text", Tag, "#F6550C")}
+        {renderInputField("Product Name", "name", "text", Tag, "#F6550C", true)}
         {renderInputField(
           "Slug (Editable)",
           "slug",
           "text",
           Sliders,
-          "#F6550C"
+          "#F6550C",
+          true
         )}
         {renderInputField(
           "Description",
           "description",
           "text",
           FileText,
-          "#F6550C"
+          "#F6550C",
+          true
         )}
         {renderInputField(
           "Long Description",
@@ -546,26 +580,35 @@ const AddProduct = () => {
         )}
         {renderInputField("Weight", "weight", "number", Weight, "#F6550C")}
         {renderInputField("Warranty", "warranty", "text", Shield, "#F6550C")}
-        {renderInputField("Price", "price", "number", DollarSign, "#F6550C")}
+        {renderInputField(
+          "Price",
+          "price",
+          "number",
+          DollarSign,
+          "#F6550C",
+          true
+        )}
         {renderInputField(
           "After Discount Price",
           "discountPrice",
           "number",
           DollarSign,
-          "#F6550C"
+          "#F6550C",
+          true
         )}
         {renderInputField(
           "Stock Quantity",
           "stockQuantity",
           "number",
           Layers,
-          "#F6550C"
+          "#F6550C",
+          true
         )}
         <label
-          className="block text-sm font-medium mb-1"
+          className="block text-base font-medium mb-1"
           style={{ color: "#F6550C" }}
         >
-          Category
+          Category<span className="text-red-500 ml-1">*</span>
         </label>
         <select
           className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
@@ -591,7 +634,12 @@ const AddProduct = () => {
 
         {renderInputField("Brand", "brand", "text", Tag, "#F6550C")}
         {renderInputField("Video URL", "videoUrl", "text", Video, "#F6550C")}
-        {renderArrayField("Product Images", productImages, setProductImages)}
+        {renderArrayField(
+          "Product Images",
+          productImages,
+          setProductImages,
+          true
+        )}
         {renderArrayField("Tags", tags, setTags)}
         {/* colour picker */}
         <div className="mb-6">
@@ -656,11 +704,12 @@ const AddProduct = () => {
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
         {renderInputField(
-          "Affiliate Link",
+          "Affiliate Link (এই ঘরটি শুধু তখনই পূরণ করুন যদি প্রোডাক্টটি affiliate টাইপের হয়। না হলে ফাঁকা রাখুন।)",
           "affiliateLink",
           "text",
           Link,
-          "#F6550C"
+          "#F6550C",
+          false
         )}
 
         {/* checkboxes and variants remain the same */}

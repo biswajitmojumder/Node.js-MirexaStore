@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://mirexastore.com
+
+# Sitemaps
+Sitemap: https://mirexastore.com/sitemap.xml
