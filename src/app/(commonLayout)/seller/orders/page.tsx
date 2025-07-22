@@ -23,7 +23,7 @@ interface Order {
   adminBkashStatus: string;
   transactionId: string;
   paymentMethod: string;
-  _id: string;
+  id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
   totalPrice: number;
@@ -218,7 +218,7 @@ const SellerOrders: React.FC = () => {
 
       // 3. Build Courier Payload
       const courierPayload = {
-        orderId: order._id,
+        orderId: order.id,
         customer: {
           fullName: order.shippingDetails.fullName,
           phone: order.shippingDetails.phone,
@@ -302,7 +302,7 @@ const SellerOrders: React.FC = () => {
   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchesQuery = order._id
+    const matchesQuery = order.id
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "" || order.status === statusFilter;
@@ -391,12 +391,12 @@ const SellerOrders: React.FC = () => {
             ) : (
               filteredOrders.map((order) => (
                 <tr
-                  key={order._id}
+                  key={order.id}
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Order ID */}
                   <td className="py-3 px-4 whitespace-nowrap font-mono text-indigo-600">
-                    #{order._id.slice(-6)}
+                    #{order.id.slice(-6)}
                   </td>
 
                   {/* Customer */}
@@ -489,7 +489,7 @@ const SellerOrders: React.FC = () => {
                                   navigator.clipboard.writeText(
                                     order.transactionId
                                   );
-                                  setCopiedOrderId(order._id);
+                                  setCopiedOrderId(order.id);
                                   setTimeout(
                                     () => setCopiedOrderId(null),
                                     2000
@@ -504,7 +504,7 @@ const SellerOrders: React.FC = () => {
                           </div>
                         )}
 
-                        {copiedOrderId === order._id && (
+                        {copiedOrderId === order.id && (
                           <div className="relative">
                             <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded shadow whitespace-nowrap pointer-events-none">
                               কপি হয়েছে!
@@ -548,7 +548,7 @@ const SellerOrders: React.FC = () => {
                             <button
                               className="text-xs bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
                               onClick={() =>
-                                updateOrderStatus(order._id, "Pending")
+                                updateOrderStatus(order.id, "Pending")
                               }
                             >
                               Processing
@@ -559,7 +559,7 @@ const SellerOrders: React.FC = () => {
                               <button
                                 className="text-xs bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
                                 onClick={() =>
-                                  updateOrderStatus(order._id, "Processing")
+                                  updateOrderStatus(order.id, "Processing")
                                 }
                               >
                                 Shipped
@@ -567,7 +567,7 @@ const SellerOrders: React.FC = () => {
                               {/* Courier Request Button */}
                               <button
                                 className="text-xs bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600"
-                                onClick={() => courierRequest(order._id)}
+                                onClick={() => courierRequest(order.id)}
                               >
                                 Courier Req
                               </button>
@@ -577,7 +577,7 @@ const SellerOrders: React.FC = () => {
                             <button
                               className="text-xs bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
                               onClick={() =>
-                                updateOrderStatus(order._id, "Shipped")
+                                updateOrderStatus(order.id, "Shipped")
                               }
                             >
                               Delivered
@@ -589,14 +589,14 @@ const SellerOrders: React.FC = () => {
                     {order.status !== "Delivered" && (
                       <button
                         className="text-xs bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                        onClick={() => deleteOrder(order._id)}
+                        onClick={() => deleteOrder(order.id)}
                       >
                         Cancel
                       </button>
                     )}
                     <button
                       className="text-xs bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600"
-                      onClick={() => router.push(`orders/${order._id}`)}
+                      onClick={() => router.push(`orders/${order.id}`)}
                     >
                       View Details
                     </button>

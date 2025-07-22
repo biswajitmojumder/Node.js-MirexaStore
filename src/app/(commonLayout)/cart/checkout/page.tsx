@@ -26,6 +26,8 @@ declare global {
 }
 
 type CartItem = {
+  deliveryCharges: any;
+  defaultDeliveryCharge: any;
   productId: string;
   name: string;
   price: number;
@@ -57,12 +59,78 @@ type UserType = {
   address: string;
 };
 
+type ObjectId = {
+  $oid: string;
+};
+
+type Variant = {
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock: number;
+  images: string[];
+  _id: ObjectId;
+};
+
+type DeliveryCharge = {
+  division: string;
+  district: string;
+  charge: number;
+  _id: ObjectId;
+};
+
+type ProductType = {
+  _id: ObjectId;
+  name: string;
+  description: string;
+  price: number;
+  stockQuantity: number;
+  category: string;
+  longDescription: string;
+  materials: string;
+  careInstructions: string;
+  specifications: string;
+  additionalInfo: string;
+  slug: string;
+  type: string;
+  discountPrice: number;
+  brand: string;
+  tags: string[];
+  variants: Variant[];
+  productImages: string[];
+  videoUrl: string;
+  deliveryCharges: DeliveryCharge[];
+  defaultDeliveryCharge: number;
+  reviews: any[]; // যদি রিভিউ এর টাইপ জানো, সেটা এখানে দিয়ে দাও
+  rating: number;
+  totalReviews: number;
+  status: string;
+  isFeatured: boolean;
+  isNewArrival: boolean;
+  sellerName: string;
+  sellerEmail: string;
+  sellerNumber: number;
+  features: string[];
+  weight: number;
+  warranty: string;
+  deletedBy: null | string; // এখানে null বা string হতে পারে
+  isDeleted: boolean;
+  createdAt: {
+    $date: string; // ISO string
+  };
+  updatedAt: {
+    $date: string;
+  };
+  __v: number;
+};
+
 const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [shippingCost, setShippingCost] = useState(60); // Default shipping for Dhaka
-  const [singleShipping, setSingleShipping] = useState(60);
+  const [shippingCost, setShippingCost] = useState(0); // Default shipping for Dhaka
+  const [singleShipping, setSingleShipping] = useState(0);
   const [user, setUser] = useState<UserType | null>(null);
   const [formData, setFormData] = useState<FormDataType>({
     fullName: "",
@@ -81,24 +149,86 @@ const CheckoutPage = () => {
   const [isFirstOrder, setIsFirstOrder] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isMultipleSellers, setIsMultipleSellers] = useState(false);
+  const [fetchedProducts, setFetchedProducts] = React.useState<ProductType[]>(
+    []
+  );
+  console.log(fetchedProducts);
   const router = useRouter();
   type FormDataType = {
     [key: string]: any;
   };
-  const cities = [
-    "Dhaka",
-    "Sylhet",
-    "Chittagong",
-    "Rajshahi",
-    "Khulna",
-    "Barisal",
-    "Rangpur",
-    "Mymensingh",
-    "Comilla",
-    "Narsingdi",
-    "Tangail",
-    "Bogra",
-  ];
+  const divisionDistrictMap: Record<string, string[]> = {
+    Dhaka: [
+      "Dhaka",
+      "Gazipur",
+      "Kishoreganj",
+      "Manikganj",
+      "Munshiganj",
+      "Narayanganj",
+      "Narsingdi",
+      "Rajbari",
+      "Shariatpur",
+      "Tangail",
+      "Faridpur",
+      "Gopalganj",
+      "Madaripur",
+    ],
+    Chattogram: [
+      "Chattogram",
+      "Cox's Bazar",
+      "Bandarban",
+      "Khagrachari",
+      "Rangamati",
+      "Brahmanbaria",
+      "Cumilla",
+      "Chandpur",
+      "Feni",
+      "Lakshmipur",
+      "Noakhali",
+    ],
+    Khulna: [
+      "Khulna",
+      "Bagerhat",
+      "Satkhira",
+      "Jessore",
+      "Jhenaidah",
+      "Magura",
+      "Meherpur",
+      "Narail",
+      "Chuadanga",
+      "Kushtia",
+    ],
+    Rajshahi: [
+      "Rajshahi",
+      "Chapai Nawabganj",
+      "Naogaon",
+      "Natore",
+      "Pabna",
+      "Joypurhat",
+      "Bogura",
+      "Sirajganj",
+    ],
+    Barisal: [
+      "Barisal",
+      "Barguna",
+      "Bhola",
+      "Jhalokati",
+      "Patuakhali",
+      "Pirojpur",
+    ],
+    Sylhet: ["Sylhet", "Habiganj", "Moulvibazar", "Sunamganj"],
+    Rangpur: [
+      "Rangpur",
+      "Dinajpur",
+      "Gaibandha",
+      "Kurigram",
+      "Lalmonirhat",
+      "Nilphamari",
+      "Panchagarh",
+      "Thakurgaon",
+    ],
+    Mymensingh: ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"],
+  };
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
@@ -189,6 +319,7 @@ const CheckoutPage = () => {
     setLoading(true);
 
     try {
+      // Group cart items by sellerEmail
       const itemsGroupedBySeller: Record<string, CartItem[]> = {};
       cartItems.forEach((item) => {
         if (!itemsGroupedBySeller[item.sellerEmail]) {
@@ -198,13 +329,37 @@ const CheckoutPage = () => {
       });
 
       const sellerEmails = Object.keys(itemsGroupedBySeller);
+
+      // Create an order per seller
       const orderPromises = sellerEmails.map(async (sellerEmail) => {
         const items = itemsGroupedBySeller[sellerEmail];
+
+        // Calculate total amount for this seller
         const totalAmount = items.reduce(
           (acc, item) => acc + item.price * item.quantity,
           0
         );
-        const shipping = shippingCost;
+
+        // Calculate shipping once per seller based on first product and delivery charges
+        let shipping = 0;
+        const firstItem = items[0];
+        const product = fetchedProducts.find((p) => {
+          const productId =
+            typeof p._id === "object" && "$oid" in p._id ? p._id.$oid : p._id;
+          return productId === firstItem.productId;
+        });
+
+        if (product) {
+          const matchedCharge = product.deliveryCharges?.find(
+            (dc) =>
+              dc.division?.toLowerCase() === formData.division.toLowerCase() &&
+              dc.district?.toLowerCase() === formData.district.toLowerCase()
+          );
+
+          shipping =
+            matchedCharge?.charge ?? product.defaultDeliveryCharge ?? 0;
+        }
+
         const grandTotal = totalAmount + shipping;
 
         const orderData = {
@@ -220,21 +375,22 @@ const CheckoutPage = () => {
             name: item.name || "",
             productImage: item.productImages || [],
           })),
-          totalPrice: totalAmount + singleShipping,
+          totalAmount,
+          totalPrice: totalAmount,
           shippingCost: shipping,
-          totalAmount: totalAmount,
-          grandTotal: grandTotal,
+          grandTotal,
           status: "Processing",
           orderDate: new Date().toISOString(),
           shippingDetails: formData,
           deliveryNote: formData.deliveryNote,
-          paymentMethod: paymentMethod,
+          paymentMethod,
           transactionId: ["bkash", "adminBkash"].includes(paymentMethod)
             ? transactionId
             : null,
         };
 
-        console.log(orderData);
+        console.log("📦 Final Order:", orderData);
+
         const response = await axios.post(
           "https://api.mirexastore.com/api/checkout",
           orderData,
@@ -251,17 +407,49 @@ const CheckoutPage = () => {
 
       await Promise.all(orderPromises);
 
-      // ✅ GA4 purchase event fire korchi ekhane
+      // GA4 purchase event tracking
       if (typeof window !== "undefined" && window.gtag) {
+        const cartTotal = cartItems.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        );
+
+        // Calculate total shipping across unique sellers
+        const uniqueSellers = new Set(
+          cartItems.map((item) => item.sellerEmail)
+        );
+        let totalShipping = 0;
+
+        uniqueSellers.forEach((sellerEmail) => {
+          const sellerItems = cartItems.filter(
+            (item) => item.sellerEmail === sellerEmail
+          );
+
+          const firstItem = sellerItems[0];
+          const product = fetchedProducts.find((p) => {
+            const productId =
+              typeof p._id === "object" && "$oid" in p._id ? p._id.$oid : p._id;
+            return productId === firstItem.productId;
+          });
+
+          if (product) {
+            const matchedCharge = product.deliveryCharges?.find(
+              (dc) =>
+                dc.division?.toLowerCase() ===
+                  formData.division.toLowerCase() &&
+                dc.district?.toLowerCase() === formData.district.toLowerCase()
+            );
+
+            totalShipping +=
+              matchedCharge?.charge ?? product.defaultDeliveryCharge ?? 0;
+          }
+        });
+
         window.gtag("event", "purchase", {
-          transaction_id: Date.now().toString(), // unique id
-          value:
-            cartItems.reduce(
-              (acc, item) => acc + item.price * item.quantity,
-              0
-            ) + shippingCost,
+          transaction_id: Date.now().toString(),
+          value: cartTotal + totalShipping,
           currency: "BDT",
-          shipping: shippingCost,
+          shipping: totalShipping,
           items: cartItems.map((item) => ({
             item_id: item.productId,
             item_name: item.name,
@@ -277,29 +465,105 @@ const CheckoutPage = () => {
       window.dispatchEvent(new Event("cartUpdated"));
       router.push("/order-history");
     } catch (error) {
-      console.error("Order placement failed:", error);
+      console.error("❌ Order placement failed:", error);
       toast.error("Order failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCity = e.target.value;
-    setFormData({ ...formData, city: selectedCity });
-  };
+  // const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const selectedCity = e.target.value;
+  //   setFormData({ ...formData, city: selectedCity });
+  // };
+
+  // const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const selectedCity = e.target.value;
+  //   setFormData((prev) => ({ ...prev, city: selectedCity }));
+  // };
+
+  // const handleDistrictChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const selectedDistrict = e.target.value;
+  //   setFormData((prev) => ({ ...prev, district: selectedDistrict }));
+  // };
+
+  // Backend theke product fetch
   useEffect(() => {
-    // শুধু তখনই শিপিং খরচ আপডেট হবে যখন কার্ট বা সিটি চেঞ্জ হবে
-    if (!formData.city) return; // city empty থাকলে কিছু করো না
+    async function fetchProducts() {
+      const productIds = [...new Set(cartItems.map((item) => item.productId))];
 
+      const productsData = await Promise.all(
+        productIds.map(
+          (id) =>
+            fetch(`https://api.mirexastore.com/api/product/details/${id}`)
+              .then((res) => res.json())
+              .then((data) => data?.data) // because response has { success, message, data }
+        )
+      );
+
+      setFetchedProducts(productsData.filter(Boolean)); // remove any undefined/null
+    }
+
+    if (cartItems.length > 0) {
+      fetchProducts();
+    } else {
+      setFetchedProducts([]);
+    }
+  }, [cartItems]);
+
+  // Shipping cost calculation
+  useEffect(() => {
+    if (
+      !formData.division ||
+      !formData.district ||
+      fetchedProducts.length === 0
+    )
+      return;
+
+    console.log("🔍 Starting shipping cost calculation...");
+    let totalShipping = 0;
+
+    // Calculate shipping once per unique seller (based on first product)
     const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
-    const sellerCount = uniqueSellers.size;
 
-    const costPerSeller = formData.city === "Dhaka" ? 60 : 120;
-    setSingleShipping(costPerSeller);
-    const totalShipping = sellerCount * costPerSeller;
+    uniqueSellers.forEach((sellerEmail) => {
+      const sellerItems = cartItems.filter(
+        (item) => item.sellerEmail === sellerEmail
+      );
+
+      const firstItem = sellerItems[0];
+      const matchedProduct = fetchedProducts.find((p) => {
+        const productId =
+          typeof p._id === "object" && "$oid" in p._id ? p._id.$oid : p._id;
+        return productId === firstItem.productId;
+      });
+
+      if (!matchedProduct) {
+        console.warn(`⚠️ Product not found for seller: ${sellerEmail}`);
+        return;
+      }
+
+      const matchedCharge = matchedProduct.deliveryCharges?.find(
+        (dc) =>
+          dc.division?.toLowerCase() === formData.division.toLowerCase() &&
+          dc.district?.toLowerCase() === formData.district.toLowerCase()
+      );
+
+      const baseShipping =
+        matchedCharge?.charge ?? matchedProduct.defaultDeliveryCharge ?? 0;
+
+      totalShipping += baseShipping; // Only one charge per seller
+    });
+
+    const averageShipping =
+      uniqueSellers.size > 0 ? totalShipping / uniqueSellers.size : 0;
+
+    console.log("✅ Total Shipping Cost:", totalShipping);
+    console.log("✅ Average Per Seller:", averageShipping);
+
+    setSingleShipping(averageShipping);
     setShippingCost(totalShipping);
-  }, [cartItems, formData.city]);
+  }, [fetchedProducts, formData.division, formData.district, cartItems]);
 
   useEffect(() => {
     const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
@@ -418,34 +682,40 @@ const CheckoutPage = () => {
                       )}
                     </div>
                   ))}
-
-                  {/* City Dropdown */}
+                  {/* বিভাগ */}
                   <div>
                     <label
-                      htmlFor="city"
+                      htmlFor="division"
                       className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      City / শহর
+                      Division / বিভাগ
                     </label>
                     <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
-                      <Landmark className="w-5 h-5 text-gray-500" />
+                      <MapPin className="w-5 h-5 text-gray-500" />
                       <select
-                        id="city"
-                        value={formData.city}
-                        onChange={handleCityChange}
+                        id="division"
+                        value={formData.division}
+                        onChange={(e) => {
+                          const selectedDivision = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            division: selectedDivision,
+                            district: "", // just reset district when division changes
+                          }));
+                        }}
                         className="w-full px-3 py-3 focus:outline-none bg-transparent"
                       >
-                        <option value="">Select a city</option>
-                        {cities.map((city, index) => (
-                          <option key={index} value={city}>
-                            {city}
+                        <option value="">Select a division</option>
+                        {Object.keys(divisionDistrictMap).map((division) => (
+                          <option key={division} value={division}>
+                            {division}
                           </option>
                         ))}
                       </select>
                     </div>
-                    {!formData.city && (
+                    {!formData.division && (
                       <p className="text-xs text-red-500 mt-1">
-                        City is required.
+                        Division is required.
                       </p>
                     )}
                   </div>
@@ -460,15 +730,27 @@ const CheckoutPage = () => {
                     </label>
                     <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
                       <MapPin className="w-5 h-5 text-gray-500" />
-                      <input
+                      <select
                         id="district"
-                        type="text"
                         value={formData.district}
                         onChange={(e) =>
-                          setFormData({ ...formData, district: e.target.value })
+                          setFormData((prev) => ({
+                            ...prev,
+                            district: e.target.value,
+                          }))
                         }
-                        className="w-full px-3 py-3 focus:outline-none"
-                      />
+                        disabled={!formData.division}
+                        className="w-full px-3 py-3 focus:outline-none bg-transparent"
+                      >
+                        <option value="">Select a district</option>
+                        {(divisionDistrictMap[formData.division] || []).map(
+                          (district) => (
+                            <option key={district} value={district}>
+                              {district}
+                            </option>
+                          )
+                        )}
+                      </select>
                     </div>
                     {!formData.district && (
                       <p className="text-xs text-red-500 mt-1">

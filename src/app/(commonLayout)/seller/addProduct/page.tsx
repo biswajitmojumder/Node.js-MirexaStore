@@ -28,6 +28,8 @@ import {
   Sliders,
   Percent,
 } from "lucide-react";
+import React from "react";
+import DeliveryChargesForm from "../../components/ui/deliveryCharges";
 
 // SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>
@@ -71,6 +73,12 @@ interface Variant {
   price: number;
   images: string[];
 }
+
+export type DeliveryCharge = {
+  division: string;
+  district: string;
+  charge: number;
+};
 
 // 🌟 Cloudinary Upload Function
 const uploadImageToCloudinary = async (file: File) => {
@@ -132,7 +140,18 @@ const AddProduct = () => {
   const [currentColor, setCurrentColor] = useState("#ff0000");
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
+  const [deliveryCharges, setDeliveryCharges] = React.useState<
+    DeliveryCharge[]
+  >([]);
+  const [defaultDeliveryCharge, setDefaultDeliveryCharge] = React.useState(0);
 
+  const handleDeliveryChange = (
+    charges: DeliveryCharge[],
+    defaultCharge: number
+  ) => {
+    setDeliveryCharges(charges);
+    setDefaultDeliveryCharge(defaultCharge);
+  };
   //colour select
 
   const addColor = () => {
@@ -283,10 +302,14 @@ const AddProduct = () => {
       sellerEmail,
       sellerName,
       sellerNumber,
+      deliveryCharges,
+      defaultDeliveryCharge,
     };
 
     setLoading(true);
+
     try {
+      console.log("data", finalData);
       const response = await axios.post(
         "https://api.mirexastore.com/api/product",
         finalData,
@@ -297,7 +320,6 @@ const AddProduct = () => {
           },
         }
       );
-
       if (response.status === 200) {
         toast.success("✅ Product added successfully!");
         resetForm();
@@ -305,7 +327,7 @@ const AddProduct = () => {
         setSelectedCategory("");
         setCustomCategory("");
       } else {
-        throw new Error("Failed to add product.");
+        throw new Error(response.data.message);
       }
     } catch (err: any) {
       console.error("Error adding product:", err);
@@ -619,6 +641,42 @@ const AddProduct = () => {
           <option value="Electronics">Electronics</option>
           <option value="Clothing">Clothing</option>
           <option value="Books">Books</option>
+          <option value="Home & Kitchen">Home & Kitchen</option>
+          <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+          <option value="Sports & Outdoors">Sports & Outdoors</option>
+          <option value="Toys & Games">Toys & Games</option>
+          <option value="Automotive">Automotive</option>
+          <option value="Health & Wellness">Health & Wellness</option>
+          <option value="Office Supplies">Office Supplies</option>
+          <option value="Jewelry & Accessories">Jewelry & Accessories</option>
+          <option value="Garden & Outdoor">Garden & Outdoor</option>
+          <option value="Baby Products">Baby Products</option>
+          <option value="Groceries & Gourmet Food">
+            Groceries & Gourmet Food
+          </option>
+          <option value="Pet Supplies">Pet Supplies</option>
+          <option value="Music & Instruments">Music & Instruments</option>
+          <option value="Movies & TV Shows">Movies & TV Shows</option>
+          <option value="Tools & Hardware">Tools & Hardware</option>
+          <option value="Computers & Accessories">
+            Computers & Accessories
+          </option>
+          <option value="Mobile Phones & Accessories">
+            Mobile Phones & Accessories
+          </option>
+          <option value="Footwear">Footwear</option>
+          <option value="Handbags & Wallets">Handbags & Wallets</option>
+          <option value="Art & Craft Supplies">Art & Craft Supplies</option>
+          <option value="Luggage & Travel Gear">Luggage & Travel Gear</option>
+          <option value="Collectibles & Memorabilia">
+            Collectibles & Memorabilia
+          </option>
+          <option value="Kitchen Appliances">Kitchen Appliances</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Software & Apps">Software & Apps</option>
+          <option value="Industrial & Scientific">
+            Industrial & Scientific
+          </option>
           <option value="Others">Others</option>
         </select>
 
@@ -735,6 +793,11 @@ const AddProduct = () => {
           Variants (Color + Size)
         </h3>
         {renderVariants()}
+        <DeliveryChargesForm
+          initialDeliveryCharges={deliveryCharges}
+          initialDefaultCharge={defaultDeliveryCharge}
+          onChange={handleDeliveryChange}
+        />
         <button
           type="submit"
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 w-full"

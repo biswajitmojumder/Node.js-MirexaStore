@@ -23,7 +23,7 @@ interface ShippingDetails {
 }
 
 interface Product {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -42,7 +42,7 @@ interface OrderItem {
 }
 
 interface Order {
-  _id: string;
+  id: string;
   shippingDetails: ShippingDetails;
   orderDate: string;
   grandTotal: number;
@@ -145,7 +145,7 @@ const OrderDetails: React.FC = () => {
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice_${order?._id.slice(-6)}.pdf`);
+      pdf.save(`Invoice_${order?.id.slice(-6)}.pdf`);
     } catch (err) {
       console.error("Invoice generation failed:", err);
       setError("Invoice download failed. Please try again.");
@@ -177,13 +177,13 @@ const OrderDetails: React.FC = () => {
         >
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2">MirexaStore</h2>
-              <p className="text-sm">www.MirexaStore.com</p>
-              <p className="text-sm">support@MirexaStore.com</p>
+              <h2 className="text-xl font-semibold mb-2">CampusNeeds</h2>
+              <p className="text-sm">www.CampusNeeds.com</p>
+              <p className="text-sm">support@CampusNeeds.com</p>
             </div>
             <div className="text-sm text-right space-y-1">
               <p>
-                <strong>Invoice ID:</strong> #{order._id.slice(-6)}
+                <strong>Invoice ID:</strong> #{order.id.slice(-6)}
               </p>
               <p>
                 <strong>Date:</strong>{" "}

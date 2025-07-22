@@ -83,7 +83,7 @@ const SellerAnalytics = () => {
               ...item,
               createdAt: order.createdAt,
               status: order.status,
-              orderId: order._id,
+              orderId: order.id,
             }))
         );
 
@@ -195,12 +195,7 @@ const SellerAnalytics = () => {
     fetchOrders();
   }, [auth?.user?.email, filter]);
 
-  if (loading)
-    return (
-      <div className="text-center mt-10">
-        <Loading />
-      </div>
-    );
+  if (loading) return <Loading />;
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   return (
@@ -390,7 +385,7 @@ const SellerAnalytics = () => {
                 );
                 return (
                   <tr key={i} className="border-t">
-                    <td className="px-4 py-2">{order._id.slice(-6)}</td>
+                    <td className="px-4 py-2">{order.id.slice(-6)}</td>
                     <td className="px-4 py-2">{order.status}</td>
                     <td className="px-4 py-2">{itemCount}</td>
                     <td className="px-4 py-2">

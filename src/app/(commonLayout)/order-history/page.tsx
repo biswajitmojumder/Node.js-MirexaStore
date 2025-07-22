@@ -35,6 +35,7 @@ interface ShippingDetails {
 }
 
 interface Order {
+  id: any;
   transactionId: string;
   paymentMethod: string;
   totalPrice: any;
@@ -114,7 +115,7 @@ const OrderHistory: React.FC = () => {
           };
         })
       );
-
+      console.log(ordersWithProductDetails);
       setOrders(ordersWithProductDetails);
       setLoading(false);
     } catch (err) {
@@ -249,6 +250,11 @@ const OrderHistory: React.FC = () => {
   if (loading) return <Loading />;
   if (error)
     return <div className="text-center text-red-500 text-lg">{error}</div>;
+  function getOrderIdString(id: string | { $oid: string }): string {
+    if (typeof id === "string") return id;
+    if (typeof id === "object" && "$oid" in id) return id.$oid;
+    return "unknown";
+  }
 
   return (
     <div className="max-w-5xl mx-auto my-8 px-4 md:px-8">
@@ -277,7 +283,7 @@ const OrderHistory: React.FC = () => {
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <h3 className="text-2xl font-semibold text-blue-600 mb-2 sm:mb-0">
-                  Order ID: <span className="">{order._id.slice(-6)}</span>
+                  Order ID: <span className="">{order.id.slice(-6)}</span>
                 </h3>
                 <p className="text-lg text-gray-500">
                   {new Date(order.orderDate).toLocaleDateString()}
@@ -296,7 +302,7 @@ const OrderHistory: React.FC = () => {
                 <p className="text-xl font-medium text-gray-700">
                   Total:{" "}
                   <span className="text-xl font-semibold">
-                    ৳{order.totalPrice}
+                    ৳{order.grandTotal}
                   </span>
                 </p>
               </div>
