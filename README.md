@@ -1,4 +1,4 @@
-# 🛒 E-Commerce Web Application
+# 🛒 E-Commerce - Multivendor Platform
 
 A full-featured, modern e-commerce platform with **role-based access control**, **real-time order tracking**, **seller subscriptions**, and more. Built using **Next.js**, **Node.js**, and **TypeScript** for performance, scalability, and maintainability.
 
