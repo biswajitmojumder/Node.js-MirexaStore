@@ -81,8 +81,6 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 
 ---
 
-## 📦 Project Structure
-
 **Live Demo**| [Visit App](https://mirexastore.com) |
 
 ---
