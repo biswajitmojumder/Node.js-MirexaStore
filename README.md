@@ -83,9 +83,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 
 ## 📦 Project Structure
 
-| Role     | Description                                  |
-|----------|----------------------------------------------|
-| **Live Demo**| [Visit App](https://mirexastore.com) |
+**Live Demo**| [Visit App](https://mirexastore.com) |
 
 ---
 
@@ -94,11 +92,6 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 - Product-wise performance charts
 - SEO-optimized for search visibility
 - Newsletter marketing integration
-
----
-
-## 📸 Screenshots (Optional)
-_You can add UI screenshots here to visually showcase the app._
 
 ---
 
