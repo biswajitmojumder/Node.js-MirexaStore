@@ -158,7 +158,7 @@ const AdminAnalytics = () => {
     return (
       <div className="container mx-auto p-6">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-          Seller Analytics Dashboard
+          Admin Analytics Dashboard
         </h1>
 
         {/* Skeleton for summary cards */}

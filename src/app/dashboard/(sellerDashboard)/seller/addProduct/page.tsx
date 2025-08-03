@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import React from "react";
 import DeliveryChargesForm from "@/app/(commonLayout)/components/ui/deliveryCharges";
+import SkeletonCard from "@/app/dashboard/components/SkeletonCard";
+import Skeleton from "react-loading-skeleton";
 
 // SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>
@@ -549,7 +551,46 @@ const AddProduct = () => {
   return (
     <div className="p-8 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <ToastContainer />
-      {loading && <Loading />}
+      {loading && (
+        <div className="container mx-auto p-6">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
+            Seller Analytics Dashboard
+          </h1>
+
+          {/* Skeleton for summary cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+
+          {/* Skeleton for charts and tables */}
+          <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+            <div className="mb-4">
+              <Skeleton style={{ height: 32, width: 200 }} />
+            </div>
+            <Skeleton style={{ height: 200 }} />
+          </div>
+
+          <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+            <div className="mb-4">
+              <Skeleton style={{ height: 32, width: 250 }} />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} style={{ height: 24 }} className="mb-2" />
+            ))}
+          </div>
+
+          <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+            <div className="mb-4">
+              <Skeleton style={{ height: 32, width: 250 }} />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} style={{ height: 24 }} className="mb-2" />
+            ))}
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="text-center text-2xl font-semibold text-gray-800">
           Add Product
