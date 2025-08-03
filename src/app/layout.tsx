@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
-import Footer from "@/app/(commonLayout)/components/shared/Footer";
 import Providers from "./lib/Providers";
 import Script from "next/script";
 import ClickSparkWrapper from "./(commonLayout)/components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
@@ -66,10 +65,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className={hindSiliguri.className}>
         <ClickSparkWrapper>
-          <Providers>
-            {children}
-            <Footer />
-          </Providers>
+          <Providers>{children}</Providers>
         </ClickSparkWrapper>
       </body>
     </html>

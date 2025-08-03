@@ -64,6 +64,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <main className="flex-grow pt-[60px]" role="main">
           {children}
+          <Footer></Footer>
         </main>
       </ClickSparkWrapper>
     </div>

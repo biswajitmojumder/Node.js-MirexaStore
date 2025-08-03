@@ -5,7 +5,7 @@ import FooterClientLinks from "./FooterClientLinks";
 
 const FooterSSR = () => {
   return (
-    <footer className="bg-[#F6550C] text-white pt-10 pb-5">
+    <footer className="bg-[#F6550C] text-white pt-10 pb-5 z-50">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo & Description */}
         <div>

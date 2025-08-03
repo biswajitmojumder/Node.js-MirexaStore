@@ -31,17 +31,12 @@ export default function ClientAdminWrapper({
   if (!isClient || !role) return null;
 
   return (
-    <div className="flex flex-1 min-h-screen min-w-0">
+    <div className="flex min-h-screen min-w-0">
       <AdminSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
-      {/* Main Content Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Navbar */}
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 md:ml-64">
         <AdminNavbar onMenuClick={() => setSidebarOpen((prev) => !prev)} />
-
-        {/* Main area */}
         <main className="flex-grow pt-[60px] min-w-0 overflow-auto bg-gray-50">
-          {/* Your children content (e.g. admin analytics) */}
           {children}
         </main>
       </div>
