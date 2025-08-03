@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SellerValiditySkeleton from "../components/skeleton/SellerValiditySkeleton";
 
 // Define Seller type
 type Seller = {
@@ -149,7 +150,7 @@ function SellerValidTill() {
     }
   }
 
-  if (loading) return <Loading />;
+  if (loading) return <SellerValiditySkeleton></SellerValiditySkeleton>;
 
   const filteredSellers = sellers.filter(({ brand, userEmail }) => {
     const term = searchTerm.toLowerCase();

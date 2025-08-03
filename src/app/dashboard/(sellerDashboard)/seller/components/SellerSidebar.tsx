@@ -2,81 +2,74 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Settings, LogOut, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
-  FaBox,
-  FaChartLine,
-  FaClipboardList,
-  FaBoxes,
-  FaUserCheck,
-  FaUserPlus,
-  FaMoneyCheckAlt,
-} from "react-icons/fa";
+  LayoutDashboard,
+  Settings,
+  LogOut,
+  X,
+  Plus,
+  PackageCheck,
+  ShoppingBasket,
+  FileWarning,
+  BadgeCheck,
+  Store,
+  ClipboardList,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/lib/redux/store";
+import axios from "axios";
 
 interface SellerSidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
-const navLinks = [
-  {
-    name: "Dashboard",
-    href: "/dashboard/seller",
-    icon: <LayoutDashboard size={18} />,
-  },
-  {
-    name: "Users",
-    href: "/dashboard/seller/users",
-    icon: <Users size={18} />,
-  },
-  {
-    name: "Orders",
-    href: "/dashboard/seller/orders",
-    icon: <FaBox size={18} />,
-  },
-  {
-    name: "Affiliate Products",
-    href: "/dashboard/seller/affiliate-products",
-    icon: <FaChartLine size={18} />,
-  },
-  {
-    name: "Product Requests",
-    href: "/dashboard/seller/products-request",
-    icon: <FaClipboardList size={18} />,
-  },
-  {
-    name: "Products",
-    href: "/dashboard/seller/products",
-    icon: <FaBoxes size={18} />,
-  },
-  {
-    name: "Seller ValidTill",
-    href: "/dashboard/seller/seller-validtill",
-    icon: <FaUserCheck size={18} />,
-  },
-  {
-    name: "Seller Requests",
-    href: "/dashboard/seller/sellerrequest",
-    icon: <FaUserPlus size={18} />,
-  },
-  {
-    name: "Subscription Requests",
-    href: "/dashboard/seller/subscription-requests",
-    icon: <FaMoneyCheckAlt size={18} />,
-  },
-  {
-    name: "Settings",
-    href: "/dashboard/seller/settings",
-    icon: <Settings size={18} />,
-  },
-];
-
 const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
   const pathname = usePathname();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [sellerSlug, setSellerSlug] = useState<string | null>(null);
+
+  const [openDropdowns, setOpenDropdowns] = useState<{
+    [key: string]: boolean;
+  }>({
+    products: false,
+    orders: false,
+    settings: false,
+  });
+
+  const toggleDropdown = (key: string) => {
+    setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  useEffect(() => {
+    const fetchSellerProfile = async () => {
+      if (!user?.email || user.role !== "seller") return;
+
+      try {
+        const res = await axios.get(
+          `https://api.mirexastore.com/api/seller/profile/${user.email}`
+        );
+        setSellerSlug(res.data?.data?.brand?.slug || null);
+      } catch (error) {
+        console.error("Failed to fetch seller profile", error);
+      }
+    };
+
+    fetchSellerProfile();
+  }, [user?.email, user?.role]);
+
+  const linkStyle = (href: string) =>
+    `flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition ${
+      pathname === href
+        ? "bg-[#F6550C]/10 text-[#F6550C]"
+        : "text-gray-700 hover:bg-gray-100"
+    }`;
 
   return (
     <>
-      {/* Overlay for mobile */}
       <div
         className={`fixed inset-0 bg-black/30 z-20 transition-opacity duration-300 md:hidden ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -84,15 +77,13 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
         onClick={() => setIsOpen(false)}
       ></div>
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full w-64 z-30 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="text-lg font-bold text-[#F6550C]">Mirexa seller</h2>
+          <h2 className="text-lg font-bold text-[#F6550C]">Mirexa Seller</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden text-gray-500"
@@ -101,25 +92,112 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
           </button>
         </div>
 
-        {/* Nav links */}
-        <nav className="p-4 space-y-2">
-          {navLinks.map((link) => (
+        <nav className="p-4 space-y-6 text-sm font-medium text-gray-700">
+          {/* SECTION: Store Overview */}
+          <div>
+            <p className="text-xs uppercase font-semibold text-gray-500 mb-2 tracking-wide">
+              Store Overview
+            </p>
             <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition ${
-                pathname === link.href
-                  ? "bg-[#F6550C]/10 text-[#F6550C]"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              href="/dashboard/seller"
+              className={linkStyle("/dashboard/seller")}
             >
-              {link.icon}
-              {link.name}
+              <LayoutDashboard size={18} className="text-[#EA580C]" />
+              Dashboard
             </Link>
-          ))}
+          </div>
+
+          {/* SECTION: Product Management */}
+          <div>
+            <p className="text-xs uppercase font-semibold text-gray-500 mb-2 tracking-wide">
+              Products
+            </p>
+            <div className="space-y-1 ml-2">
+              <Link
+                href="/dashboard/seller/addProduct"
+                className={linkStyle("/dashboard/seller/addProduct")}
+              >
+                <Plus size={16} className="text-[#EA580C]" />
+                Add Product
+              </Link>
+              <Link
+                href="/dashboard/seller/products"
+                className={linkStyle("/dashboard/seller/products")}
+              >
+                <ShoppingBasket size={16} className="text-[#EA580C]" />
+                Product Management
+              </Link>
+              <Link
+                href="/dashboard/seller/inactive-draft"
+                className={linkStyle("/dashboard/seller/inactive-draft")}
+              >
+                <FileWarning size={16} className="text-yellow-600" />
+                Inactive / Under-review
+              </Link>
+            </div>
+          </div>
+
+          {/* SECTION: Orders */}
+          <div>
+            <p className="text-xs uppercase font-semibold text-gray-500 mb-2 tracking-wide">
+              Orders & Sales
+            </p>
+            <Link
+              href="/dashboard/seller/orders"
+              className={linkStyle("/dashboard/seller/orders")}
+            >
+              <PackageCheck size={18} className="text-[#EA580C]" />
+              Order Management
+            </Link>
+          </div>
+
+          {/* SECTION: Settings */}
+          <div>
+            <p className="text-xs uppercase font-semibold text-gray-500 mb-2 tracking-wide">
+              Settings & Subscription
+            </p>
+            <Link
+              href="/dashboard/seller/subscription"
+              className={linkStyle("/dashboard/seller/subscription")}
+            >
+              <BadgeCheck size={18} className="text-[#EA580C]" />
+              Subscription
+            </Link>
+            <Link
+              href="/dashboard/seller/profile"
+              className={linkStyle("/dashboard/seller/profile")}
+            >
+              <Settings size={18} className="text-[#EA580C]" />
+              Profile Settings
+            </Link>
+          </div>
+
+          {/* SECTION: Store or Request */}
+          <div>
+            <p className="text-xs uppercase font-semibold text-gray-500 mb-2 tracking-wide">
+              Store Access
+            </p>
+            {sellerSlug ? (
+              <Link
+                href={`/store/${sellerSlug}`}
+                className={linkStyle(`/store/${sellerSlug}`)}
+              >
+                <Store size={18} className="text-[#EA580C]" />
+                My Store
+              </Link>
+            ) : (
+              <Link
+                href="/seller-request"
+                className={linkStyle("/seller-request")}
+              >
+                <ClipboardList size={18} className="text-[#EA580C]" />
+                My Request
+              </Link>
+            )}
+          </div>
         </nav>
 
-        {/* Footer/Logout */}
+        {/* Logout Button */}
         <div className="absolute bottom-4 left-0 w-full px-4">
           <button className="flex items-center gap-3 px-3 py-2 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-md transition">
             <LogOut size={18} />

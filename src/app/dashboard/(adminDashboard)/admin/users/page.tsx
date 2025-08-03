@@ -10,6 +10,7 @@ import { RootState } from "@/app/lib/redux/store";
 import { useSelector } from "react-redux";
 import WithAuth from "@/app/lib/utils/withAuth";
 import ConfirmationModal from "@/app/(commonLayout)/components/ConfirmationModal/ConfirmationModal";
+import UserTableSkeleton from "../components/skeleton/UserTableSkeleton";
 
 // User type definition
 type UserType = {
@@ -171,7 +172,7 @@ const UserViewPage = () => {
       </div>
 
       {loading ? (
-        <Loading />
+        <UserTableSkeleton />
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto">

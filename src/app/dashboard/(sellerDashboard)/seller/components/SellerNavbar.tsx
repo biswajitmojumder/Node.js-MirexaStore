@@ -60,15 +60,16 @@ const SellerNavbar = ({ onMenuClick }: AdminNavbarProps) => {
 
         {/* Notification */}
         {/* Notification Button */}
-        <div className="relative">
+        <div className="relative pt-2">
           <button
             onClick={() => setShowNotification((prev) => !prev)}
             className="relative text-gray-600 hover:text-[#F6550C] transition"
             aria-label="Notifications"
           >
-            <Bell size={20} />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-              3
+            <Bell size={22} />
+
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full">
+              2
             </span>
           </button>
 
