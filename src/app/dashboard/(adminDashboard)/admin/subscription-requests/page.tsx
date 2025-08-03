@@ -7,6 +7,7 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import WithAuth from "@/app/lib/utils/withAuth";
 import Loading from "@/app/loading";
+import SubscriptionRequestsSkeleton from "../components/skeleton/SubscriptionRequestsSkeleton";
 
 interface SubscriptionRequest {
   _id: string;
@@ -96,7 +97,7 @@ function SubscriptionRequestsPage() {
       </button>
 
       {loading ? (
-        <Loading></Loading>
+        <SubscriptionRequestsSkeleton></SubscriptionRequestsSkeleton>
       ) : requests.length === 0 ? (
         <div className="text-center text-gray-500">
           No pending subscription requests.

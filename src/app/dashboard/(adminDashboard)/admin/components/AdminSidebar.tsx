@@ -41,9 +41,9 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-2 left-0 h-full w-64 z-30 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-2 left-0 h-[calc(100vh-0.5rem)] w-64 z-30 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
+        } md:translate-x-0 overflow-y-auto`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
@@ -191,12 +191,12 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
         </nav>
 
         {/* Logout Button */}
-        <div className="absolute bottom-4 left-0 w-full px-4">
+        {/* <div className="absolute bottom-4 left-0 w-full px-4">
           <button className="flex items-center gap-3 px-3 py-2 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-md transition">
             <LogOut size={18} />
             Logout
           </button>
-        </div>
+        </div> */}
       </aside>
     </>
   );

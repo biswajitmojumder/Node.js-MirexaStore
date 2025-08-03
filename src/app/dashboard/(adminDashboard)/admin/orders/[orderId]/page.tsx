@@ -9,6 +9,7 @@ import Image from "next/image";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { RootState } from "@/app/lib/redux/store";
 import { useAppSelector } from "@/app/lib/redux/hook";
+import InvoiceSkeleton from "@/app/dashboard/(sellerDashboard)/seller/components/skeletons/InvoiceSkeleton";
 
 interface ShippingDetails {
   fullName: string;
@@ -115,7 +116,7 @@ const OrderDetails: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return <InvoiceSkeleton></InvoiceSkeleton>;
 
   if (error)
     return <div className="text-center text-red-500 mt-6">{error}</div>;

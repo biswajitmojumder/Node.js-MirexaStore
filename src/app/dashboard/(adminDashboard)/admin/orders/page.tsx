@@ -12,6 +12,7 @@ import { RootState } from "@/app/lib/redux/store";
 import { Copy } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import PaymentCell from "@/app/(commonLayout)/components/shared/pay-seller";
+import AdminOrderSkeleton from "../components/skeleton/AdminOrdersSkeleton";
 
 interface ShippingDetails {
   fullName: string;
@@ -201,7 +202,7 @@ const AdminOrders: React.FC = () => {
     }
   );
 
-  if (loading) return <Loading />;
+  if (loading) return <AdminOrderSkeleton></AdminOrderSkeleton>;
   if (error)
     return (
       <div className="text-center text-red-500">

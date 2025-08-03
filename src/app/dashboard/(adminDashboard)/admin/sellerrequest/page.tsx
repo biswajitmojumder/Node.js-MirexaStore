@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import Loading from "@/app/loading";
+import SellerRequestSkeleton from "../components/skeleton/SellerRequestSkeleton";
 
 // Define types
 interface sellerRequest {
@@ -117,12 +118,7 @@ const AdminSellerRequests: React.FC = () => {
     }
   };
 
-  if (loading)
-    return (
-      <div>
-        <Loading></Loading>
-      </div>
-    );
+  if (loading) return <SellerRequestSkeleton></SellerRequestSkeleton>;
 
   return (
     <div className="max-w-5xl mx-auto p-6">

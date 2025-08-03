@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
 import Link from "next/link";
+import ProductsRequestSkeleton from "../components/skeleton/ProductsRequestSkeleton";
 
 type Variant = {
   color: string;
@@ -136,7 +137,7 @@ const ProductRequest = () => {
       </div>
 
       {loading ? (
-        <Loading />
+        <ProductsRequestSkeleton></ProductsRequestSkeleton>
       ) : products.length === 0 ? (
         <p className="text-center text-gray-500">No products found.</p>
       ) : (

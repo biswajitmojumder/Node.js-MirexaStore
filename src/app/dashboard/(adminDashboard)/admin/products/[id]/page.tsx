@@ -10,6 +10,7 @@ import Loading from "@/app/loading";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
+import EditProductSkeleton from "@/app/dashboard/(sellerDashboard)/seller/components/skeletons/EditProductSkeleton";
 
 const EditProductPage = () => {
   const { id } = useParams();
@@ -90,7 +91,7 @@ const EditProductPage = () => {
     }
   };
 
-  if (loading) return <Loading></Loading>;
+  if (loading) return <EditProductSkeleton></EditProductSkeleton>;
 
   return (
     <>

@@ -5,6 +5,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useAppSelector } from "@/app/lib/redux/hook";
 import Loading from "@/app/loading";
+import AffiliateProductsSkeleton from "../components/skeleton/AffiliateProductsSkeleton";
 
 type GroupedProducts = {
   [sellerEmail: string]: {
@@ -99,7 +100,7 @@ const AffiliateProductsPage = () => {
     return filtered;
   }, [search, groupedData]);
 
-  if (loading) return <Loading />;
+  if (loading) return <AffiliateProductsSkeleton></AffiliateProductsSkeleton>;
 
   const sellerCount = Object.keys(filteredGroupedData).length;
   const totalProducts = Object.values(filteredGroupedData).reduce(

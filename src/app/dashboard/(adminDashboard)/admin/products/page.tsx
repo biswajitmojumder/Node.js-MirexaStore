@@ -10,6 +10,7 @@ import WithAuth from "@/app/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import ConfirmationModal from "@/app/(commonLayout)/components/ConfirmationModal/ConfirmationModal";
+import ProductManagementSkeleton from "../components/skeleton/ProductManagementSkeleton";
 
 const AdminProductPage = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -132,11 +133,7 @@ const AdminProductPage = () => {
   };
 
   if (loading) {
-    return (
-      <p className="text-center text-gray-500">
-        <Loading></Loading>
-      </p>
-    );
+    return <ProductManagementSkeleton></ProductManagementSkeleton>;
   }
 
   return (
