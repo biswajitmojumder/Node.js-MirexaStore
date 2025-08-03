@@ -2,6 +2,7 @@ const { heroui } = require("@heroui/react");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
@@ -11,4 +12,8 @@ module.exports = {
   },
   darkMode: "class",
   plugins: [heroui(), require("daisyui")], // Add DaisyUI here
+
+
 };
+
+

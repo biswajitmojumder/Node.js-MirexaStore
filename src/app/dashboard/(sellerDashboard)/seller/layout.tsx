@@ -1,5 +1,5 @@
 import FooterSSR from "@/app/(commonLayout)/components/shared/Footer";
-import ClientAdminWrapper from "./ClientAdminWrapper";
+import ClientSellerWrapper from "./ClientSellerWrapper";
 
 export default function AdminLayout({
   children,
@@ -8,7 +8,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
-      <ClientAdminWrapper>{children}</ClientAdminWrapper>
+      <ClientSellerWrapper>{children}</ClientSellerWrapper>
       {/* <FooterSSR></FooterSSR> */}
     </div>
   );

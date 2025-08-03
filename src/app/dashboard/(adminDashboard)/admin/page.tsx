@@ -14,6 +14,8 @@ import {
   Tooltip,
 } from "chart.js";
 import Loading from "@/app/loading";
+import SkeletonCard from "../../components/SkeletonCard";
+import Skeleton from "react-loading-skeleton";
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -152,12 +154,50 @@ const AdminAnalytics = () => {
     }
   }, [auth?.user?.role]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="text-center mt-10">
-        <Loading />
+      <div className="container mx-auto p-6">
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
+          Seller Analytics Dashboard
+        </h1>
+
+        {/* Skeleton for summary cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {Array(5)
+            .fill(null)
+            .map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+        </div>
+
+        {/* Skeleton for charts and tables */}
+        <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+          <div className="mb-4">
+            <Skeleton style={{ height: 32, width: 200 }} />
+          </div>
+          <Skeleton style={{ height: 200 }} />
+        </div>
+
+        <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+          <div className="mb-4">
+            <Skeleton style={{ height: 32, width: 250 }} />
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} style={{ height: 24 }} className="mb-2" />
+          ))}
+        </div>
+
+        <div className="mt-10 bg-white p-6 rounded-xl shadow-md border">
+          <div className="mb-4">
+            <Skeleton style={{ height: 32, width: 250 }} />
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} style={{ height: 24 }} className="mb-2" />
+          ))}
+        </div>
       </div>
     );
+  }
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   // Get current users for pagination

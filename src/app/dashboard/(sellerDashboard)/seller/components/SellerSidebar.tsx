@@ -13,7 +13,7 @@ import {
   FaMoneyCheckAlt,
 } from "react-icons/fa";
 
-interface AdminSidebarProps {
+interface SellerSidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
@@ -21,57 +21,57 @@ interface AdminSidebarProps {
 const navLinks = [
   {
     name: "Dashboard",
-    href: "/dashboard/admin",
+    href: "/dashboard/seller",
     icon: <LayoutDashboard size={18} />,
   },
   {
     name: "Users",
-    href: "/dashboard/admin/users",
+    href: "/dashboard/seller/users",
     icon: <Users size={18} />,
   },
   {
     name: "Orders",
-    href: "/dashboard/admin/orders",
+    href: "/dashboard/seller/orders",
     icon: <FaBox size={18} />,
   },
   {
     name: "Affiliate Products",
-    href: "/dashboard/admin/affiliate-products",
+    href: "/dashboard/seller/affiliate-products",
     icon: <FaChartLine size={18} />,
   },
   {
     name: "Product Requests",
-    href: "/dashboard/admin/products-request",
+    href: "/dashboard/seller/products-request",
     icon: <FaClipboardList size={18} />,
   },
   {
     name: "Products",
-    href: "/dashboard/admin/products",
+    href: "/dashboard/seller/products",
     icon: <FaBoxes size={18} />,
   },
   {
     name: "Seller ValidTill",
-    href: "/dashboard/admin/seller-validtill",
+    href: "/dashboard/seller/seller-validtill",
     icon: <FaUserCheck size={18} />,
   },
   {
     name: "Seller Requests",
-    href: "/dashboard/admin/sellerrequest",
+    href: "/dashboard/seller/sellerrequest",
     icon: <FaUserPlus size={18} />,
   },
   {
     name: "Subscription Requests",
-    href: "/dashboard/admin/subscription-requests",
+    href: "/dashboard/seller/subscription-requests",
     icon: <FaMoneyCheckAlt size={18} />,
   },
   {
     name: "Settings",
-    href: "/dashboard/admin/settings",
+    href: "/dashboard/seller/settings",
     icon: <Settings size={18} />,
   },
 ];
 
-const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
+const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
   const pathname = usePathname();
 
   return (
@@ -86,13 +86,13 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-2 left-0 h-full w-64 z-30 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 z-30 bg-white shadow-md transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="text-lg font-bold text-[#F6550C]">Mirexa Admin</h2>
+          <h2 className="text-lg font-bold text-[#F6550C]">Mirexa seller</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden text-gray-500"
@@ -131,4 +131,4 @@ const AdminSidebar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
   );
 };
 
-export default AdminSidebar;
+export default SellerSidebar;
