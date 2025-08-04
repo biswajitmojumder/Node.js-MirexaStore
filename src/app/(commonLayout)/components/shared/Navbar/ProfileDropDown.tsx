@@ -29,6 +29,7 @@ import {
   CalendarCheck,
   BadgeCheck,
   UserCheck,
+  LayoutDashboardIcon,
 } from "lucide-react";
 import { FaHandshake } from "react-icons/fa";
 
@@ -155,101 +156,12 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
-                      href="/admin/sellerrequest"
+                      href="/dashboard/admin"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
-                      <ClipboardList className="w-5 h-5 text-[#EA580C]" />
-                      Seller Request
-                    </Link>
-                    <Link
-                      href="/admin/users"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <Users className="w-5 h-5 text-[#EA580C]" />
-                      User Management
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/product-request"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <PlusCircle className="w-5 h-5 text-[#EA580C]" />
-                      Product add request
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/subscription-requests"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <UserCheck className="w-5 h-5 text-[#EA580C]" />
-                      Subscription Requests
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/seller-validtill"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <CalendarCheck className="w-5 h-5 text-[#EA580C]" />
-                      Seller ValidTill
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/affiliate-product"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <FaHandshake className="w-5 h-5 text-[#EA580C]" />
-                      Affiliate Product
-                    </Link>
-                  </li>
-
-                  <li>
-                    <Link
-                      href="/admin/addProduct"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <Plus className="w-5 h-5 text-[#EA580C]" />
-                      Add Product
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/products"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <ShoppingBasket className="w-5 h-5 text-[#EA580C]" />
-                      Product Management
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/orders"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <PackageCheck className="w-5 h-5 text-[#EA580C]" />
-                      Order Management
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/admin/analytics"
-                      onClick={handleLinkClick}
-                      className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
-                    >
-                      <BarChart2 className="w-5 h-5 text-[#EA580C]" />
-                      Analytics
+                      <LayoutDashboardIcon className="w-5 h-5 text-[#EA580C]" />
+                      Dashboard
                     </Link>
                   </li>
                 </>
@@ -259,15 +171,15 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
-                      href="/seller/addProduct"
+                      href="/dashboard/seller"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >
-                      <Plus className="w-5 h-5 text-[#EA580C]" />
-                      Add Product
+                      <LayoutDashboardIcon className="w-5 h-5 text-[#EA580C]" />
+                      Dashboard
                     </Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link
                       href="/seller/orders"
                       onClick={handleLinkClick}
@@ -351,7 +263,7 @@ const ProfileDropdown = () => {
                         My Request
                       </Link>
                     </li>
-                  )}
+                  )} */}
                 </>
               )}
 
@@ -359,7 +271,7 @@ const ProfileDropdown = () => {
                 <>
                   <li>
                     <Link
-                      href="/product"
+                      href="/products"
                       onClick={handleLinkClick}
                       className="hover:bg-gray-100 p-2 rounded-lg flex items-center gap-2"
                     >

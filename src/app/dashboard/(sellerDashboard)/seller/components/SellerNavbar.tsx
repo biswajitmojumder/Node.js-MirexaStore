@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { MoreVertical, Bell, Search, LogOut, Home } from "lucide-react";
 import Link from "next/link";
 
-interface AdminNavbarProps {
+interface SellerNavbarProps {
   onMenuClick: () => void;
 }
 
-const SellerNavbar = ({ onMenuClick }: AdminNavbarProps) => {
+const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -42,7 +42,7 @@ const SellerNavbar = ({ onMenuClick }: AdminNavbarProps) => {
         </button>
 
         <h1 className="text-xl font-extrabold text-[#F6550C] select-none">
-          Mirexa Admin
+          Mirexa Seller
         </h1>
       </div>
 

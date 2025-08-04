@@ -1,59 +1,100 @@
-"use client";
+// "use client";
 
-const Blog = () => {
-  const blogPosts = [
-    {
-      title: "How to Choose the Best Electronics for Your Home",
-      date: "March 12, 2025",
-      excerpt:
-        "Choosing the right electronics for your home can be a challenge. Here are some tips on how to make an informed decision when purchasing electronics...",
-      link: "/blog/how-to-choose-electronics",
-    },
-    {
-      title: "Top 5 Fashion Trends in 2025",
-      date: "February 20, 2025",
-      excerpt:
-        "2025 is bringing in some exciting new fashion trends. From vintage looks to cutting-edge designs, here’s what you should expect in fashion this year...",
-      link: "/blog/top-fashion-trends-2025",
-    },
-    {
-      title: "The Importance of Sustainable Shopping",
-      date: "January 5, 2025",
-      excerpt:
-        "Sustainability is key in today’s shopping landscape. Learn about why shopping sustainably is important and how you can contribute to a better environment...",
-      link: "/blog/sustainable-shopping",
-    },
-  ];
+// import Image from "next/image";
+// import Link from "next/link";
 
-  return (
-    <section className="bg-gray-50 py-10">
-      <div className="max-w-5xl mx-auto px-4 md:px-8">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-          Blog / ব্লগ
-        </h1>
+// export const blogs = [
+//   {
+//     id: 1,
+//     title: "Top 5 Shopping Trends in 2025 You Can’t Miss",
+//     excerpt:
+//       "Discover the most exciting eCommerce trends in 2025, including AI-driven personalization, voice shopping, and sustainable packaging.",
+//     image: "/blog/trends.jpg",
+//     slug: "shopping-trends-2025",
+//     content: `
+//       <p>In 2025, shopping is transforming with AI, voice assistants, and eco-conscious consumers leading the way. Personalization will be a major driver of conversions, and customers will expect smarter, faster interactions.</p>
+//       <p>Brands adopting sustainable practices and faster delivery logistics will lead the competition.</p>
+//     `,
+//   },
+//   {
+//     id: 2,
+//     title: "How to Choose the Right Product for Your Online Store",
+//     excerpt:
+//       "Struggling to pick products that actually sell? Learn how to identify winning products, analyze demand, and find profitable niches.",
+//     image: "/blog/product-selection.jpg",
+//     slug: "choose-right-product-online-store",
+//     content: `
+//       <p>Choosing the right product begins with understanding your target customer. Start by solving a specific pain point or need.</p>
+//       <p>Research trends, test small batches, and always analyze feedback and sales data before scaling.</p>
+//     `,
+//   },
+//   {
+//     id: 3,
+//     title: "Why Fast Shipping Is the Future of eCommerce",
+//     excerpt:
+//       "Speed matters more than ever. We break down how 1-day and same-day delivery are changing customer expectations and boosting conversions.",
+//     image: "/blog/fast-shipping.jpg",
+//     slug: "importance-of-fast-shipping",
+//     content: `
+//       <p>Customers now expect fast shipping. 1-day and same-day delivery is becoming standard thanks to companies like Amazon.</p>
+//       <p>To stay competitive, online stores must optimize their fulfillment process or use third-party logistics solutions.</p>
+//     `,
+//   },
+//   {
+//     id: 4,
+//     title: "Creating a Brand That Builds Customer Trust",
+//     excerpt:
+//       "A strong brand is more than a logo. Learn the key ingredients to build trust, boost retention, and drive word-of-mouth sales.",
+//     image: "/blog/brand-trust.jpg",
+//     slug: "build-customer-trust-branding",
+//     content: `
+//       <p>Trust is the foundation of any successful brand. Build it through consistency, quality products, real testimonials, and great support.</p>
+//       <p>Your brand’s story, voice, and values must align with your audience’s expectations.</p>
+//     `,
+//   },
+// ];
 
-        <div className="space-y-12">
-          {blogPosts.map((post, index) => (
-            <div
-              key={index}
-              className="bg-white shadow-lg rounded-2xl p-8 hover:shadow-2xl transition-all"
-            >
-              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-                {post.title}
-              </h2>
-              <p className="text-gray-600 mb-4">{post.excerpt}</p>
-              <p className="text-sm text-gray-500 mb-4">
-                Published on {post.date}
-              </p>
-              <a href={post.link} className="text-blue-600 hover:underline">
-                Read More
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
+// const BlogSection = () => {
+//   return (
+//     <section className="max-w-7xl mx-auto px-4 py-12">
+//       <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
+//         From Our Blog
+//       </h2>
 
-export default Blog;
+//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+//         {blogs.map((blog) => (
+//           <div
+//             key={blog.id}
+//             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+//           >
+//             <Link href={`/blog/${blog.slug}`}>
+//               <Image
+//                 src={blog.image}
+//                 alt={blog.title}
+//                 width={400}
+//                 height={250}
+//                 className="w-full h-48 object-cover"
+//               />
+//             </Link>
+//             <div className="p-4">
+//               <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
+//                 {blog.title}
+//               </h3>
+//               <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+//                 {blog.excerpt}
+//               </p>
+//               <Link
+//                 href={`/blog/${blog.slug}`}
+//                 className="text-orange-600 font-medium hover:underline text-sm"
+//               >
+//                 Read More →
+//               </Link>
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     </section>
+//   );
+// };
+
+// export default BlogSection;

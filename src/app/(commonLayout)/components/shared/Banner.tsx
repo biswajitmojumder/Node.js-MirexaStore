@@ -28,7 +28,7 @@ const Banner: React.FC = () => {
           shopping experience.
         </p>
         <a
-          href="/product"
+          href="/products"
           className="inline-block bg-[#F6550C] hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition"
         >
           <ShinyText
