@@ -21,7 +21,11 @@ const Login = () => {
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
 
-  const redirectPath = decodeURIComponent(searchParams.get("redirect") || "/");
+  const getRedirectPath = (role: string) => {
+    if (role === "admin") return "/dashboard/admin";
+    if (role === "seller") return "/dashboard/seller";
+    return "/";
+  };
 
   useEffect(() => {
     const signUpEmail = localStorage.getItem("signUpEmail");
@@ -31,9 +35,6 @@ const Login = () => {
     }
 
     const token = searchParams.get("token");
-    const redirectPathFromGoogle = decodeURIComponent(
-      searchParams.get("redirect") || "/"
-    );
 
     const checkGoogleLogin = async () => {
       if (!token) return;
@@ -65,7 +66,7 @@ const Login = () => {
         });
 
         setTimeout(() => {
-          router.push(redirectPathFromGoogle);
+          router.push(getRedirectPath(user.role));
         }, 1500);
       } catch (error) {
         console.error("Google login failed:", error);
@@ -102,7 +103,7 @@ const Login = () => {
       });
 
       setTimeout(() => {
-        router.push(redirectPath);
+        router.push(getRedirectPath(data.role));
       }, 2000);
     } catch (error: any) {
       console.error("Login error:", error);
@@ -127,12 +128,79 @@ const Login = () => {
     );
   };
 
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string) => {
+    setIsSubmitting(true);
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+
+    try {
+      const response = await axios.post(
+        "https://api.mirexastore.com/api/auth/login",
+        { email: demoEmail, password: demoPassword }
+      );
+
+      const { token, data } = response.data;
+
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("user", JSON.stringify(data));
+      localStorage.setItem("role", data.role);
+
+      dispatch(loginUser({ user: data, token }));
+
+      toast.success("Logged in successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+
+      setTimeout(() => {
+        router.push(getRedirectPath(data.role));
+      }, 2000);
+    } catch (error: any) {
+      toast.error("Demo login failed.", {
+        position: "top-center",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto p-8 bg-white rounded-lg shadow-lg">
-      <h1 className="text-4xl font-bold mb-8 text-center text-orange-600">
+      <h1 className="text-4xl font-bold mb-6 text-center text-orange-600">
         Welcome Back!
       </h1>
 
+      {/* Demo Quick Login Buttons */}
+      <div className="mb-6 space-y-3">
+        <h3 className="text-sm font-semibold text-gray-600 text-center">
+          Quick Login as
+        </h3>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("mirexastore@gmail.com", "12345")}
+            className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
+          >
+            Login as User
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("mdeasinsarkar01@gmail.com", "123")}
+            className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
+          >
+            Login as Seller
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("yeasin@gmail.com", "123")}
+            className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
+          >
+            Login as Admin
+          </button>
+        </div>
+      </div>
+
+      {/* Manual Login Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-gray-700 font-medium mb-2">Email</label>
@@ -173,6 +241,7 @@ const Login = () => {
         </button>
       </form>
 
+      {/* Google Login */}
       <div className="mt-6 text-center">
         <button
           onClick={handleGoogleLogin}
