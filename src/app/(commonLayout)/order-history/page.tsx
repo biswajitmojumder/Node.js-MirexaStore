@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css"; // Importing CSS for Toastify
 import FloatingIcons from "../components/ui/FloatingIcons";
 import Image from "next/image";
 import toast, { Toaster } from "react-hot-toast";
+import OrderHistorySkeleton from "../components/skeleton/OrderHistorySkeleton";
 type MediaType = {
   url: string;
   type: "image" | "video"; // media type can only be image or video
@@ -247,7 +248,7 @@ const OrderHistory: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return <OrderHistorySkeleton></OrderHistorySkeleton>;
   if (error)
     return <div className="text-center text-red-500 text-lg">{error}</div>;
   function getOrderIdString(id: string | { $oid: string }): string {
