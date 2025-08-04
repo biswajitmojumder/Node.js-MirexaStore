@@ -7,6 +7,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import { toast, ToastContainer } from "react-toastify";
+import BrandSkeleton from "../components/skeleton/BrandSkeleton";
 
 type BrandType = {
   _id: string;
@@ -29,6 +30,7 @@ export default function BrandsPage() {
     [key: string]: number;
   }>({});
   const token = useSelector((state: RootState) => state.auth.token);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -45,6 +47,8 @@ export default function BrandsPage() {
         }
       } catch (err) {
         console.error("Failed to load brands:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -132,53 +136,61 @@ export default function BrandsPage() {
       </h1>
 
       <div className="space-y-4">
-        {brands.map(({ _id, brand }) => (
-          <Link
-            href={`/stores/${brand.slug}`}
-            key={_id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg shadow-sm hover:shadow transition"
-          >
-            <div className="flex items-start sm:items-center gap-4 flex-1">
-              <Image
-                src={brand.logo}
-                alt={brand.name}
-                width={50}
-                height={50}
-                className="rounded-full object-cover border"
-              />
-              <div>
-                <p className="font-semibold text-lg text-gray-800 flex items-center gap-2">
-                  {brand.name}
-                  {brand.verified && (
-                    <span className="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded font-medium">
-                      Verified
-                    </span>
-                  )}
-                </p>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {brand.tagline || brand.description}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  👥 {followersCountMap[_id] ?? 0} follower
-                  {followersCountMap[_id] !== 1 ? "s" : ""}
-                </p>
+        {loading ? (
+          <>
+            {[...Array(6)].map((_, i) => (
+              <BrandSkeleton key={i} />
+            ))}
+          </>
+        ) : (
+          brands.map(({ _id, brand }) => (
+            <Link
+              href={`/stores/${brand.slug}`}
+              key={_id}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg shadow-sm hover:shadow transition"
+            >
+              <div className="flex items-start sm:items-center gap-4 flex-1">
+                <Image
+                  src={brand.logo}
+                  alt={brand.name}
+                  width={50}
+                  height={50}
+                  className="rounded-full object-cover border"
+                />
+                <div>
+                  <p className="font-semibold text-lg text-gray-800 flex items-center gap-2">
+                    {brand.name}
+                    {brand.verified && (
+                      <span className="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded font-medium">
+                        Verified
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {brand.tagline || brand.description}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    👥 {followersCountMap[_id] ?? 0} follower
+                    {followersCountMap[_id] !== 1 ? "s" : ""}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="sm:ml-auto">
-              <button
-                onClick={(e) => handleFollowToggle(e, _id)}
-                className={`w-full sm:w-auto mt-2 sm:mt-0 px-4 py-1 text-sm rounded transition font-medium border ${
-                  isFollowingMap[_id]
-                    ? "bg-gray-100 text-gray-800 border-gray-300"
-                    : "bg-blue-600 text-white border-blue-600"
-                }`}
-              >
-                {isFollowingMap[_id] ? "Following" : "Follow"}
-              </button>
-            </div>
-          </Link>
-        ))}
+              <div className="sm:ml-auto">
+                <button
+                  onClick={(e) => handleFollowToggle(e, _id)}
+                  className={`w-full sm:w-auto mt-2 sm:mt-0 px-4 py-1 text-sm rounded transition font-medium border ${
+                    isFollowingMap[_id]
+                      ? "bg-gray-100 text-gray-800 border-gray-300"
+                      : "bg-blue-600 text-white border-blue-600"
+                  }`}
+                >
+                  {isFollowingMap[_id] ? "Following" : "Follow"}
+                </button>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
 
       <ToastContainer position="bottom-right" autoClose={2500} />
