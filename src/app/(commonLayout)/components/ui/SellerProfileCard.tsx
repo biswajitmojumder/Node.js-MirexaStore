@@ -40,7 +40,7 @@ export default function SellerProfileCard({
       <div className="flex items-start justify-between flex-wrap gap-4">
         {/* Left side: Logo + Brand Info */}
         <Link
-          href={`/store/${sellerProfile.brand.slug}`}
+          href={`/stores/${sellerProfile.brand.slug}`}
           className="flex items-center gap-4 flex-1 min-w-0 group"
         >
           {sellerProfile.brand.logo && (

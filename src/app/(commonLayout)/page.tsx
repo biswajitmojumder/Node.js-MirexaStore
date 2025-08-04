@@ -1,6 +1,7 @@
 import Banner from "./components/shared/Banner";
 import Newsletter from "./components/shared/NewsletterSubscription/NewsletterSubscription";
 import Testimonials from "./components/shared/Testimonial/TestimonialSection";
+import TopSellerSection from "./components/TopSellersSection/TopSellersSection";
 
 import FloatingIcons from "./components/ui/FloatingIcons";
 import CategorySection from "./product/category/page";
@@ -12,6 +13,7 @@ const HomePage = () => {
       <Banner />
       <CategorySection></CategorySection>
       <Product />
+      <TopSellerSection></TopSellerSection>
       <Testimonials />
       <Newsletter />
     </>
