@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Loading from "@/app/loading";
 import { Pagination } from "@heroui/react";
+import { Star } from "lucide-react";
+import ProductCardSkeleton from "../skeleton/ProductCardSkeleton";
 
 export type Product = {
   stockQuantity: number;
@@ -23,18 +25,15 @@ export type Product = {
 };
 
 type ProductCartProps = {
-  products: Product[]; // All products passed from the parent
+  products: Product[];
 };
 
 const ProductCart = ({ products }: ProductCartProps) => {
   const router = useRouter();
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8; // Number of products to display per page
-  const [loading, setLoading] = useState(true); // Loading state
+  const productsPerPage = 8;
+  const [loading, setLoading] = useState(true);
 
-  // Calculate the index of the first and last product on the current page
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(
@@ -42,16 +41,13 @@ const ProductCart = ({ products }: ProductCartProps) => {
     indexOfLastProduct
   );
 
-  // Total number of pages
   const totalPages = Math.ceil(products.length / productsPerPage);
 
-  // Navigate to product details
   const handleSeeDetails = (slug: string) => {
-    setLoading(true); // Set loading state when navigating to details
+    setLoading(true);
     router.push(`/product/${slug}`);
   };
 
-  // Calculate discount percentage
   const calculateDiscountPercentage = (
     price: number,
     discountPrice: number
@@ -62,25 +58,22 @@ const ProductCart = ({ products }: ProductCartProps) => {
     return 0;
   };
 
-  // Handle page change (next or previous)
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
   useEffect(() => {
-    // Simulate a delay for loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }); // Delay for 1 second to show loading (you can remove this when fetching actual data)
-
-    return () => clearTimeout(timer); // Clear the timer when the component unmounts
-  }, [currentPage]); // Re-run whenever the page changes
+    const timer = setTimeout(() => setLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, [currentPage]);
 
   return (
     <>
       {loading ? (
-        <Loading /> // Display loading component while the data is loading
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
-        <main className="container mx-auto px-4 py-8">
-          <div className="grid text-center grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-6">
+        <main className="container mx-auto px-2 py-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-6">
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => {
                 const discountPercentage = calculateDiscountPercentage(
@@ -88,104 +81,100 @@ const ProductCart = ({ products }: ProductCartProps) => {
                   product.discountPrice || 0
                 );
 
-                // Determine stock status
-                const stockStatus =
-                  product.stockQuantity > 0 ? "In Stock" : "Out of Stock";
-
                 return (
                   <motion.div
                     key={product._id}
-                    className="card bg-base-100 shadow-md rounded-lg overflow-hidden cursor-pointer"
-                    onClick={() => handleSeeDetails(product.slug)}
-                    whileHover={{ scale: 1.05 }}
+                    className="bg-white border rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
+                    whileHover={{ scale: 1.03 }}
                     transition={{ duration: 0.3 }}
+                    onClick={() => handleSeeDetails(product.slug)}
                   >
-                    <div>
-                      <figure className="flex items-center justify-center overflow-hidden bg-white relative">
-                        {product.productImages?.length > 0 ? (
+                    {/* Image Area */}
+                    <div className="relative w-full h-44 bg-white flex items-center justify-center">
+                      {discountPercentage > 0 && (
+                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-md z-10">
+                          {discountPercentage}% OFF
+                        </span>
+                      )}
+
+                      {product.productImages?.length > 0 ? (
+                        <div className="relative w-[180px] h-[200px]">
+                          <Image
+                            src={product.productImages[0]}
+                            alt={product.name}
+                            fill
+                            unoptimized
+                            className="object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xl">No Image</span>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="p-4 space-y-1">
+                      <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
+                        {product.name}
+                      </h3>
+
+                      {product.brand && (
+                        <p className="text-xs text-gray-500">{product.brand}</p>
+                      )}
+
+                      <p className="text-xs text-gray-400">
+                        {product.category}
+                      </p>
+
+                      {/* Price */}
+                      <div className="flex items-center gap-2">
+                        {product.discountPrice ? (
                           <>
-                            {discountPercentage > 0 && (
-                              <span className="absolute top-2 left-2 bg-red-500 z-10 text-white px-3 py-1 text-xs font-semibold rounded-md">
-                                {discountPercentage}% Off
-                              </span>
-                            )}
-
-                            <div className="relative w-[200px] h-[220px] mx-auto flex items-center justify-center overflow-hidden">
-                              <div className="relative w-40 h-44 sm:w-48 sm:h-52 md:w-56 md:h-60 mx-auto flex items-center justify-center overflow-hidden">
-                                <Image
-                                  src={product.productImages[0]}
-                                  alt={product.name}
-                                  fill
-                                  className="object-contain"
-                                  unoptimized
-                                />
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-3xl font-bold text-gray-500">
-                            {product.name[0]}
-                          </span>
-                        )}
-                      </figure>
-
-                      <div className="card-body p-1 lg:p-4 flex flex-col items-start gap-1">
-                        <h2 className="card-title text-base lg:text-lg font-medium text-left">
-                          {product.name}
-                        </h2>
-
-                        {product.brand && (
-                          <p className="text-gray-500 text-sm text-left">
-                            {product.brand}
-                          </p>
-                        )}
-
-                        <p className="text-gray-500 text-sm text-left">
-                          {product.category}
-                        </p>
-
-                        <div className="flex items-center gap-2 text-left">
-                          {product.discountPrice ? (
-                            <>
-                              <span className="text-[#F85606] font-bold">
-                                ৳{product.discountPrice}
-                              </span>
-                              <span className="line-through text-gray-400 text-sm">
-                                ৳{product.price}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-[#F85606] font-bold">
+                            <span className="text-orange-600 font-bold">
+                              ৳{product.discountPrice}
+                            </span>
+                            <span className="text-xs text-gray-500 line-through">
                               ৳{product.price}
                             </span>
-                          )}
-                        </div>
-
-                        {/* Stock status + Rating in same line */}
-                        <div className="flex items-start text-left justify-between w-full text-sm">
-                          <p
-                            className={`font-bold m-0 p-0 ${
-                              product.stockQuantity > 0
-                                ? "text-green-500"
-                                : "text-red-500"
-                            }`}
-                            style={{ minWidth: "fit-content" }}
-                          >
-                            {product.stockQuantity > 0
-                              ? "In Stock"
-                              : "Out of Stock"}
-                          </p>
-
-                          {typeof product.averageRating === "number" && (
-                            <div className="flex items-center gap-1 text-yellow-500 font-semibold">
-                              <span>⭐ {product.averageRating.toFixed(1)}</span>
-                              <span className="text-gray-500 font-normal">
-                                ({product.totalReviews ?? 0})
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                          </>
+                        ) : (
+                          <span className="text-gray-800 font-semibold">
+                            ৳{product.price}
+                          </span>
+                        )}
                       </div>
+
+                      {/* Ratings */}
+                      <div className="flex items-center gap-1 text-sm text-yellow-500">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={14}
+                            fill={
+                              i < (product.averageRating || 0)
+                                ? "#facc15"
+                                : "none"
+                            }
+                            strokeWidth={1.5}
+                          />
+                        ))}
+                        <span className="ml-1 text-gray-500 text-xs">
+                          ({product.totalReviews || 0})
+                        </span>
+                      </div>
+
+                      {/* Stock Status */}
+                      <span
+                        className={`text-xs font-semibold ${
+                          product.stockQuantity > 0
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {product.stockQuantity > 0
+                          ? "In Stock"
+                          : "Out of Stock"}
+                      </span>
                     </div>
                   </motion.div>
                 );
@@ -197,16 +186,16 @@ const ProductCart = ({ products }: ProductCartProps) => {
             )}
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-6 flex justify-center">
+            <div className="mt-8 flex justify-center">
               <Pagination
                 showControls
                 total={totalPages}
                 page={currentPage}
                 onChange={setCurrentPage}
                 classNames={{
-                  cursor: "bg-[#F85606] text-white", // active page style
+                  cursor: "bg-[#F85606] text-white",
                 }}
               />
             </div>

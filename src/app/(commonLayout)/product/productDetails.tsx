@@ -15,6 +15,7 @@ import { HiPlus, HiMinus } from "react-icons/hi";
 import Link from "next/link";
 import { MdVerified } from "react-icons/md";
 import SellerProfileCard from "../components/ui/SellerProfileCard";
+import ProductDetailsSkeleton from "../components/skeleton/ProductDetailsSkeleton";
 
 interface ProductDetailsProps {
   product: {
@@ -558,7 +559,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   return (
     <>
       {isLoading ? (
-        <Loading />
+        <ProductDetailsSkeleton></ProductDetailsSkeleton>
       ) : (
         <main>
           <div className="product-details pt-5 flex flex-col gap-8 px-4 sm:px-8 lg:px-16">
