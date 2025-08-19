@@ -1,5 +1,5 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-	siteUrl: 'https://mirexastore.com',
+	siteUrl: 'https://api.mirexastore.com',
 	generateRobotsTxt: true,
 };

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "MirexaStore | Best Online Shopping in Bangladesh",
     description:
       "Shop at MirexaStore – Bangladesh’s most trusted destination for electronics, fashion, and daily essentials. Quality guaranteed. Fast shipping nationwide.",
-    url: "https://mirexastore.com/",
+    url: "https://api.mirexastore.com/",
     siteName: "MirexaStore",
     images: [
       {

@@ -37,7 +37,9 @@ async function getsellerBySlug(slug: string): Promise<SellerProfile | null> {
   try {
     const res = await fetch(
       `https://api.mirexastore.com/api/seller/slug/${slug}`,
-      { cache: "no-store" }
+      {
+        cache: "no-store",
+      }
     );
 
     if (!res.ok) return null;

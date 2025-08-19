@@ -7,6 +7,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 ## 🚀 Features at a Glance
 
 ### 👤 User Features
+
 - 🔍 Browse all products without login
 - 🛒 Add to cart & place orders after login/signup
 - 📦 Real-time order tracking
@@ -23,6 +24,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 ---
 
 ### 🛍️ Seller Features
+
 - 🆓 7-day free trial for new sellers
 - 💳 Purchase subscription plans after trial
 - ✅ Store creation after admin approval
@@ -43,6 +45,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 ---
 
 ### 🛡️ Admin Features
+
 - 🔍 Review & approve/reject seller requests
 - 👥 Manage users & permissions
 - 🛒 Approve product listings
@@ -64,6 +67,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 ## 🧰 Tech Stack
 
 ### 🖥️ Frontend
+
 - Next.js
 - React.js
 - TypeScript
@@ -71,6 +75,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 - Tailwind CSS
 
 ### 🗄️ Backend
+
 - Node.js
 - Express.js
 - MongoDB
@@ -81,11 +86,12 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 
 ---
 
-**Live Demo**| [Visit App](https://mirexastore.com) |
+**Live Demo**| [Visit App](https://api.mirexastore.com) |
 
 ---
 
 ## 📊 Analytics & Optimization
+
 - Real-time order & sales data
 - Product-wise performance charts
 - SEO-optimized for search visibility
@@ -107,4 +113,3 @@ Want to contribute? PRs are welcome! Please fork the repo, make changes, and sub
 ---
 
 > **Built with ❤️ by Md Yeasin Sarkar**
-

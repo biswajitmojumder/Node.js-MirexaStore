@@ -87,12 +87,12 @@ const BlogSection = () => {
               <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                 {blog.excerpt}
               </p>
-              <Link
+              {/* <Link
                 href={`/blog/${blog.slug}`}
                 className="text-orange-600 font-medium hover:underline text-sm"
               >
                 Read More →
-              </Link>
+              </Link> */}
             </div>
           </div>
         ))}
