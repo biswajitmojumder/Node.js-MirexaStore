@@ -21,16 +21,18 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
 
           script: |
+            # Change directory to the project folder
             cd /www/wwwroot/frontend/MirexaStore
 
+            # Use the full path for all commands to ensure they are found.
             echo "👉 Pulling latest code..."
-            git pull origin main
+            /usr/bin/git pull origin main
 
             echo "👉 Installing dependencies..."
-            npm install
+            /home/yeasin_sarkar/.nvm/versions/node/v22.18.0/bin/npm install
 
             echo "👉 Building Next.js app..."
-            npm run build
+            /home/yeasin_sarkar/.nvm/versions/node/v22.18.0/bin/npm run build
 
             echo "👉 Restarting Next.js with PM2..."
-            pm2 restart mirexastore-frontend || pm2 start npm --name "mirexastore-frontend" -- run start
+            /home/yeasin_sarkar/.nvm/versions/node/v22.18.0/bin/pm2 restart mirexastore-frontend || /home/yeasin_sarkar/.nvm/versions/node/v22.18.0/bin/pm2 start npm --name "mirexastore-frontend" -- run start
