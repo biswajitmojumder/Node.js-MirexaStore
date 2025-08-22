@@ -1,0 +1,36 @@
+name: Deploy Frontend (Next.js)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+
+          script: |
+            cd /www/wwwroot/frontend/MirexaStore
+
+            echo "👉 Pulling latest code..."
+            git pull origin main
+
+            echo "👉 Installing dependencies..."
+            npm install
+
+            echo "👉 Building Next.js app..."
+            npm run build
+
+            echo "👉 Restarting Next.js with PM2..."
+            pm2 restart mirexastore-frontend || pm2 start npm --name "mirexastore-frontend" -- run start
