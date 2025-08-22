@@ -71,7 +71,7 @@ export default function CategorySection({ categories }: Props) {
   if (!categories || categories.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500 text-sm">
-        No categories available now.
+        No categories available nowwww.
       </div>
     );
   }
