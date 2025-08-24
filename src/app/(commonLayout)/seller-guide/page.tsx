@@ -21,7 +21,7 @@ export default function SellerGuidePage() {
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-bold text-[#EA580C] mb-2 flex items-center justify-center gap-2">
           <FileText className="w-6 h-6" />
-          Seller Guide / সেলার গাইডলাইন
+          Seller Guide / সেলার গাইডলাইন..
         </h1>
         <p className="text-gray-600">
           Follow these steps to become a seller at MirexaStore. <br />
