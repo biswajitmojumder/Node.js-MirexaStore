@@ -504,7 +504,7 @@ const SellerProfileForm = () => {
           <div className="space-y-2">
             <label className="flex items-center text-sm font-medium text-gray-700">
               <ImageIcon className="w-4 h-4 mr-1 text-orange-500" />
-              Upload Logo <span className="text-red-500 ml-1">*</span>
+              Upload Logo.. <span className="text-red-500 ml-1">*</span>
             </label>
 
             {/* Dropzone-style uploader */}
@@ -570,7 +570,7 @@ const SellerProfileForm = () => {
           <div className="space-y-2">
             <label className="flex items-center text-sm font-medium text-gray-700">
               <FileImage className="w-4 h-4 mr-1 text-orange-500" />
-              Upload Banner <span className="text-red-500 ml-1">*</span>
+              Upload Banner.. <span className="text-red-500 ml-1">*</span>
             </label>
 
             {!form.banner ? (
