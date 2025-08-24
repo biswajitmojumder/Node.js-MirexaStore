@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -19,7 +19,11 @@ import {
   FileImage,
   AlignLeft,
   Banknote,
+  X,
+  UploadCloud,
+  Loader2,
 } from "lucide-react";
+
 import Loading from "@/app/loading";
 import toast, { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
@@ -47,7 +51,7 @@ const SellerProfileForm = () => {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [profileExists, setProfileExists] = useState(false);
-
+  type Field = "logo" | "banner";
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -127,19 +131,43 @@ const SellerProfileForm = () => {
     }
   };
 
+  const [uploading, setUploading] = useState<{
+    logo: boolean;
+    banner: boolean;
+  }>({
+    logo: false,
+    banner: false,
+  });
+
+  const [progress, setProgress] = useState<{ logo: number; banner: number }>({
+    logo: 0,
+    banner: 0,
+  });
+
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    field: "logo" | "banner"
+    field: Field
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // allow only one per field
+    if (form[field]) {
+      alert("Already uploaded. Remove first, then upload again.");
+      e.target.value = "";
+      return;
+    }
+
     if (!file.type.startsWith("image/")) {
       alert("Only image files are allowed.");
+      e.target.value = "";
       return;
     }
 
     try {
+      setUploading((u) => ({ ...u, [field]: true }));
+      setProgress((p) => ({ ...p, [field]: 0 }));
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", "campus-needs-upload");
@@ -148,23 +176,39 @@ const SellerProfileForm = () => {
 
       const res = await axios.post(
         "https://api.cloudinary.com/v1_1/dwg8d0bfp/image/upload",
-        formData
+        formData,
+        {
+          onUploadProgress: (evt) => {
+            if (!evt.total) return;
+            const percent = Math.round((evt.loaded * 100) / evt.total);
+            setProgress((p) => ({ ...p, [field]: percent }));
+          },
+        }
       );
 
-      const originalUrl = res.data.secure_url;
+      const originalUrl: string = res.data.secure_url;
       const optimizedUrl = originalUrl.replace(
         "/upload/",
-        "/upload/q_auto:eco,f_auto,w_800/"
+        // quality + format auto; width tuned—logo ছোট হবে, banner বড়
+        field === "logo"
+          ? "/upload/q_auto:eco,f_auto,w_400/"
+          : "/upload/q_auto:eco,f_auto,w_1600/"
       );
 
-      setForm((prev) => ({
-        ...prev,
-        [field]: optimizedUrl,
-      }));
+      setForm((prev) => ({ ...prev, [field]: optimizedUrl }));
     } catch (error) {
       console.error("Image upload failed:", error);
       alert("Image upload failed. Please try again.");
+    } finally {
+      setUploading((u) => ({ ...u, [field]: false }));
+      // progress reset করবেন না চাইলে রাখুন—আমি 100 এ রেখে দিচ্ছি UX-এর জন্য
+      setTimeout(() => {
+        setProgress((p) => ({ ...p, [field]: 0 }));
+      }, 800);
     }
+  };
+  const removeImage = (field: Field) => {
+    setForm((prev) => ({ ...prev, [field]: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -454,53 +498,137 @@ const SellerProfileForm = () => {
           />
         </div>
 
-        {/* Upload Logo with icon */}
-        <div>
-          <label className="flex items-center text-sm font-medium mb-1 text-gray-700">
-            <ImageIcon className="w-4 h-4 mr-1 text-orange-500" />
-            Upload Logo<span className="text-red-500 ml-1">*</span>
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleImageUpload(e, "logo")}
-            className="mb-2"
-            required
-          />
-          {form.logo && (
-            <Image
-              src={form.logo}
-              alt="Logo Preview"
-              width={100}
-              height={100}
-              className="rounded"
-            />
-          )}
-        </div>
+        {/* Upload Logo */}
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Upload Logo */}
+          <div className="space-y-2">
+            <label className="flex items-center text-sm font-medium text-gray-700">
+              <ImageIcon className="w-4 h-4 mr-1 text-orange-500" />
+              Upload Logo <span className="text-red-500 ml-1">*</span>
+            </label>
 
-        {/* Upload Banner with icon */}
-        <div>
-          <label className="flex items-center text-sm font-medium mb-1 text-gray-700">
-            <FileImage className="w-4 h-4 mr-1 text-orange-500" />
-            Upload Banner<span className="text-red-500 ml-1">*</span>
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleImageUpload(e, "banner")}
-            className="mb-2"
-            required
-          />
-          {form.banner && (
-            <div className="relative w-full h-32 sm:h-40 mt-2 rounded overflow-hidden">
-              <Image
-                src={form.banner}
-                alt="Banner Preview"
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
+            {/* Dropzone-style uploader */}
+            {!form.logo ? (
+              <label
+                className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 cursor-pointer transition
+              ${
+                uploading.logo
+                  ? "opacity-70 cursor-not-allowed"
+                  : "hover:border-orange-400 hover:bg-orange-50/40"
+              } `}
+              >
+                <UploadCloud className="w-7 h-7 mb-2" />
+                <p className="text-sm text-gray-600 text-center">
+                  Click to upload logo (PNG/SVG). Recommended height ~80–120px.
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "logo")}
+                  className="hidden"
+                  disabled={uploading.logo}
+                />
+                {/* Progress */}
+                {uploading.logo && (
+                  <div className="w-full mt-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading… {progress.logo}%
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 bg-orange-500 transition-all"
+                        style={{ width: `${progress.logo}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </label>
+            ) : (
+              <div className="relative inline-block">
+                <Image
+                  src={form.logo}
+                  alt="Logo Preview"
+                  width={120}
+                  height={120}
+                  className="rounded-xl border shadow-sm bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage("logo")}
+                  className="absolute -top-2 -right-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-white shadow ring-1 ring-gray-200 hover:bg-red-50"
+                  aria-label="Remove logo"
+                  title="Remove"
+                >
+                  <X className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Upload Banner */}
+          <div className="space-y-2">
+            <label className="flex items-center text-sm font-medium text-gray-700">
+              <FileImage className="w-4 h-4 mr-1 text-orange-500" />
+              Upload Banner <span className="text-red-500 ml-1">*</span>
+            </label>
+
+            {!form.banner ? (
+              <label
+                className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 cursor-pointer transition
+            ${
+              uploading.banner
+                ? "opacity-70 cursor-not-allowed"
+                : "hover:border-orange-400 hover:bg-orange-50/40"
+            } `}
+              >
+                <UploadCloud className="w-7 h-7 mb-2" />
+                <p className="text-sm text-gray-600 text-center">
+                  Click to upload banner (recommended 1600×500+).
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "banner")}
+                  className="hidden"
+                  disabled={uploading.banner}
+                />
+                {/* Progress */}
+                {uploading.banner && (
+                  <div className="w-full mt-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading… {progress.banner}%
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 bg-orange-500 transition-all"
+                        style={{ width: `${progress.banner}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </label>
+            ) : (
+              <div className="relative w-full h-40 sm:h-48 mt-1 rounded-2xl overflow-hidden border shadow-sm bg-white">
+                <Image
+                  src={form.banner}
+                  alt="Banner Preview"
+                  fill
+                  className="object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage("banner")}
+                  className="absolute top-2 right-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/90 shadow ring-1 ring-gray-200 hover:bg-red-50"
+                  aria-label="Remove banner"
+                  title="Remove"
+                >
+                  <X className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <button
